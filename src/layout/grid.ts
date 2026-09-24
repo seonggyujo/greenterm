@@ -1,32 +1,16 @@
-// Pure layout math, no DOM. For n panes:
+// Pure layout math, no DOM. The automatic grid for n panes:
 //   cols = ceil(sqrt(n)), rows = ceil(n / cols)
-// The last row may hold fewer panes; they stretch to fill the width. To do
-// that with integer spans the grid uses lcm(cols, lastRowCount) tracks.
-//   n=3 -> 2 tracks: [1, 1, 2]           (two on top, one wide below)
-//   n=5 -> 6 tracks: [2, 2, 2, 3, 3]     (three on top, two wide below)
+// Rows fill in order. The last row may hold fewer panes; they stretch to
+// fill the width.
+//   n=3 -> [2, 1]     (two on top, one wide below)
+//   n=5 -> [3, 2]     (three on top, two wide below)
+// split-tree.ts turns this into a column of rows.
 
-export interface GridLayout {
-  /** CSS grid column tracks. */
-  columns: number;
-  rows: number;
-  /** grid-column span for each pane, in order. */
-  spans: number[];
-}
-
-const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
-const lcm = (a: number, b: number): number => (a / gcd(a, b)) * b;
-
-export function computeGrid(count: number): GridLayout {
-  if (count <= 0) return { columns: 1, rows: 1, spans: [] };
-
+/** How many panes sit in each row, top to bottom. */
+export function gridRows(count: number): number[] {
+  if (count <= 0) return [];
   const cols = Math.ceil(Math.sqrt(count));
   const rows = Math.ceil(count / cols);
-  const fullRowPanes = cols * (rows - 1);
-  const lastRow = count - fullRowPanes;
-  const columns = lcm(cols, lastRow);
-
-  const spans = Array.from({ length: count }, (_, i) =>
-    i < fullRowPanes ? columns / cols : columns / lastRow,
-  );
-  return { columns, rows, spans };
+  const lastRow = count - cols * (rows - 1);
+  return Array.from({ length: rows }, (_, i) => (i < rows - 1 ? cols : lastRow));
 }

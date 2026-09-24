@@ -13,7 +13,7 @@
 ---
 
 greenterm opens several shells side by side in one window and lays them out for you. There are no
-split shortcuts to learn: every action is a button. The terminals themselves are left untouched
+split shortcuts to learn: every action is a button or a drag. The terminals themselves are left untouched
 (default colors, your shell's own output), while the window around them has a green (or black)
 theme that shows which shells are alive.
 
@@ -28,6 +28,14 @@ Press **+ New terminal** and the grid recomputes: 1 pane fills the window, 2 sit
 fill the width. Closing a pane lets the others glide into place.
 
 ![Automatic grid](docs/media/split.gif)
+
+### Arrange by dragging
+
+Grab a pane by its header and drop it on another pane. Near an edge it splits that pane on that
+side (a preview shows where it will land); in the middle the two panes swap places. Esc cancels.
+Drag the gap between two panes to resize them, and double-click it to make them equal again.
+Once you arrange panes yourself, **+** splits the focused pane along its longer side, and a grid
+button appears in the title bar that brings back the automatic grid.
 
 ### Shells, folder and uptime
 

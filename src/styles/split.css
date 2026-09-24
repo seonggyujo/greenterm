@@ -1,0 +1,85 @@
+/* User splits: dividers in the gaps between panes (layout/dividers.ts)
+   and the drop preview while a pane is dragged (pane/pane-drag.ts). */
+
+.divider {
+  position: absolute;
+  z-index: 1;
+}
+
+.divider[hidden] {
+  display: none;
+}
+
+.divider.row {
+  cursor: col-resize;
+}
+
+.divider.column {
+  cursor: row-resize;
+}
+
+/* A thin line in the middle of the gap, on hover and while dragging. */
+.divider::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 1px;
+  background: var(--border-strong);
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.divider.row::after {
+  width: 2px;
+}
+
+.divider.column::after {
+  height: 2px;
+}
+
+.divider:hover::after,
+.divider.active::after {
+  opacity: 1;
+}
+
+/* Keep the cursor while the pointer runs ahead of the handle. */
+.resizing-row,
+.resizing-row * {
+  cursor: col-resize !important;
+}
+
+.resizing-column,
+.resizing-column * {
+  cursor: row-resize !important;
+}
+
+.pane-dragging,
+.pane-dragging * {
+  cursor: grabbing !important;
+}
+
+.pane.dragging {
+  opacity: 0.5;
+}
+
+/* Where the dragged pane will go: half of the target, or all of it for a
+   swap. */
+.drop-preview {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  border: 1px solid var(--fg-dim);
+  border-radius: 10px;
+  background: var(--glow);
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.drop-preview.visible {
+  opacity: 1;
+}
+
+.drop-preview.swap {
+  border-style: dashed;
+}

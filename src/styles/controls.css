@@ -1,4 +1,5 @@
-/* Title bar controls: count badge, font size, new terminal button. */
+/* Title bar controls: tidy button, count badge, font size, new terminal
+   button. */
 
 .tb-count {
   pointer-events: none;
@@ -73,6 +74,19 @@
   padding: 0;
   justify-content: center;
   font-family: var(--font-mono);
+}
+
+/* "Back to automatic grid", only while the layout is manual. */
+.tb-tidy[hidden] {
+  display: none;
+}
+
+.tb-tidy svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
 }
 
 /* Theme swatches. Their fill is the theme's own color, not a token. */

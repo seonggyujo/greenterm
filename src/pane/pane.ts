@@ -85,6 +85,11 @@ export class Pane implements Fittable {
     return this.link.id !== null && !this.exited;
   }
 
+  /** The header, where a drag to move the pane starts (pane-drag.ts). */
+  get handle(): HTMLElement {
+    return this.header.el;
+  }
+
   fit(): void {
     const size = this.view.fit();
     if (!size || this.exited) return;

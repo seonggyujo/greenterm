@@ -4,10 +4,6 @@
      never animates;
    - every infinite animation pauses while the window is hidden. */
 
-.pane {
-  position: relative;
-}
-
 .pane::before,
 .pane::after {
   content: "";

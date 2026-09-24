@@ -1,14 +1,17 @@
 import { createLogger } from "../app/log";
 import type { UptimeClock } from "../app/uptime-clock";
 import { onPtyExit, type ShellKind } from "../ipc/pty";
+import type { Zone } from "../layout/drop-zone";
 import { FitScheduler } from "../layout/fit-scheduler";
 import { flip } from "../layout/flip";
-import { computeGrid } from "../layout/grid";
+import { SplitLayout } from "../layout/split-layout";
 import { Pane } from "./pane";
+import { attachPaneDrag, type DropHost } from "./pane-drag";
 
-// Owns the list of panes: add, close, focus, font size, and the auto grid.
-// Any change in pane count re-applies the grid; the ResizeObserver in
-// FitScheduler then refits exactly the panes whose size changed.
+// Owns the list of panes: add, close, focus, font size. Where each pane
+// sits is up to SplitLayout (auto grid, or the user's own splits); the
+// ResizeObserver in FitScheduler then refits exactly the panes whose size
+// changed.
 
 const log = createLogger("panes");
 
@@ -21,13 +24,24 @@ export class PaneManager {
   private panes: Pane[] = [];
   private focused: Pane | null = null;
   private readonly fits = new FitScheduler();
+  private readonly layout: SplitLayout<Pane>;
+  private readonly dropHost: DropHost;
 
   constructor(
     private readonly workspace: HTMLElement,
     private readonly clock: UptimeClock,
     private fontSize: number,
     private readonly onChange: (counts: PaneCounts) => void,
-  ) {}
+    /** True while the user's own arrangement replaces the auto grid. */
+    onLayoutMode: (manual: boolean) => void,
+  ) {
+    this.layout = new SplitLayout(workspace, () => this.panes, onLayoutMode);
+    this.dropHost = {
+      workspace,
+      paneAt: (x, y) => this.paneAt(x, y),
+      drop: (source, target, zone) => this.move(source, target, zone),
+    };
+  }
 
   /** Subscribe to shell exits. Call once before adding panes. */
   async init(): Promise<void> {
@@ -44,7 +58,7 @@ export class PaneManager {
 
   async add(shell: ShellKind, cwd: string | null = null): Promise<Pane> {
     // Create inside flip() so the old boxes are measured before the new
-    // pane takes a grid cell.
+    // pane takes its place.
     let pane!: Pane;
     flip(this.elements(), () => {
       pane = new Pane(this.workspace, {
@@ -56,8 +70,9 @@ export class PaneManager {
         onFocus: (p) => this.setFocus(p),
       });
       this.panes.push(pane);
-      this.relayout();
+      this.layout.add(pane, this.focused);
     });
+    attachPaneDrag(pane, this.dropHost);
     pane.enter();
     this.fits.observe(pane.el, pane);
     pane.focus();
@@ -81,14 +96,19 @@ export class PaneManager {
     next?.focus();
     this.notify();
 
-    // Play the exit animation, then free the slot and let the rest glide
-    // into the new grid.
+    // Play the exit animation, then free the space and let the rest glide
+    // into place.
     void pane.leave().then(() => {
       flip(this.elements(), () => {
         pane.dispose();
-        this.relayout();
+        this.layout.remove(pane);
       });
     });
+  }
+
+  /** Puts the panes back into the automatic grid. */
+  tidy(): void {
+    flip(this.elements(), () => this.layout.tidy());
   }
 
   setFontSize(px: number): void {
@@ -100,6 +120,17 @@ export class PaneManager {
     log.debug(`font size ${px}px`);
   }
 
+  /** The pane under a point in CSS pixels, if any. */
+  paneAt(x: number, y: number): Pane | undefined {
+    const el = document.elementFromPoint(x, y)?.closest(".pane");
+    return this.panes.find((p) => p.el === el);
+  }
+
+  private move(source: Pane, target: Pane, zone: Zone): void {
+    flip(this.elements(), () => this.layout.move(source, target, zone));
+    source.focus();
+  }
+
   private setFocus(pane: Pane): void {
     if (this.focused === pane) return;
     this.focused?.setFocused(false);
@@ -107,25 +138,8 @@ export class PaneManager {
     pane.setFocused(true);
   }
 
-  /** The pane under a point in CSS pixels, if any. */
-  paneAt(x: number, y: number): Pane | undefined {
-    const el = document.elementFromPoint(x, y)?.closest(".pane");
-    return this.panes.find((p) => p.el === el);
-  }
-
   private elements(): HTMLElement[] {
     return this.panes.map((p) => p.el);
-  }
-
-  private relayout(): void {
-    const grid = computeGrid(this.panes.length);
-    const style = this.workspace.style;
-    style.gridTemplateColumns = `repeat(${grid.columns}, minmax(0, 1fr))`;
-    style.gridTemplateRows = `repeat(${grid.rows}, minmax(0, 1fr))`;
-    this.panes.forEach((p, i) => {
-      p.el.style.gridColumn = `span ${grid.spans[i]}`;
-    });
-    log.debug(`grid ${grid.columns} tracks x ${grid.rows} rows, spans ${grid.spans.join(",")}`);
   }
 
   private notify(): void {

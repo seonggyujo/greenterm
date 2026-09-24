@@ -6,6 +6,7 @@ import "./styles/controls.css";
 import "./styles/shell-menu.css";
 import "./styles/workspace.css";
 import "./styles/pane.css";
+import "./styles/split.css";
 import "./styles/empty-state.css";
 import "./styles/effects.css";
 import { loadFontSize, saveFontSize } from "./app/font-size";
@@ -26,6 +27,7 @@ import { createNewTerminalButton } from "./ui/new-terminal-button";
 import { createShellMenu } from "./ui/shell-menu";
 import { createTerminalCount } from "./ui/terminal-count";
 import { createThemeToggle } from "./ui/theme-toggle";
+import { createTidyButton } from "./ui/tidy-button";
 import { createTitlebar } from "./ui/titlebar";
 
 const log = createLogger("app");
@@ -55,11 +57,18 @@ async function main(): Promise<void> {
   const empty = createEmptyState(() => open(defaultShell));
   workspace.append(empty.el);
 
+  const tidy = createTidyButton(() => panes.tidy());
   const fontSize = loadFontSize();
-  const panes = new PaneManager(workspace, new UptimeClock(), fontSize, (c) => {
-    count.update(c);
-    empty.setVisible(c.total === 0);
-  });
+  const panes = new PaneManager(
+    workspace,
+    new UptimeClock(),
+    fontSize,
+    (c) => {
+      count.update(c);
+      empty.setVisible(c.total === 0);
+    },
+    (manual) => tidy.setVisible(manual),
+  );
   await panes.init();
   // "Open in greenterm" while this window runs: a new pane in that folder.
   await onOpenFolder((dir) => open(defaultShell, dir));
@@ -84,7 +93,7 @@ async function main(): Promise<void> {
     (anchor) => menu.toggle(anchor),
   );
   const themeToggle = createThemeToggle(theme, applyTheme);
-  titlebar.actions.append(count.el, themeToggle, fontControl, newButton.el);
+  titlebar.actions.append(tidy.el, count.el, themeToggle, fontControl, newButton.el);
 
   await panes.add(defaultShell, await takeLaunchDir());
   log.info("ready");

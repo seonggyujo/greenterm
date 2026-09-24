@@ -37,6 +37,13 @@
   overflow: hidden;
 }
 
-.pane-body .xterm {
+/* The xterm host has no padding of its own: the fit addon reads the
+   host's height with padding included, so padding here would give one
+   row too many and clip the last line. */
+.pane-term {
+  height: 100%;
+}
+
+.pane-term .xterm {
   height: 100%;
 }

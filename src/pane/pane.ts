@@ -47,10 +47,13 @@ export class Pane implements Fittable {
     this.header = createPaneHeader(SHELL_LABELS[opts.shell], () => opts.onClose(this));
     const body = document.createElement("div");
     body.className = "pane-body";
+    const host = document.createElement("div");
+    host.className = "pane-term";
+    body.append(host);
     this.el.append(this.header.el, body);
     parent.append(this.el);
 
-    this.view = new TerminalView(body, opts.fontSize);
+    this.view = new TerminalView(host, opts.fontSize);
     this.glow = new OutputGlow(this.el);
     this.link = new PtyLink(this.view, () => this.glow.ping());
 

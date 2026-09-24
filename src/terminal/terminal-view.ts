@@ -4,6 +4,7 @@ import { WebglAddon } from "@xterm/addon-webgl";
 import { createLogger } from "../app/log";
 import { attachRightClick } from "./clipboard";
 import { attachClipboardKeys } from "./keys";
+import { attachLinks } from "./links";
 
 // One xterm instance with fit + WebGL. The terminal itself is not styled:
 // default xterm colors, only the Windows console font. No IPC here: the pane
@@ -38,6 +39,7 @@ export class TerminalView {
     this.loadWebgl();
     attachClipboardKeys(this.term);
     attachRightClick(this.term, host);
+    attachLinks(this.term);
   }
 
   private loadWebgl(): void {

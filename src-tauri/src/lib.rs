@@ -22,6 +22,8 @@ pub fn run() {
     }
 
     let app = builder
+        // Opens http(s) links from terminal output in the default browser.
+        .plugin(tauri_plugin_opener::init())
         .manage(pty::PtyRegistry::default())
         .manage(launch::LaunchDir::from_args())
         .setup(|app| Ok(window::create_main(app)?))

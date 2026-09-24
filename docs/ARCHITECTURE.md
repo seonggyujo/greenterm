@@ -32,6 +32,7 @@
 | `terminal/flow-control.ts` | `write` 콜백으로 대기 바이트 추적, 256KB 넘으면 pause, 32KB 밑이면 resume |
 | `terminal/keys.ts` | WebView 단축키 차단, Ctrl+C/V |
 | `terminal/clipboard.ts` | 복사·붙여넣기, 우클릭(선택 있으면 복사, 없으면 붙여넣기) |
+| `terminal/links.ts` | 출력 속 URL과 OSC 8 링크를 Ctrl+클릭으로 브라우저에서 열기(opener 플러그인, http/https만) |
 | `terminal/cwd.ts` | 셸이 보내는 현재 폴더 신호(OSC 9;9, OSC 7) 해석 |
 | `pane/pane.ts` | pane 하나: 헤더, TerminalView, PtyLink, 글로우, 실행 시간을 묶는다 |
 | `pane/pty-link.ts` | TerminalView와 백엔드 PTY 연결: 출력, 입력, 크기, kill |

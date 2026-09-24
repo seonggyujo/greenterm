@@ -40,13 +40,13 @@ export class PtyLink {
     return this.ptyId;
   }
 
-  /** Throws when the shell cannot be started. */
-  async spawn(shell: ShellKind, cols: number, rows: number): Promise<void> {
-    this.ptyId = await spawnPty(shell, cols, rows, (data) => {
+  /** Throws when the shell cannot be started. `cwd` null = home folder. */
+  async spawn(shell: ShellKind, cols: number, rows: number, cwd: string | null): Promise<void> {
+    this.ptyId = await spawnPty(shell, cols, rows, cwd, (data) => {
       this.view.write(data, this.flow.track(data.length));
       this.onOutput();
     });
-    log.info(`spawned ${shell} as pty ${this.ptyId} (${cols}x${rows})`);
+    log.info(`spawned ${shell} as pty ${this.ptyId} (${cols}x${rows}) in ${cwd ?? "home"}`);
     this.pending.forEach((d) => this.write(d));
     this.pending = [];
   }

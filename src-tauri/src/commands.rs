@@ -1,5 +1,6 @@
 //! Tauri commands. Thin layer: argument plumbing only, logic lives in `pty`.
 
+use std::path::Path;
 use std::thread;
 
 use tauri::ipc::{Channel, InvokeResponseBody};
@@ -21,9 +22,10 @@ pub fn spawn_pty(
     shell: ShellKind,
     cols: u16,
     rows: u16,
+    cwd: Option<String>,
     on_output: Channel<InvokeResponseBody>,
 ) -> Result<u32, String> {
-    registry.spawn(app, shell, cols, rows, on_output)
+    registry.spawn(app, shell, cols, rows, cwd.as_deref().map(Path::new), on_output)
 }
 
 /// Sync command on the main thread so keystrokes keep their order. It only

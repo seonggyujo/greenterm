@@ -42,13 +42,14 @@ export class PaneManager {
     });
   }
 
-  async add(shell: ShellKind): Promise<Pane> {
+  async add(shell: ShellKind, cwd: string | null = null): Promise<Pane> {
     // Create inside flip() so the old boxes are measured before the new
     // pane takes a grid cell.
     let pane!: Pane;
     flip(this.elements(), () => {
       pane = new Pane(this.workspace, {
         shell,
+        cwd,
         fontSize: this.fontSize,
         clock: this.clock,
         onClose: (p) => this.close(p),
@@ -104,6 +105,12 @@ export class PaneManager {
     this.focused?.setFocused(false);
     this.focused = pane;
     pane.setFocused(true);
+  }
+
+  /** The pane under a point in CSS pixels, if any. */
+  paneAt(x: number, y: number): Pane | undefined {
+    const el = document.elementFromPoint(x, y)?.closest(".pane");
+    return this.panes.find((p) => p.el === el);
   }
 
   private elements(): HTMLElement[] {

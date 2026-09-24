@@ -54,6 +54,8 @@ Switch the window chrome between green and black, and change the terminal font s
 
 ### Also
 
+- **Open in greenterm** in the Explorer context menu of folders and drives (on Windows 11 under "Show more options"). If greenterm is already running, the folder opens as a new pane.
+- Drop files on a pane to type their paths, like Windows Terminal (handy for attaching images in CLI tools).
 - Right-click copies the selection, or pastes when nothing is selected (like the Windows console).
   Ctrl+C copies a selection, otherwise it interrupts. Ctrl+V pastes.
 - Browser shortcuts (F5, Ctrl+R, Ctrl+F, ...) never reach the web view, so they go to the shell.

@@ -13,6 +13,7 @@
 | `main.ts` | 부트스트랩만. 모듈을 만들고 서로 연결한다 |
 | `app/perf-monitor.ts` | dev 전용 long task(50ms 초과) 로그 |
 | `app/theme.ts` | 앱 틀 테마(green, black) 적용과 저장 |
+| `app/file-drop.ts` | 파일을 pane에 끌어다 놓으면 경로를 입력(Windows Terminal 방식). Tauri 드래그 이벤트 사용 |
 | `app/log.ts` | 범위별 로거. dev에서는 콘솔과 `tauri dev` 터미널로, prod에서는 warn/error만 콘솔로 |
 | `app/shells.ts` | 셸 표시 이름, + 버튼 기본 셸 저장 |
 | `app/font-size.ts` | 터미널 글씨 크기(10~24px) 저장 |
@@ -25,6 +26,7 @@
 | `ui/terminal-count.ts` | 실행 중 터미널 개수 |
 | `ui/theme-toggle.ts` | 테마 선택 동그라미 두 개 |
 | `ui/empty-state.ts` | 터미널 0개일 때 큰 + 버튼과 깜빡이는 `_` |
+| `ipc/launch.ts` | 시작 폴더 받기(`take_launch_dir`), 켜진 창으로 온 폴더(`open-folder` 이벤트) |
 | `ipc/pty.ts` | PTY 명령 타입 래퍼, 출력 Channel(ArrayBuffer), `pty-exit` 구독, 셸 목록 |
 | `terminal/terminal-view.ts` | xterm 생성, fit·webgl addon, context loss 시 DOM 렌더러로 fallback |
 | `terminal/flow-control.ts` | `write` 콜백으로 대기 바이트 추적, 256KB 넘으면 pause, 32KB 밑이면 resume |
@@ -52,6 +54,7 @@
 | `main.rs` | `greenterm_lib::run()` 호출만 |
 | `lib.rs` | Builder 구성, 명령 등록, 페이지 로드·앱 종료 시 모든 PTY kill |
 | `window.rs` | 메인 창 생성. 설정 파일로 못 켜는 옵션(클립보드 읽기 자동 허용) 때문에 코드에서 만든다 |
+| `launch.rs` | 명령줄 폴더 인자("Open in greenterm"), 이미 켜져 있으면 그 창에 pane 추가(single-instance 플러그인, release 빌드만) |
 | `logging.rs` | dev용 stderr 로거. release에서는 로그 호출이 컴파일에서 빠진다 |
 | `commands.rs` | Tauri 명령. 인자만 넘기고 `pty` 모듈에 위임 |
 | `pty/mod.rs` | `pty` 모듈 공개 API |
@@ -85,6 +88,7 @@
 - `src-tauri/tauri.conf.json`: 창은 `create: false`(`window.rs`에서 생성), `decorations: false`(자체 타이틀바), `shadow: true`(Windows 11 둥근 모서리와 그림자). CSP는 `'self'`와 IPC만 허용.
 - `src-tauri/capabilities/default.json`: 이벤트와 창 조작(닫기, 최소화, 최대화, 드래그)만 허용.
 - `tauri.conf.json` `bundle.windows`: 설치 파일 아이콘과 설치 창 이미지(`src-tauri/installer/*.bmp`).
+- `src-tauri/installer/hooks.nsh`, `context-menu.wxs`: 탐색기 우클릭 "Open in greenterm" 등록과 제거(NSIS, MSI). 서명 없는 클래식 메뉴라 Windows 11에서는 "추가 옵션 표시" 안에 나온다.
 - `build.rs`: `icons/`가 바뀌면 다시 실행되게 해서 exe에 새 아이콘이 들어가게 한다.
 - `Cargo.toml` release 프로필: `lto = true`, `codegen-units = 1`, `panic = "abort"`, `strip = true`, `opt-level = "s"`.
 

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::Path;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 
@@ -24,10 +25,11 @@ impl PtyRegistry {
         shell: ShellKind,
         cols: u16,
         rows: u16,
+        cwd: Option<&Path>,
         out: Channel<InvokeResponseBody>,
     ) -> Result<u32, String> {
         let id = self.next_id.fetch_add(1, Ordering::Relaxed) + 1;
-        let session = PtySession::spawn(app, id, shell, cols, rows, out)?;
+        let session = PtySession::spawn(app, id, shell, cols, rows, cwd, out)?;
         let count = {
             let mut sessions = self.sessions.lock().unwrap();
             sessions.insert(id, session);

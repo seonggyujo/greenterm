@@ -1,6 +1,6 @@
 [package]
 name = "greenterm"
-version = "0.1.1"
+version = "0.1.2"
 description = "Green multi-pane terminal"
 authors = ["seonggyujo"]
 license = "MIT"
@@ -21,6 +21,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 portable-pty = "0.9.0"
 log = { version = "0.4", features = ["release_max_level_off"] }
+tauri-plugin-single-instance = "2"
 
 # https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

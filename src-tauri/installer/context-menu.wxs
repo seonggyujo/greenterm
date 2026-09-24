@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MSI fragment (tauri.conf.json > bundle.windows.wix.fragmentPaths).
+     Adds "Open in greenterm" to the Explorer context menu of folders,
+     folder backgrounds and drives, for the installing user. Classic menu
+     entries: on Windows 11 they appear under "Show more options".
+     [INSTALLDIR]greenterm.exe is the installed app. (Referencing the file
+     entry [#Path] instead fails MSI check ICE69.) Removed on uninstall. -->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="ContextMenu" Guid="*">
+        <RegistryKey Root="HKCU" Key="Software\Classes\Directory\shell\greenterm">
+          <RegistryValue Type="string" Value="Open in greenterm" KeyPath="yes" />
+          <RegistryValue Name="Icon" Type="string" Value="[INSTALLDIR]greenterm.exe" />
+          <RegistryValue Key="command" Type="string" Value="&quot;[INSTALLDIR]greenterm.exe&quot; &quot;%V&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCU" Key="Software\Classes\Directory\Background\shell\greenterm">
+          <RegistryValue Type="string" Value="Open in greenterm" />
+          <RegistryValue Name="Icon" Type="string" Value="[INSTALLDIR]greenterm.exe" />
+          <RegistryValue Key="command" Type="string" Value="&quot;[INSTALLDIR]greenterm.exe&quot; &quot;%V&quot;" />
+        </RegistryKey>
+        <RegistryKey Root="HKCU" Key="Software\Classes\Drive\shell\greenterm">
+          <RegistryValue Type="string" Value="Open in greenterm" />
+          <RegistryValue Name="Icon" Type="string" Value="[INSTALLDIR]greenterm.exe" />
+          <RegistryValue Key="command" Type="string" Value="&quot;[INSTALLDIR]greenterm.exe&quot; &quot;%V&quot;" />
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>

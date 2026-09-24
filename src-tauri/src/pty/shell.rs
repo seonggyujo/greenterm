@@ -43,10 +43,11 @@ impl ShellKind {
         }
     }
 
-    /// Builds the command line for this shell, starting in the user's home.
-    /// The environment is passed through; the only addition is the
-    /// invisible current-folder report (see cwd_report.rs).
-    pub fn command(self) -> Result<CommandBuilder, String> {
+    /// Builds the command line for this shell, starting in `cwd` when it is
+    /// an existing folder, else in the user's home. The environment is
+    /// passed through; the only addition is the invisible current-folder
+    /// report (see cwd_report.rs).
+    pub fn command(self, cwd: Option<&Path>) -> Result<CommandBuilder, String> {
         let program = self
             .program()
             .ok_or_else(|| format!("{self:?} is not installed"))?;
@@ -57,8 +58,13 @@ impl ShellKind {
             ShellKind::Cmd => {}
         }
         cwd_report::apply(self, &mut cmd);
-        if let Some(home) = env::var_os("USERPROFILE") {
-            cmd.cwd(home);
+        match cwd.filter(|dir| dir.is_dir()) {
+            Some(dir) => cmd.cwd(dir),
+            None => {
+                if let Some(home) = env::var_os("USERPROFILE") {
+                    cmd.cwd(home);
+                }
+            }
         }
         Ok(cmd)
     }

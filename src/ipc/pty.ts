@@ -19,11 +19,12 @@ export function spawnPty(
   shell: ShellKind,
   cols: number,
   rows: number,
+  cwd: string | null,
   onOutput: (data: Uint8Array) => void,
 ): Promise<number> {
   const channel = new Channel<ArrayBuffer>();
   channel.onmessage = (buf) => onOutput(new Uint8Array(buf));
-  return invoke<number>("spawn_pty", { shell, cols, rows, onOutput: channel });
+  return invoke<number>("spawn_pty", { shell, cols, rows, cwd, onOutput: channel });
 }
 
 export const writePty = (id: number, data: string) => invoke<void>("write_pty", { id, data });

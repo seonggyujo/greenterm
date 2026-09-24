@@ -24,6 +24,11 @@
   border-color: var(--border-strong);
 }
 
+/* Files dragged over this pane will be typed into it (app/file-drop.ts). */
+.pane.drop-target {
+  border-color: var(--fg);
+}
+
 /* Same color as xterm's default background. */
 .pane-body {
   flex: 1;

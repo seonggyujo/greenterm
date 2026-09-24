@@ -10,11 +10,13 @@ import "./styles/empty-state.css";
 import "./styles/effects.css";
 import { loadFontSize, saveFontSize } from "./app/font-size";
 import { createLogger } from "./app/log";
+import { installFileDrop } from "./app/file-drop";
 import { installLongTaskMonitor } from "./app/perf-monitor";
 import { loadDefaultShell, saveDefaultShell, SHELL_LABELS } from "./app/shells";
 import { applyTheme, loadTheme } from "./app/theme";
 import { UptimeClock } from "./app/uptime-clock";
 import { installVisibilityTracking } from "./app/visibility";
+import { onOpenFolder, takeLaunchDir } from "./ipc/launch";
 import { listShells, type ShellKind } from "./ipc/pty";
 import { PaneManager } from "./pane/pane-manager";
 import { installShortcutGuard } from "./terminal/keys";
@@ -45,8 +47,8 @@ async function main(): Promise<void> {
   let defaultShell = loadDefaultShell(shells);
   log.info(`shells: ${shells.join(", ")}; default ${defaultShell}`);
 
-  const open = (shell: ShellKind) => {
-    panes.add(shell).catch((err) => log.error("add terminal failed", err));
+  const open = (shell: ShellKind, cwd: string | null = null) => {
+    panes.add(shell, cwd).catch((err) => log.error("add terminal failed", err));
   };
 
   const count = createTerminalCount();
@@ -59,6 +61,9 @@ async function main(): Promise<void> {
     empty.setVisible(c.total === 0);
   });
   await panes.init();
+  // "Open in greenterm" while this window runs: a new pane in that folder.
+  await onOpenFolder((dir) => open(defaultShell, dir));
+  await installFileDrop((x, y) => panes.paneAt(x, y));
 
   // The menu only selects the shell; the + button opens it.
   const menu = createShellMenu(shells, defaultShell, (shell) => {
@@ -81,7 +86,7 @@ async function main(): Promise<void> {
   const themeToggle = createThemeToggle(theme, applyTheme);
   titlebar.actions.append(count.el, themeToggle, fontControl, newButton.el);
 
-  await panes.add(defaultShell);
+  await panes.add(defaultShell, await takeLaunchDir());
   log.info("ready");
 }
 

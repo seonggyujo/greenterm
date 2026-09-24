@@ -18,6 +18,8 @@ const log = createLogger("pane");
 
 export interface PaneOptions {
   shell: ShellKind;
+  /** Folder to start in; null = home. */
+  cwd: string | null;
   fontSize: number;
   clock: UptimeClock;
   onClose(pane: Pane): void;
@@ -27,6 +29,7 @@ export interface PaneOptions {
 export class Pane implements Fittable {
   readonly el: HTMLElement;
   readonly shell: ShellKind;
+  private readonly cwd: string | null;
   private readonly header: PaneHeader;
   private readonly view: TerminalView;
   private readonly link: PtyLink;
@@ -37,6 +40,7 @@ export class Pane implements Fittable {
 
   constructor(parent: HTMLElement, opts: PaneOptions) {
     this.shell = opts.shell;
+    this.cwd = opts.cwd;
     this.clock = opts.clock;
     this.el = document.createElement("section");
     this.el.className = "pane";
@@ -62,7 +66,7 @@ export class Pane implements Fittable {
   async start(): Promise<void> {
     const { cols, rows } = this.view.fit() ?? { cols: 80, rows: 24 };
     try {
-      await this.link.spawn(this.shell, cols, rows);
+      await this.link.spawn(this.shell, cols, rows, this.cwd);
       const startedAt = Date.now();
       this.stopUptime = this.clock.subscribe((now) =>
         this.header.setUptime(formatUptime(now - startedAt)),
@@ -98,6 +102,12 @@ export class Pane implements Fittable {
 
   focus(): void {
     this.view.focus();
+  }
+
+  /** Types text into the shell as a paste (bracketed paste when enabled). */
+  paste(text: string): void {
+    this.view.term.paste(text);
+    this.focus();
   }
 
   markExited(code: number): void {

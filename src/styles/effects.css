@@ -1,0 +1,85 @@
+/* "Alive" effects on the app chrome. Rules:
+   - animate only opacity and transform;
+   - glows live on pseudo-elements and fade via opacity, box-shadow itself
+     never animates;
+   - every infinite animation pauses while the window is hidden. */
+
+.pane {
+  position: relative;
+}
+
+.pane::before,
+.pane::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Focus glow. */
+.pane::before {
+  box-shadow: 0 0 12px var(--glow);
+  transition: opacity 200ms ease-out;
+}
+
+.pane.focused::before {
+  opacity: 1;
+}
+
+/* Output flash: border brightens, then fades over 0.3s. */
+.pane::after {
+  border: 1px solid var(--flash);
+  box-shadow: 0 0 8px var(--flash-glow);
+  transition: opacity 300ms ease-out;
+}
+
+.pane.output::after {
+  opacity: 1;
+  transition-duration: 40ms;
+}
+
+.pane.leaving {
+  pointer-events: none;
+}
+
+/* Status dot: pulses only while output is arriving (`active`, set by
+   pane/output-glow.ts). A running infinite animation makes the WebView
+   draw every frame, so an always-on pulse would cost CPU while idle. */
+@keyframes dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.pane.active:not(.exited) .pane-dot {
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+
+/* Empty-state cursor, only while the empty state is shown. */
+@keyframes cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.empty-state.visible .empty-cursor {
+  animation: cursor-blink 1.1s steps(1) infinite;
+}
+
+.app-hidden .pane-dot,
+.app-hidden .empty-cursor {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pane-dot,
+  .empty-cursor {
+    animation: none !important;
+  }
+}

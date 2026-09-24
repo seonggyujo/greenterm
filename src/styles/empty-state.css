@@ -1,0 +1,54 @@
+/* Overlay in the workspace shown when no terminal is open. */
+
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease-out, visibility 0s linear 200ms;
+}
+
+.empty-state.visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms ease-out 120ms, visibility 0s;
+}
+
+.empty-add {
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--bg-raised);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1;
+  transition: background-color 150ms, border-color 150ms, transform 150ms;
+}
+
+.empty-add:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  transform: scale(1.04);
+}
+
+.empty-add:active {
+  transform: scale(0.97);
+}
+
+.empty-caption {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-dim);
+}
+
+.empty-cursor {
+  color: var(--fg);
+}

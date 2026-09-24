@@ -1,0 +1,122 @@
+/* Title bar controls: count badge, font size, new terminal button. */
+
+.tb-count {
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-dim);
+  margin-right: 6px;
+}
+
+.tb-count.idle {
+  opacity: 0.6;
+}
+
+.tb-button {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-control);
+  color: var(--fg-dim);
+  font-size: 12px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 120ms, color 120ms, border-color 120ms;
+}
+
+.tb-button:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--fg);
+  border-color: var(--border-strong);
+}
+
+.tb-button:active:not(:disabled) {
+  background: var(--bg-active);
+}
+
+.tb-button:disabled {
+  opacity: 0.35;
+}
+
+.tb-primary {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.tb-plus {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.tb-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tb-group .tb-button {
+  border-radius: 0;
+}
+
+.tb-group .tb-button:first-child {
+  border-radius: 7px 0 0 7px;
+}
+
+.tb-group .tb-button:last-child {
+  border-radius: 0 7px 7px 0;
+}
+
+.tb-icon {
+  width: 30px;
+  padding: 0;
+  justify-content: center;
+  font-family: var(--font-mono);
+}
+
+/* Theme swatches. Their fill is the theme's own color, not a token. */
+.theme-toggle {
+  display: inline-flex;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.theme-swatch {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  opacity: 0.55;
+  transition: opacity 120ms, transform 120ms;
+}
+
+.theme-swatch:hover {
+  opacity: 0.9;
+}
+
+.theme-swatch[aria-checked="true"] {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--bg-bar-top), 0 0 0 3px var(--fg-dim);
+}
+
+.theme-green {
+  background: #39ff88;
+}
+
+.theme-black {
+  background: #1c1c1f;
+}
+
+.tb-font-value {
+  min-width: 30px;
+  height: 26px;
+  display: inline-grid;
+  place-items: center;
+  border-block: 1px solid var(--border);
+  background: var(--bg-inset);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-dim);
+}

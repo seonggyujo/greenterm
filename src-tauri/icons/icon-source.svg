@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- greenterm app icon source: one focused terminal window with a prompt.
+       Regenerate every size with:
+       npm run tauri icon src-tauri/icons/icon-source.svg -->
+  <defs>
+    <filter id="glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+
+  <!-- Soft green glow around the window -->
+  <rect x="96" y="96" width="832" height="832" rx="180" fill="none"
+        stroke="#39ff88" stroke-width="44" opacity="0.5" filter="url(#glow)"/>
+
+  <!-- Window -->
+  <rect x="96" y="96" width="832" height="832" rx="180" fill="#000"
+        stroke="#39ff88" stroke-width="40"/>
+
+  <!-- Prompt: > and _ -->
+  <path d="M318 368 L480 512 L318 656" fill="none" stroke="#39ff88"
+        stroke-width="76" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="540" y="612" width="190" height="72" rx="20" fill="#39ff88"/>
+</svg>

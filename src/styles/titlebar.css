@@ -1,0 +1,91 @@
+.titlebar {
+  flex: none;
+  height: var(--titlebar-h);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px 0 16px;
+  background: linear-gradient(var(--bg-bar-top), var(--bg-bar-bottom));
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Text inside the bar must not swallow the drag gesture. */
+.brand {
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--fg);
+}
+
+.brand-dot {
+  text-shadow: 0 0 6px var(--glow);
+}
+
+.titlebar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Traffic lights */
+
+.traffic-lights {
+  display: flex;
+  gap: 10px;
+  margin-left: 6px;
+}
+
+.light {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.35);
+}
+
+.light.close {
+  background: #ff5f57;
+}
+.light.minimize {
+  background: #febc2e;
+}
+.light.zoom {
+  background: #28c840;
+}
+
+.light svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+  fill: none;
+  stroke: rgb(0 0 0 / 0.6);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.light svg .fill {
+  fill: rgb(0 0 0 / 0.6);
+  stroke: none;
+}
+
+/* Glyphs appear on all three when the group is hovered, as on macOS. */
+.traffic-lights:hover .light svg {
+  opacity: 1;
+}
+
+.light:active {
+  filter: brightness(0.8);
+}
+
+.window-inactive .traffic-lights:not(:hover) .light {
+  background: var(--light-off);
+  box-shadow: inset 0 0 0 0.5px var(--light-off-ring);
+}

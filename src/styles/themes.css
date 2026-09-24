@@ -1,0 +1,64 @@
+/* App chrome color themes. The terminal itself is never themed.
+   Green is the default; <html data-theme="black"> switches to black.
+   Every chrome color used in other style files must be one of these
+   tokens, so a theme only needs to redefine this list. */
+
+:root {
+  --bg-app: #07110b;
+  --bg-pane: #0b1a11;
+  --bg-bar-top: #0d1f14;
+  --bg-bar-bottom: #0a1710;
+  --bg-raised: #0d1f14;
+  --bg-control: #0f2418;
+  --bg-hover: #143020;
+  --bg-active: #0c1d13;
+  --bg-inset: #0b1a11;
+
+  --border: #1f4d33;
+  --border-soft: #143322;
+  --border-strong: #2c6b47;
+
+  --fg: #39ff88;
+  --fg-soft: #9fd9b5;
+  --fg-dim: #5fae7f;
+  --fg-muted: #6b7f72;
+
+  --glow: #39ff8855;
+  --flash: #39ff88aa;
+  --flash-glow: #39ff8833;
+
+  --badge-bg: #1f2a24;
+  --badge-fg: #9aa9a0;
+  --light-off: #24382b;
+  --light-off-ring: rgb(95 174 127 / 0.25);
+}
+
+:root[data-theme="black"] {
+  --bg-app: #0a0a0b;
+  --bg-pane: #111113;
+  --bg-bar-top: #19191b;
+  --bg-bar-bottom: #131315;
+  --bg-raised: #161618;
+  --bg-control: #1a1a1d;
+  --bg-hover: #242428;
+  --bg-active: #121214;
+  --bg-inset: #0e0e10;
+
+  --border: #2b2b2f;
+  --border-soft: #202023;
+  --border-strong: #45454b;
+
+  --fg: #ececec;
+  --fg-soft: #c9c9cf;
+  --fg-dim: #9b9ba1;
+  --fg-muted: #6e6e74;
+
+  --glow: rgb(255 255 255 / 0.16);
+  --flash: rgb(255 255 255 / 0.55);
+  --flash-glow: rgb(255 255 255 / 0.12);
+
+  --badge-bg: #232326;
+  --badge-fg: #a5a5aa;
+  --light-off: #2c2c30;
+  --light-off-ring: rgb(255 255 255 / 0.12);
+}

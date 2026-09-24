@@ -1,0 +1,79 @@
+/* ▾ part of the new-terminal split button and its dropdown. */
+
+/* Selected shell name inside the main button. Fixed width (fits
+   "PowerShell") so switching shells never shifts the title bar controls. */
+.tb-shell {
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--bg-inset);
+  color: var(--fg-dim);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.tb-arrow {
+  width: 26px;
+  padding: 0;
+  justify-content: center;
+  border-left-color: var(--border-soft);
+  font-size: 11px;
+}
+
+.shell-menu {
+  position: fixed;
+  z-index: 20;
+  min-width: 170px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-raised);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.5);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+  transform-origin: top right;
+  visibility: hidden;
+  transition: opacity 120ms ease-out, transform 120ms ease-out, visibility 0s linear 120ms;
+}
+
+.shell-menu.open {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  transition: opacity 120ms ease-out, transform 120ms ease-out, visibility 0s;
+}
+
+.shell-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-dim);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: left;
+}
+
+.shell-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.shell-check {
+  width: 12px;
+  visibility: hidden;
+}
+
+.shell-menu-item[aria-checked="true"] .shell-check {
+  visibility: visible;
+  color: var(--fg);
+}

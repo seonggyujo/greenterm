@@ -39,7 +39,7 @@ export class TerminalView {
     this.loadWebgl();
     attachClipboardKeys(this.term);
     attachRightClick(this.term, host);
-    attachLinks(this.term);
+    attachLinks(this.term, host);
   }
 
   private loadWebgl(): void {

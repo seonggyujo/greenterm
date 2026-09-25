@@ -83,6 +83,7 @@ setting back to its default.
 
 - **Open in greenterm** in the Explorer context menu of folders and drives (on Windows 11 under "Show more options"). If greenterm is already running, the folder opens as a new pane.
 - Ctrl+click a link in the output to open it in your browser (http and https only).
+  In apps that track the mouse (Claude Code, vim), that click is not passed to the app, so the link opens once.
 - Drop files on a pane to type their paths, like Windows Terminal (handy for attaching images in CLI tools).
 - Right-click copies the selection, or pastes when nothing is selected (like the Windows console).
   When an app tracks the mouse (vim, Claude Code), the right-click goes to the app instead,

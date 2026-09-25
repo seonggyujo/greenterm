@@ -43,7 +43,7 @@
 | `terminal/flow-control.ts` | `write` 콜백으로 대기 바이트 추적, 256KB 넘으면 pause, 32KB 밑이면 resume |
 | `terminal/keys.ts` | WebView 단축키 차단, Ctrl+C/V |
 | `terminal/clipboard.ts` | 복사·붙여넣기, 우클릭(선택 있으면 복사, 없으면 붙여넣기. 앱이 마우스 추적 중이면 앱에 넘김, Shift+우클릭은 항상 처리) |
-| `terminal/links.ts` | 출력 속 URL과 OSC 8 링크를 Ctrl+클릭으로 브라우저에서 열기(opener 플러그인, http/https만) |
+| `terminal/links.ts` | 출력 속 URL과 OSC 8 링크를 Ctrl+클릭으로 브라우저에서 열기(opener 플러그인, http/https만. 앱이 마우스 추적 중이어도 링크 위 Ctrl+클릭은 앱에 넘기지 않음) |
 | `terminal/cwd.ts` | 셸이 보내는 현재 폴더 신호(OSC 9;9, OSC 7) 해석 |
 | `pane/pane-item.ts` | pane 매니저, 배치, 끌기가 pane에 요구하는 것. 터미널(`pane.ts`)과 웹(`web-pane.ts`) 두 종류 |
 | `pane/pane.ts` | 터미널 pane 하나: 헤더, TerminalView, PtyLink, 글로우, 실행 시간을 묶는다 |

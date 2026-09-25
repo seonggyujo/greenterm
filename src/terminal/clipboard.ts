@@ -3,6 +3,8 @@ import { createLogger } from "../app/log";
 
 // Windows console clipboard behavior:
 //   right-click  -> copy if text is selected, otherwise paste
+//                   (goes to the app instead when it tracks the mouse;
+//                   Shift+right-click still copies or pastes)
 //   Ctrl+C       -> copy if text is selected, otherwise ^C to the shell
 //   Ctrl+V       -> paste (browser paste event, handled by xterm)
 
@@ -30,6 +32,13 @@ export function attachRightClick(term: Terminal, host: HTMLElement): void {
   host.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     e.stopPropagation();
+    // An app that turned on mouse tracking (vim, Claude Code) already got
+    // this click from xterm and handles it itself; pasting here as well would
+    // paste twice. Shift+right-click is never reported, so it stays ours.
+    if (term.modes.mouseTrackingMode !== "none" && !e.shiftKey) {
+      log.debug("right-click left to the app (mouse tracking on)");
+      return;
+    }
     if (!copySelection(term)) void pasteClipboard(term);
   });
 }

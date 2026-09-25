@@ -85,6 +85,8 @@ setting back to its default.
 - Ctrl+click a link in the output to open it in your browser (http and https only).
 - Drop files on a pane to type their paths, like Windows Terminal (handy for attaching images in CLI tools).
 - Right-click copies the selection, or pastes when nothing is selected (like the Windows console).
+  When an app tracks the mouse (vim, Claude Code), the right-click goes to the app instead,
+  like Windows Terminal. Shift+right-click still copies or pastes.
   Ctrl+C copies a selection, otherwise it interrupts. Ctrl+V pastes.
 - In terminals, browser shortcuts (F5, Ctrl+R, Ctrl+F, ...) never reach the web view, so they go to the shell.
 - macOS-style title bar with traffic-light buttons in Windows order.

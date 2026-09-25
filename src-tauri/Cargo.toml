@@ -24,6 +24,8 @@ portable-pty = "0.9.0"
 log = { version = "0.4", features = ["release_max_level_off"] }
 tauri-plugin-single-instance = "2"
 tauri-plugin-opener = "2"
+# Same version Tauri uses: web pane focus events (src/web/focus.rs).
+webview2-com = "0.38"
 
 # https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

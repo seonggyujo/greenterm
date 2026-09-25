@@ -21,12 +21,15 @@ export class WebView {
   private readonly watchStyle = new MutationObserver(() => this.schedule());
   private readonly stopOverlay: () => void;
   private readonly stopPage: Promise<() => void>;
+  private readonly stopFocus: Promise<() => void>;
 
   constructor(
     readonly label: string,
     private readonly host: HTMLElement,
     moved: HTMLElement,
     onPage: (page: ipc.WebPage) => void,
+    /** A click into the page gave it keyboard focus. */
+    onFocused: () => void,
   ) {
     this.watchStyle.observe(moved, { attributes: true, attributeFilter: ["style"] });
     this.stopOverlay = onOverlay((up) => this.setShown(!up));
@@ -36,6 +39,9 @@ export class WebView {
       if (page.title !== null) log.debug(`${label} title "${page.title}"`);
       this.lastUrl = page.url;
       onPage(page);
+    });
+    this.stopFocus = ipc.onWebFocus((focused) => {
+      if (focused === label) onFocused();
     });
   }
 
@@ -83,6 +89,7 @@ export class WebView {
     this.watchStyle.disconnect();
     this.stopOverlay();
     void this.stopPage.then((stop) => stop());
+    void this.stopFocus.then((stop) => stop());
     cancelAnimationFrame(this.frame);
   }
 

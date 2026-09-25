@@ -37,7 +37,7 @@
 | `ui/theme-toggle.ts` | 테마 선택 동그라미 두 개(설정 창 안) |
 | `ui/empty-state.ts` | 터미널 0개일 때 큰 + 버튼과 깜빡이는 `_` |
 | `ipc/launch.ts` | 시작 폴더 받기(`take_launch_dir`), 켜진 창으로 온 폴더(`open-folder` 이벤트) |
-| `ipc/web.ts` | 웹 pane 명령 타입 래퍼(열기, 위치·크기, 보이기, 이동, 뒤로, 새로고침, 포커스, 닫기, 웹 데이터 지우기), `web-page` 이벤트(URL, 제목) |
+| `ipc/web.ts` | 웹 pane 명령 타입 래퍼(열기, 위치·크기, 보이기, 이동, 뒤로, 새로고침, 포커스, 닫기, 웹 데이터 지우기), `web-page` 이벤트(URL, 제목), `web-focus` 이벤트(페이지 안 클릭) |
 | `ipc/pty.ts` | PTY 명령 타입 래퍼, 출력 Channel(ArrayBuffer), `pty-exit` 구독, 셸 목록 |
 | `terminal/terminal-view.ts` | xterm 생성, fit·webgl addon, context loss 시 DOM 렌더러로 fallback |
 | `terminal/flow-control.ts` | `write` 콜백으로 대기 바이트 추적, 256KB 넘으면 pause, 32KB 밑이면 resume |
@@ -81,6 +81,7 @@
 | `main.rs` | `greenterm_lib::run()` 호출만 |
 | `lib.rs` | Builder 구성, 명령 등록. 앱 페이지(main)가 다시 로드되면 모든 PTY kill과 웹 pane 닫기(웹 pane의 페이지 로드는 제외), 앱 종료 시 PTY kill |
 | `web/mod.rs` | 웹 pane 명령: 창의 child webview 열기(async, sync면 Windows에서 교착), 위치·크기(sync라 순서 유지), 보이기, 이동, 뒤로, 새로고침, 포커스, 닫기. 라벨은 `web-`로 시작해야 해서 main은 못 건드린다 |
+| `web/focus.rs` | 웹 pane이 키보드 포커스를 받으면(페이지 안 클릭) `web-focus` 이벤트로 main에 알림. 앱 페이지는 그 클릭을 못 보니 WebView2 `GotFocus`를 쓴다(`webview2-com`) |
 | `web/profile.rs` | 웹 pane 전용 WebView2 프로필 폴더(`%LOCALAPPDATA%\com.greenterm.app\web-panes`). 앱 설정이 든 앱 페이지 프로필과 분리해서 웹 데이터만 지울 수 있다. 지우기: 웹 pane이 있으면 WebView2가 비우고 새로고침, 없으면 폴더 삭제 |
 | `web/page.rs` | 웹 pane 페이지 동작: http(s)만 탐색, 새 창 요청은 기본 브라우저로, URL·제목을 `web-page` 이벤트로 main에 보고 |
 | `window.rs` | 메인 창 생성. 설정 파일로 못 켜는 옵션(클립보드 읽기 자동 허용) 때문에 코드에서 만든다 |
@@ -122,6 +123,7 @@
 - `tauri.conf.json` `bundle.windows`: 설치 파일 아이콘과 설치 창 이미지(`src-tauri/installer/*.bmp`).
 - `src-tauri/installer/hooks.nsh`, `context-menu.wxs`: 탐색기 우클릭 "Open in greenterm" 등록과 제거(NSIS, MSI). 서명 없는 클래식 메뉴라 Windows 11에서는 "추가 옵션 표시" 안에 나온다.
 - `build.rs`: `icons/`가 바뀌면 다시 실행되게 해서 exe에 새 아이콘이 들어가게 한다.
+- `Cargo.toml` `webview2-com`: Tauri가 쓰는 것과 같은 버전(0.38). 웹 pane 포커스 이벤트용.
 - `Cargo.toml` `tauri` `unstable` 기능: 웹 pane의 child webview(`Window::add_child`)에 필요. 원격 페이지는 capability가 없어 앱 명령과 플러그인 명령을 못 부른다(Tauri가 remote origin을 거부).
 - `Cargo.toml` release 프로필: `lto = true`, `codegen-units = 1`, `panic = "abort"`, `strip = true`, `opt-level = "s"`.
 

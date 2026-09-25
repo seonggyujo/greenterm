@@ -39,6 +39,11 @@ export const closeWeb = (label: string) => invoke<void>("web_close", { label });
 /** Cookies, history and site data of every web pane; the settings stay. */
 export const clearWebData = () => invoke<void>("web_clear_data");
 
+/** A web pane took keyboard focus (a click into the page); payload is its label. */
+export function onWebFocus(handler: (label: string) => void): Promise<UnlistenFn> {
+  return listen<string>("web-focus", (event) => handler(event.payload));
+}
+
 export function onWebPage(handler: (page: WebPage) => void): Promise<UnlistenFn> {
   return listen<WebPage>("web-page", (event) => handler(event.payload));
 }

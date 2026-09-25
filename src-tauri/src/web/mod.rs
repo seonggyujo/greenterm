@@ -3,6 +3,7 @@
 //! (CSS) pixels. Pages get no IPC: Tauri rejects app commands from remote
 //! origins, and no capability grants remote URLs anything.
 
+mod focus;
 mod page;
 pub mod profile;
 
@@ -47,10 +48,11 @@ pub fn web_open(
     info!("web: opening {label} at {x},{y} {width}x{height}: {url}");
     let data = profile::dir(webview.app_handle())?;
     let builder = page::builder(&label, url, data, webview.app_handle().clone());
-    webview
+    let child = webview
         .window()
         .add_child(builder, LogicalPosition::new(x, y), LogicalSize::new(width, height))
         .map_err(fail)?;
+    focus::watch(&child);
     info!("web: opened {label}");
     Ok(())
 }

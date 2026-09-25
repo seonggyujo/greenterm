@@ -49,10 +49,18 @@ export class WebPane implements PaneItem {
     this.el.append(this.header.el, this.body);
     parent.append(this.el);
 
-    this.view = new WebView(this.name, this.body, this.el, (page) => {
-      this.header.setUrl(page.url);
-      if (page.title !== null) this.header.setTitle(page.title);
-    });
+    this.view = new WebView(
+      this.name,
+      this.body,
+      this.el,
+      (page) => {
+        this.header.setUrl(page.url);
+        if (page.title !== null) this.header.setTitle(page.title);
+      },
+      // The app page never sees clicks inside the page, so the native
+      // focus event marks this pane as the focused one.
+      () => opts.onFocus(this),
+    );
     this.el.addEventListener("focusin", () => opts.onFocus(this));
     this.header.el.addEventListener("mousedown", () => opts.onFocus(this));
   }

@@ -1402,6 +1402,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-opener",
  "tauri-plugin-single-instance",
+ "webview2-com",
 ]
 
 [[package]]

@@ -1,0 +1,49 @@
+/* Web pane (pane/web-pane.ts): header controls, and the body that the
+   native webview covers. */
+
+.web-nav {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-dim);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.web-nav:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.web-url {
+  flex: 0 1 45%;
+  min-width: 60px;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  background: var(--bg-inset);
+  color: var(--fg-soft);
+  font: inherit;
+  outline: none;
+}
+
+.web-url:focus {
+  border-color: var(--border-strong);
+  color: var(--fg);
+}
+
+/* Seen only while the page loads, or while the webview is hidden for a
+   drag or a menu. */
+.web-body {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--fg-dim);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}

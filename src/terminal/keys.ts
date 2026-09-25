@@ -1,4 +1,5 @@
 import type { Terminal } from "@xterm/xterm";
+import { createLogger } from "../app/log";
 import { copySelection } from "./clipboard";
 
 // Keyboard glue between xterm and the WebView.
@@ -8,6 +9,8 @@ import { copySelection } from "./clipboard";
 //    reaches the shell as ^R.
 // 2. Ctrl+C copies when text is selected, otherwise it is ^C. Ctrl+V pastes
 //    (see clipboard.ts).
+
+const log = createLogger("keys");
 
 const BLOCKED = new Set([
   "f3", "f5", "f7",
@@ -35,7 +38,10 @@ export function installShortcutGuard(): void {
   window.addEventListener(
     "keydown",
     (e) => {
-      if (BLOCKED.has(combo(e))) e.preventDefault();
+      const key = combo(e);
+      if (!BLOCKED.has(key)) return;
+      e.preventDefault();
+      if (!e.repeat) log.debug(`${key}: browser action blocked, the key still reaches the shell`);
     },
     { capture: true },
   );

@@ -1,10 +1,12 @@
+import { motionEnabled } from "../app/motion";
 import { isAppHidden } from "../app/visibility";
 
 // Output activity on a pane, shown in two ways:
 //   `output` - border flash, removed GLOW ms after the last accepted ping
 //   `active` - status dot pulses, removed ACTIVE ms after the last ping
 // A quiet shell therefore has no running animation, so an idle app draws
-// no frames. The DOM is touched at most once per THROTTLE ms.
+// no frames. The DOM is touched at most once per THROTTLE ms. Off with
+// Settings > Animations.
 
 const THROTTLE = 150;
 const GLOW = 300;
@@ -18,7 +20,7 @@ export class OutputGlow {
   constructor(private readonly el: HTMLElement) {}
 
   ping(): void {
-    if (isAppHidden()) return;
+    if (isAppHidden() || !motionEnabled()) return;
     const now = performance.now();
     if (now - this.last < THROTTLE) return;
     this.last = now;

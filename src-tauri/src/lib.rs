@@ -2,6 +2,7 @@ mod commands;
 mod launch;
 mod logging;
 mod pty;
+mod web;
 mod window;
 
 use tauri::webview::PageLoadEvent;
@@ -28,10 +29,12 @@ pub fn run() {
         .manage(launch::LaunchDir::from_args())
         .setup(|app| Ok(window::create_main(app)?))
         // A reload (dev hot reload, crash recovery) starts a fresh frontend
-        // that knows nothing about the old shells, so drop them all.
+        // that knows nothing about the old shells and web panes, so drop
+        // them all. Only for the app page: web panes load pages all the time.
         .on_page_load(|webview, payload| {
-            if payload.event() == PageLoadEvent::Started {
+            if webview.label() == "main" && payload.event() == PageLoadEvent::Started {
                 webview.state::<pty::PtyRegistry>().kill_all();
+                web::close_all(webview.app_handle());
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -44,6 +47,15 @@ pub fn run() {
             commands::resume_pty,
             commands::kill_pty,
             commands::frontend_log,
+            web::web_open,
+            web::web_bounds,
+            web::web_visible,
+            web::web_navigate,
+            web::web_back,
+            web::web_reload,
+            web::web_focus,
+            web::web_close,
+            web::profile::web_clear_data,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

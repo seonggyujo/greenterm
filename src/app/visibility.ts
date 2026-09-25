@@ -1,5 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { createLogger } from "./log";
+import { motionEnabled } from "./motion";
 
 // Whether anyone can see the app. WebView2 keeps document.hidden false when
 // the window is minimized, so the Tauri window state is checked as well.
@@ -40,7 +41,7 @@ export function onAppVisibility(fn: (hidden: boolean) => void): void {
   listeners.add(fn);
 }
 
-/** False when nobody can see the animation or the user asked for less motion. */
+/** False when nobody can see the animation, or the user asked for less motion (Windows setting or Settings > Animations). */
 export function motionAllowed(): boolean {
-  return !hidden && !reducedMotion.matches;
+  return !hidden && !reducedMotion.matches && motionEnabled();
 }

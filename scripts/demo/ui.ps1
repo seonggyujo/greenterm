@@ -27,6 +27,8 @@ public static class Ui {
 
   static void Send(INPUT i) { SendInput(1, new[] { i }, Marshal.SizeOf(typeof(INPUT))); }
   static void Mouse(uint flags) { var i = new INPUT { type = 0 }; i.mi.flags = flags; Send(i); }
+  public static void Down() { Mouse(0x0002); }
+  public static void Up() { Mouse(0x0004); }
   public static void Click(int x, int y) {
     SetCursorPos(x, y); Thread.Sleep(60);
     Mouse(0x0002); Thread.Sleep(40); Mouse(0x0004);
@@ -42,9 +44,12 @@ public static class Ui {
 }
 "@
 
+# Only a greenterm built from this repo ($GtExe, set by record.ps1), never an
+# installed one that may be running with real work in it.
 function Get-GtWindow {
-  $p = Get-Process greenterm -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
-  if (-not $p) { throw "greenterm is not running" }
+  $p = Get-Process greenterm -ErrorAction SilentlyContinue |
+    Where-Object { $_.MainWindowHandle -ne 0 -and $_.Path -like $GtExe } | Select-Object -First 1
+  if (-not $p) { throw "no greenterm matching $GtExe is running" }
   $p.MainWindowHandle
 }
 
@@ -67,10 +72,13 @@ function Type-Gt([string]$text, [int]$delayMs = 45) {
 
 function Enter-Gt { Assert-GtFocus; [Ui]::Key(0x0D, $false); [Ui]::Key(0x0D, $true) }
 
-function CtrlC-Gt {
+# Ctrl + a letter key, e.g. CtrlKey-Gt 0x43 for Ctrl+C.
+function CtrlKey-Gt([uint16]$vk) {
   Assert-GtFocus
-  [Ui]::Key(0x11, $false); [Ui]::Key(0x43, $false); [Ui]::Key(0x43, $true); [Ui]::Key(0x11, $true)
+  [Ui]::Key(0x11, $false); [Ui]::Key($vk, $false); [Ui]::Key($vk, $true); [Ui]::Key(0x11, $true)
 }
+
+function CtrlC-Gt { CtrlKey-Gt 0x43 }
 
 # Smooth cursor glide so the recording shows where the pointer goes.
 function Move-Gt([int]$x, [int]$y, [int]$ms = 280) {
@@ -84,3 +92,17 @@ function Move-Gt([int]$x, [int]$y, [int]$ms = 280) {
 }
 
 function Tap($pt) { Move-Gt $pt[0] $pt[1]; Start-Sleep -Milliseconds 120; Click-Gt $pt[0] $pt[1] }
+
+# Two clicks close enough in time and place to count as a double-click.
+function DoubleTap($pt) {
+  Move-Gt $pt[0] $pt[1]; Start-Sleep -Milliseconds 120
+  Click-Gt $pt[0] $pt[1]; Start-Sleep -Milliseconds 90; Click-Gt $pt[0] $pt[1]
+}
+
+# Press at $from, glide to $to, release. The button is always released.
+function Drag-Gt($from, $to, [int]$ms = 900) {
+  Move-Gt $from[0] $from[1]; Start-Sleep -Milliseconds 150
+  Assert-GtFocus; [Ui]::Down()
+  try { Move-Gt $to[0] $to[1] $ms; Start-Sleep -Milliseconds 350; Assert-GtFocus }
+  finally { [Ui]::Up() }
+}

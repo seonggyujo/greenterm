@@ -77,3 +77,14 @@
   visibility: visible;
   color: var(--fg);
 }
+
+/* "Web page": an action below the shells, not a choice. */
+.shell-menu-web {
+  margin-top: 4px;
+  border-top: 1px solid var(--border-soft);
+  border-radius: 0 0 6px 6px;
+}
+
+.shell-menu-web .shell-check {
+  visibility: visible;
+}

@@ -1,14 +1,16 @@
 import { createLogger } from "../app/log";
+import { setOverlay } from "../app/overlay";
 import { setBox } from "../layout/box-style";
 import { previewBox, zoneAt, type Zone } from "../layout/drop-zone";
-import type { Pane } from "./pane";
+import type { PaneItem as Pane } from "./pane-item";
 
 // Drag a pane by its header and drop it on another pane: near an edge it
 // splits that pane on that side, in the middle the two swap places. A
 // translucent box shows where the pane will go; Esc cancels. Pointer
 // events, not HTML5 drag and drop: Tauri's native file drop turns that off
 // in the webview. The header keeps the pointer captured, so the terminals
-// underneath never start a text selection.
+// underneath never start a text selection. Web pages are native views
+// above the app page, so they hide while a drag is on (app/overlay.ts).
 
 const log = createLogger("pane-drag");
 
@@ -30,7 +32,7 @@ export function attachPaneDrag(pane: Pane, host: DropHost): void {
   const handle = pane.handle;
 
   handle.addEventListener("pointerdown", (down) => {
-    if (down.button !== 0 || (down.target as Element).closest("button")) return;
+    if (down.button !== 0 || (down.target as Element).closest("button, input")) return;
     handle.setPointerCapture(down.pointerId);
     let preview: HTMLElement | null = null;
     let drop: Drop | null = null;
@@ -41,8 +43,9 @@ export function attachPaneDrag(pane: Pane, host: DropHost): void {
       host.workspace.append(el);
       pane.el.classList.add("dragging");
       document.body.classList.add("pane-dragging");
+      setOverlay("pane-drag", true);
       window.addEventListener("keydown", cancelKey, true);
-      log.debug(`dragging pty ${pane.id}`);
+      log.debug(`dragging ${pane.name}`);
       return el;
     };
 
@@ -87,11 +90,12 @@ export function attachPaneDrag(pane: Pane, host: DropHost): void {
       preview.remove();
       pane.el.classList.remove("dragging");
       document.body.classList.remove("pane-dragging");
+      setOverlay("pane-drag", false);
       if (!drop) {
-        log.debug(`drag of pty ${pane.id} cancelled`);
+        log.debug(`drag of ${pane.name} cancelled`);
         return;
       }
-      log.info(`dropped pty ${pane.id} on pty ${drop.target.id} (${drop.zone})`);
+      log.info(`dropped ${pane.name} on ${drop.target.name} (${drop.zone})`);
       host.drop(pane, drop.target, drop.zone);
     };
 

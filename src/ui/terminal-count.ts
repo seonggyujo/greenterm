@@ -1,4 +1,4 @@
-import type { PaneCounts } from "../pane/pane-manager";
+import type { PaneCounts } from "../pane/pane-counts";
 
 // "2 running" style badge in the title bar.
 
@@ -12,8 +12,8 @@ export function createTerminalCount(): TerminalCount {
   el.className = "tb-count";
   return {
     el,
-    update({ total, running }) {
-      el.textContent = running === total ? `${running} running` : `${running} / ${total} running`;
+    update({ terminals, running }) {
+      el.textContent = running === terminals ? `${running} running` : `${running} / ${terminals} running`;
       el.classList.toggle("idle", running === 0);
     },
   };

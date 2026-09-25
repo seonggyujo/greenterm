@@ -2,11 +2,11 @@ import { createLogger } from "../app/log";
 import { SHELL_LABELS } from "../app/shells";
 import { formatUptime, type UptimeClock } from "../app/uptime-clock";
 import type { ShellKind } from "../ipc/pty";
-import type { Fittable } from "../layout/fit-scheduler";
 import { watchCwd } from "../terminal/cwd";
 import { TerminalView } from "../terminal/terminal-view";
 import { OutputGlow } from "./output-glow";
 import { createPaneHeader, type PaneHeader } from "./pane-header";
+import type { PaneItem } from "./pane-item";
 import { animateEnter, animateLeave } from "./pane-motion";
 import { PtyLink } from "./pty-link";
 
@@ -26,7 +26,7 @@ export interface PaneOptions {
   onFocus(pane: Pane): void;
 }
 
-export class Pane implements Fittable {
+export class Pane implements PaneItem {
   readonly el: HTMLElement;
   readonly shell: ShellKind;
   private readonly cwd: string | null;
@@ -58,7 +58,7 @@ export class Pane implements Fittable {
     this.link = new PtyLink(this.view, () => this.glow.ping());
 
     this.view.term.onTitleChange((title) => this.header.setTitle(title));
-    watchCwd(this.view.term, (path) => this.header.setCwd(path));
+    watchCwd(this.view.term, () => this.name, (path) => this.header.setCwd(path));
     this.el.addEventListener("focusin", () => opts.onFocus(this));
     this.header.el.addEventListener("mousedown", (e) => {
       e.preventDefault();
@@ -82,6 +82,10 @@ export class Pane implements Fittable {
 
   get id(): number | null {
     return this.link.id;
+  }
+
+  get name(): string {
+    return `pty ${this.link.id}`;
   }
 
   get running(): boolean {

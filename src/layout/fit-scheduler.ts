@@ -4,6 +4,10 @@
 // the rest for the next frame. Maximizing a window with six panes then
 // never blocks the main thread for one long task.
 
+import { createLogger } from "../app/log";
+
+const log = createLogger("fit");
+
 export interface Fittable {
   fit(): void;
 }
@@ -54,6 +58,8 @@ export class FitScheduler {
       target.fit();
       if (performance.now() - start >= FRAME_BUDGET) break;
     }
-    if (this.dirty.size > 0) this.schedule();
+    if (this.dirty.size === 0) return;
+    log.debug(`frame budget used, ${this.dirty.size} fit(s) moved to the next frame`);
+    this.schedule();
   }
 }

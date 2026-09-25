@@ -1,0 +1,136 @@
+/* Settings panel under the gear button (ui/settings-panel.ts). Opens and
+   closes like the shell menu. */
+
+.tb-settings svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+}
+
+.settings-panel {
+  position: fixed;
+  z-index: 20;
+  width: 300px;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-raised);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.5);
+  display: grid;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+  transform-origin: top right;
+  visibility: hidden;
+  transition: opacity 120ms ease-out, transform 120ms ease-out, visibility 0s linear 120ms;
+}
+
+.settings-panel.open {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  transition: opacity 120ms ease-out, transform 120ms ease-out, visibility 0s;
+}
+
+.settings-title {
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+.settings-row {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-label {
+  font-size: 12px;
+  color: var(--fg-soft);
+}
+
+/* The swatch ring must match the panel, not the title bar. */
+.settings-panel .theme-swatch[aria-checked="true"] {
+  box-shadow: 0 0 0 2px var(--bg-raised), 0 0 0 3px var(--fg-dim);
+}
+
+.settings-text {
+  width: 150px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  background: var(--bg-inset);
+  color: var(--fg-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  outline: none;
+}
+
+.settings-text:focus {
+  border-color: var(--border-strong);
+  color: var(--fg);
+}
+
+.switch {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--bg-inset);
+  transition: background-color 120ms, border-color 120ms;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+  transition: transform 120ms ease-out, background-color 120ms;
+}
+
+.switch[aria-checked="true"] {
+  background: var(--bg-active);
+  border-color: var(--fg-dim);
+}
+
+.switch[aria-checked="true"]::after {
+  transform: translateX(16px);
+  background: var(--fg);
+}
+
+/* Between the preferences and the data actions. */
+.settings-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--border-soft);
+}
+
+.settings-action {
+  min-width: 96px;
+  justify-content: center;
+}
+
+/* Second click runs it: the button asks first. Also while hovered, which
+   it always is right after the first click. */
+.settings-action.confirm,
+.settings-action.confirm:hover:not(:disabled) {
+  border-color: #6b2a2a;
+  background: #3a1616;
+  color: #ff8f8f;
+}

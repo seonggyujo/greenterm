@@ -27,4 +27,10 @@ export default defineConfig(() => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  build: {
+    // The bundle is read from local disk inside the app, not downloaded, so
+    // 500 kB is no concern. xterm and its WebGL addon alone are ~470 kB;
+    // the whole bundle is ~506 kB. This still warns if it grows a lot.
+    chunkSizeWarningLimit: 600,
+  },
 }));

@@ -1,5 +1,5 @@
 import { getCurrentWebview } from "@tauri-apps/api/webview";
-import type { Pane } from "../pane/pane";
+import type { PaneItem as Pane } from "../pane/pane-item";
 import { createLogger } from "./log";
 
 // Dropping files on a pane types their paths into it, like Windows
@@ -33,6 +33,6 @@ export async function installFileDrop(paneAt: (x: number, y: number) => Pane | u
     mark(undefined);
     if (!pane || payload.paths.length === 0) return;
     pane.paste(payload.paths.map(quote).join(" ") + " ");
-    log.info(`dropped ${payload.paths.length} path(s) on pty ${pane.id}`);
+    log.info(`dropped ${payload.paths.length} path(s) on ${pane.name}`);
   });
 }

@@ -61,9 +61,10 @@ export function createTitlebar(): Titlebar {
   el.append(brand, actions, lights);
 
   // Grey out the traffic lights when the window loses focus, like macOS.
+  // The Tauri window event, not DOM blur: clicking into a web pane (a
+  // child webview) blurs this page while the window stays active.
   const root = document.documentElement;
-  window.addEventListener("blur", () => root.classList.add("window-inactive"));
-  window.addEventListener("focus", () => root.classList.remove("window-inactive"));
+  void win.onFocusChanged(({ payload: focused }) => root.classList.toggle("window-inactive", !focused));
 
   return { el, actions };
 }

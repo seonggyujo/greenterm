@@ -10,6 +10,9 @@ import "./styles/split.css";
 import "./styles/settings.css";
 import "./styles/empty-state.css";
 import "./styles/agent-sidebar.css";
+import "./styles/agent-item.css";
+import "./styles/agent-marks.css";
+import "./styles/usage-bar.css";
 import "./styles/agent-hints.css";
 import "./styles/effects.css";
 import { loadFontSize, saveFontSize } from "./app/font-size";
@@ -52,13 +55,14 @@ async function main(): Promise<void> {
   const titlebar = createTitlebar();
   const workspace = document.createElement("main");
   workspace.id = "workspace";
-  // Coding agents in the panes: their sidebar sits left of the workspace.
+  // Coding agents in the panes: their sidebar sits left of the workspace,
+  // their usage bar along the bottom.
   const clock = new UptimeClock();
   const agents = wireAgents(clock, () => panes);
   const middle = document.createElement("div");
   middle.className = "app-middle";
   middle.append(agents.sidebar, workspace);
-  document.body.append(titlebar.el, middle);
+  document.body.append(titlebar.el, middle, agents.usageBar);
 
   const shells = await listShells();
   let defaultShell = loadDefaultShell(shells);

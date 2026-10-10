@@ -1,0 +1,17 @@
+{
+  "name": "heron-limits",
+  "version": "0.1.0",
+  "description": "Shows Claude Code's usage limits and context use in Heron, which can get them only from the status line",
+  "author": {
+    "name": "seonggyujo"
+  },
+  "homepage": "https://github.com/seonggyujo/heron",
+  "repository": "https://github.com/seonggyujo/heron",
+  "license": "MIT",
+  "keywords": [
+    "heron",
+    "statusline",
+    "usage",
+    "limits"
+  ]
+}

@@ -1,0 +1,23 @@
+/* Colors of the agent states, shared by the sidebar row badges and the
+   pane header dots (pane/pane-signals.ts), and the outline of the pane
+   whose sidebar row is hovered. */
+
+.agent-item.work .agent-n,
+.pane.agent-work .pane-dot {
+  background: var(--agent-work);
+}
+
+.agent-item.need .agent-n,
+.pane.agent-need .pane-dot {
+  background: var(--agent-need);
+}
+
+.agent-item.done .agent-n,
+.pane.agent-done .pane-dot {
+  background: var(--agent-done);
+}
+
+.pane.agent-hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 1px var(--fg-dim);
+}

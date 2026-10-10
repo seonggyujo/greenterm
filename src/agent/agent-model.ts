@@ -1,9 +1,12 @@
 // What Heron knows about the coding agent (Claude Code) in one pane, and
-// how each signal changes it. Pure: no DOM, no IPC. Two sources:
-//   - agent files (exact, ipc/agent.ts): the state from Heron's hooks or
-//     the plugin's, the model check and limits from the plugin's status line
+// how each signal changes it. Pure: no DOM, no IPC. Sources:
+//   - agent updates (exact, ipc/agent.ts): the state from Heron's hooks, the
+//     model check Heron's backend makes, and context use from the
+//     heron-limits plugin's status line (its limits: usage.ts)
 //   - the terminal title (rough): "✳ <title>" idle, a turning half circle working
 // Once a hook has reported for a pane, hooks decide the state.
+
+import { contextOf } from "./usage";
 
 export type AgentState = "idle" | "working" | "permission" | "question" | "waiting" | "done";
 export type CheckState = "ok" | "mismatch" | "pending";
@@ -25,21 +28,10 @@ export interface Agent {
   /** Notification text, e.g. which tool needs permission. */
   message: string | null;
   check: ModelCheck | null;
-  /** The agent's working folder (from the agent files). */
+  /** Percent of the context window in use (heron-limits plugin). */
+  context: number | null;
+  /** The agent's working folder (from the hooks). */
   cwd: string | null;
-}
-
-export interface Limit {
-  used: number;
-  /** Epoch seconds. */
-  resetsAt: number | null;
-}
-
-export interface Limits {
-  fiveHour: Limit | null;
-  sevenDay: Limit | null;
-  /** When the plugin wrote them (ms), to keep the newest. */
-  at: number;
 }
 
 const STATES: readonly AgentState[] = ["idle", "working", "permission", "question", "waiting", "done"];
@@ -48,7 +40,6 @@ const IDLE_TITLE = /^✳\s+(.*)$/u;
 
 const record = (v: unknown): Record<string, unknown> => (v && typeof v === "object" ? (v as Record<string, unknown>) : {});
 const text = (v: unknown): string | null => (typeof v === "string" && v ? v : null);
-const number = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
 
 const fresh = (now: number): Agent => ({
   state: "idle",
@@ -57,6 +48,7 @@ const fresh = (now: number): Agent => ({
   title: null,
   message: null,
   check: null,
+  context: null,
   cwd: null,
 });
 
@@ -74,25 +66,17 @@ export function applyState(prev: Agent | undefined, data: unknown, now: number):
   return { ...a, message: text(d.message), cwd: text(d.cwd) ?? a.cwd };
 }
 
-/** The plugin's status line file: the model check. Limits are read by limitsOf. */
+/** The plugin's status line file: context use. Its limits: usage.ts. */
 export function applyStatus(prev: Agent | undefined, data: unknown, now: number): Agent {
-  const c = record(record(data).check);
-  const state: CheckState | null = c.state === "ok" || c.state === "mismatch" || c.state === "pending" ? c.state : null;
-  const check: ModelCheck | null = state ? { state, selected: text(c.selected), actual: text(c.actual) } : null;
-  const a = prev ?? fresh(now);
-  return { ...a, check, cwd: text(record(data).cwd) ?? a.cwd };
+  return { ...(prev ?? fresh(now)), context: contextOf(data) };
 }
 
-export function limitsOf(data: unknown): Limits | null {
-  const d = record(data);
-  const at = number(d.at);
-  if (at === null) return null;
-  const limit = (v: unknown): Limit | null => {
-    const used = number(record(v).used);
-    return used === null ? null : { used, resetsAt: number(record(v).resets_at) };
-  };
-  const l = record(d.limits);
-  return { fiveHour: limit(l.five_hour), sevenDay: limit(l.seven_day), at };
+/** The model check of the backend (src-tauri/src/agent). Only for a pane that has an agent. */
+export function applyCheck(prev: Agent | undefined, data: unknown): Agent | undefined {
+  if (!prev) return prev;
+  const c = record(data);
+  const state = (["ok", "mismatch", "pending"] as const).find((s) => s === c.state);
+  return { ...prev, check: state ? { state, selected: text(c.selected), actual: text(c.actual) } : null };
 }
 
 /** Claude Code's terminal title, or null for any other title. */

@@ -1,0 +1,14 @@
+{
+  "name": "heron",
+  "description": "Claude Code plugins for Heron, the terminal app for coding agents",
+  "owner": {
+    "name": "seonggyujo"
+  },
+  "plugins": [
+    {
+      "name": "heron-limits",
+      "source": "./plugin",
+      "description": "Shows Claude Code's usage limits and context use in Heron, which can get them only from the status line"
+    }
+  ]
+}

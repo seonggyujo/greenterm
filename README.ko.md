@@ -26,31 +26,38 @@ Tauri v2, vanilla TypeScript, xterm.js(WebGL), ConPTY로 만들었어요.
 ### 코딩 에이전트
 
 pane에서 Claude Code를 켜면 왼쪽에 사이드바가 나타나요. 에이전트가 있는 pane마다 한 줄씩 생기고,
-pane 번호, 폴더, 에이전트가 하는 일(작업 중이면 경과 시간, 끝남)을 보여 줘요. 나를 기다리는
+에이전트 상태 색 배지에 든 pane 번호, 폴더, 에이전트가 하는 일(작업 중이면 경과 시간, 끝남)을 보여 줘요. 나를 기다리는
 에이전트가 맨 위에 와요. 줄을 누르면 그 pane으로 가고, 마우스를 올리면 어느 pane인지 테두리로
 알려 줘요. pane의 상태 점도 같은 색으로 바뀌어요. Heron이 다른 창 뒤에 있을 때 에이전트가
-일을 마치거나 나를 기다리면 작업 표시줄 버튼이 깜빡여요. 사이드바는 점만 남는 얇은 줄로 접을 수 있고,
+일을 마치거나 나를 기다리면 작업 표시줄 버튼이 깜빡여요. 사이드바는 배지만 남는 얇은 줄로 접을 수 있고,
 에이전트가 없으면 숨어요. 따로 설치할 것은 없어요. Claude Code가 터미널에 붙이는 제목을 읽어서
 알아내요.
 
-에이전트가 권한을 기다리거나 질문하는 것까지 보려면 사이드바 아래의 **Turn on**(켜기)을 누르세요.
+에이전트가 권한을 기다리거나(무엇을 하려는지까지) 질문하는 것도 보려면 사이드바 아래의 **Turn on**(켜기)을 누르세요.
 설정의 **Claude Code 훅** 스위치로 켜도 돼요. Heron이 Claude Code의 `~/.claude/settings.json`에
 heron.exe를 부르는 훅 몇 개를 넣어서, 따로 설치할 것은 없어요. Claude Code 2.1.139 이상이
 필요해요. 사용자가 넣은 훅은 그대로 두고, 바꾸기 전 파일은 `settings.json.heron-backup`으로
 남겨요. 스위치를 끄거나 Heron을 삭제하면 훅도 빠져요. Heron 밖에서는 아무 일도 하지 않아요.
 
-[routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) 플러그인(0.4.0
-이상)을 설치하면 선택한 모델과 다른 모델이 답할 때 경고하고, 5시간·주간 사용 한도와 초기화까지
-남은 시간도 보여 줘요. Claude Code에서 설치해요.
+훅을 켜면 Heron이 대화의 답마다 모델도 확인해요. 답한 모델이 선택한 모델(`/model`)과 다르면
+그 에이전트 줄에 모델 이름과 함께 경고가 떠요. 답마다 그 답이 왔을 때 선택돼 있던 모델과
+한 번만 비교하니까, 모델을 바꿔도 앞선 답이 경고로 바뀌지 않아요. 모델 변경을 훅에 알려 주는
+Claude Code 2.1.251 이상이 필요해요.
+
+5시간·주간 사용 한도와 에이전트마다 컨텍스트 창을 얼마나 썼는지는 Claude Code의 상태줄로만
+들어와요. 이 저장소의 **heron-limits** 플러그인([plugin/](plugin/))이 이 값을 Heron에 넘기고,
+Heron은 창 아래 하단바에 보여 줘요. 한도마다 초기화까지 남은 시간, 에이전트마다 컨텍스트
+사용량 칩이 나오고, 70%부터 노랑, 90%부터 빨강이에요. 쓰던 상태줄은 그대로 보여요.
+Claude Code에서 설치해요.
 
 ```
-/plugin marketplace add seonggyujo/claude-code-routing-detector
-/plugin install routing-detector@routing-detector
+/plugin marketplace add seonggyujo/heron
+/plugin install heron-limits@heron
 ```
 
 Heron은 셸마다 환경변수 두 개(`HERON_PANE`, `HERON_AGENT_DIR`)로 훅과 플러그인에 어느
 pane인지 알려 줘요. 훅과 플러그인은 `%LOCALAPPDATA%\io.github.seonggyujo.heron\agents` 아래에 pane마다 작은
-파일 두 개를 남기는데, 이 PC 밖으로 나가지 않고 pane을 닫으면 지워져요. Heron 밖에서는
+파일 몇 개를 남기는데, 이 PC 밖으로 나가지 않고 pane을 닫으면 지워져요. Heron 밖에서는
 아무것도 쓰지 않아요.
 
 ### 자동 분할

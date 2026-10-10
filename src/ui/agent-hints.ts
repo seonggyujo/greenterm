@@ -4,9 +4,9 @@ import { hooksErrorText } from "../i18n/hooks-error";
 import { t } from "../i18n/lang";
 
 // The notes at the bottom of the agent sidebar. First an offer to turn on
-// Heron's Claude Code hooks (permission requests and questions); once
-// they are on, or the offer is closed, a pointer to the routing-detector
-// plugin for model checks and usage limits. Each can be closed for good.
+// Heron's Claude Code hooks (permission requests, questions, model checks);
+// once they are on, or the offer is closed, a pointer to the heron-limits
+// plugin for usage limits and context use. Each can be closed for good.
 
 export interface AgentHints {
   el: HTMLElement;

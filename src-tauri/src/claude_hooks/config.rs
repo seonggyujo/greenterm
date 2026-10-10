@@ -8,10 +8,11 @@ use serde_json::{json, Map, Value};
 
 use super::HOOK_FLAG;
 
-/// The events Heron listens to, with the matcher of each. All exist
-/// since Claude Code 2.1.78 (StopFailure is the newest); the `args` form
-/// of the entries needs 2.1.139, which version.rs checks.
-const EVENTS: [(&str, Option<&str>); 7] = [
+/// The events Heron listens to, with the matcher of each. The `args` form
+/// of the entries needs Claude Code 2.1.139, which version.rs checks. All
+/// exist since then but PostModelSwitch (2.1.251), and an older Claude Code
+/// skips an event name it does not know (since 2.1.101).
+const EVENTS: [(&str, Option<&str>); 8] = [
     // Not "compact": a compaction can happen in the middle of a turn.
     ("SessionStart", Some("startup|resume|clear")),
     ("UserPromptSubmit", None),
@@ -20,6 +21,7 @@ const EVENTS: [(&str, Option<&str>); 7] = [
     ("Stop", None),
     ("StopFailure", None),
     ("SessionEnd", None),
+    ("PostModelSwitch", None),
 ];
 
 /// The hook exits at once; this only bounds a stuck one.

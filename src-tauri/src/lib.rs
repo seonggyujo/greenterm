@@ -1,6 +1,7 @@
 mod agent;
 mod attention;
 mod claude_hooks;
+mod claude_version;
 mod commands;
 mod launch;
 mod logging;

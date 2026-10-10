@@ -11,19 +11,24 @@ const STALE_AFTER: Duration = Duration::from_secs(24 * 60 * 60);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Kind {
-    /// Written by the status line: model check, limits, context use.
+    /// Written by the heron-limits plugin's status line: usage limits,
+    /// context use.
     Status,
-    /// Written by hooks: working, needs permission, waiting, done.
+    /// Written by hooks: working, needs permission, waiting, done, and the
+    /// transcript.
     State,
+    /// Written by hooks: the model the session uses.
+    Model,
 }
 
-pub const KINDS: [Kind; 2] = [Kind::Status, Kind::State];
+pub const KINDS: [Kind; 3] = [Kind::Status, Kind::State, Kind::Model];
 
 impl Kind {
     pub fn name(self) -> &'static str {
         match self {
             Kind::Status => "status",
             Kind::State => "state",
+            Kind::Model => "model",
         }
     }
 }

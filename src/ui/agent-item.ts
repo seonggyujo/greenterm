@@ -3,10 +3,11 @@ import { formatUptime } from "../app/uptime-clock";
 import { t } from "../i18n/lang";
 
 // One row of the agent sidebar:
-//   ● 1  heron        2m 14s
-//        working
-//        ⚠ sonnet-5
-// Collapsed, only the dot and the pane number show; the tooltip says the rest.
+//   [1] heron              2m 14s
+//       needs permission · Bash: cargo test
+//       ⚠ sonnet-5
+// The pane number's badge takes the state's color. Collapsed, only the
+// badge shows; the tooltip says the rest.
 
 export interface AgentRow {
   pty: number;
@@ -34,6 +35,12 @@ function stateText(a: Agent): string {
   }[a.state];
 }
 
+/** The state, and what the agent asks for when it waits on a permission or a question. */
+function lineText(a: Agent): string {
+  const asks = a.state === "permission" || a.state === "question";
+  return asks && a.message ? `${stateText(a)} · ${a.message}` : stateText(a);
+}
+
 function span(className: string, text = ""): HTMLSpanElement {
   const el = document.createElement("span");
   el.className = className;
@@ -51,13 +58,13 @@ export function createAgentItem(row: AgentRow, onPick: (pty: number) => void, on
   const top = span("agent-top");
   top.append(span("agent-name", row.folder), time);
   const body = span("agent-body");
-  body.append(top, span("agent-line", stateText(a)));
+  body.append(top, span("agent-line", lineText(a)));
   const tips = [`${row.number} · ${row.folder} · ${stateText(a)}`, a.title, a.message];
   if (a.check?.state === "mismatch") {
     body.append(span("agent-warn", `⚠ ${(a.check.actual ?? "?").replace(/^claude-/, "")}`));
     tips.push(t().agentMismatch(a.check.selected ?? "?", a.check.actual ?? "?"));
   }
-  el.append(span("agent-dot"), span("agent-n", String(row.number)), body);
+  el.append(span("agent-n", String(row.number)), body);
   el.title = tips.filter(Boolean).join("\n");
 
   el.addEventListener("click", () => onPick(row.pty));

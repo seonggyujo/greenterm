@@ -1,14 +1,15 @@
 //! Heron's own Claude Code hooks, so agents in the panes report what
-//! they do without the routing-detector plugin. With the user's consent
+//! they do and which model they use, without any plugin. With the user's consent
 //! (the sidebar or Settings), Heron adds entries to Claude Code's
 //! settings.json that run `heron.exe --agent-hook` on a few events
-//! (entry.rs writes the pane's state file). The uninstaller and Settings run
+//! (entry.rs writes the pane's state and model files). The uninstaller and Settings run
 //! `remove`, which leaves the user's own hooks as they were.
 
 mod config;
 #[cfg(test)]
 mod config_tests;
 mod entry;
+mod records;
 mod settings_file;
 mod version;
 

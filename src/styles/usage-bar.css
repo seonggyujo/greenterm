@@ -1,0 +1,138 @@
+/* The usage bar along the bottom of the window (ui/usage-bar.ts): a block
+   per usage limit (ui/limit-meter.ts), then a chip per agent with its
+   context use. Yellow from 70%, red from 90%. */
+
+.usage-bar {
+  flex: none;
+  height: 64px;
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--border);
+  background: var(--bg-bar-bottom);
+  color: var(--fg-dim);
+  font-family: var(--font-ui);
+}
+
+.usage-bar[hidden],
+.limit-meter[hidden],
+.usage-context[hidden] {
+  display: none;
+}
+
+.limit-meter {
+  flex: none;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 18px;
+  border-right: 1px solid var(--border-soft);
+}
+
+.limit-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.limit-reset {
+  font-variant-numeric: tabular-nums;
+}
+
+.limit-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.limit-used {
+  min-width: 3.1em;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--fg-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.limit-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border-soft);
+  overflow: hidden;
+}
+
+.limit-fill {
+  display: block;
+  height: 100%;
+  background: var(--agent-work);
+}
+
+.limit-meter.warn .limit-used,
+.usage-chip.warn .chip-used {
+  color: var(--agent-need);
+}
+
+.limit-meter.warn .limit-fill {
+  background: var(--agent-need);
+}
+
+.limit-meter.bad .limit-used,
+.usage-chip.bad .chip-used {
+  color: var(--agent-bad);
+}
+
+.limit-meter.bad .limit-fill {
+  background: var(--agent-bad);
+}
+
+.usage-context {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+}
+
+.usage-label {
+  flex: none;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.usage-chips {
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.usage-chip {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg-soft);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.usage-chip:hover {
+  background: var(--bg-hover);
+}
+
+.chip-used {
+  font-weight: 700;
+  color: var(--agent-work);
+}

@@ -11,9 +11,10 @@
 | 경로 | 역할 |
 | --- | --- |
 | `main.ts` | 부트스트랩만. 모듈을 만들고 서로 연결한다 |
-| `wire-agents.ts` | `main.ts`처럼 연결만: 에이전트 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 사이드바와 pane 점(`pane-signals.ts`의 표시 함수)을 다시 그린다. 에이전트가 나를 기다리거나 끝나면 작업 표시줄 버튼을 깜빡인다(`ipc/attention.ts`). 사이드바 줄에 마우스를 올리면 그 pane 테두리를 밝힌다. 시작할 때 Claude Code 훅 상태를 맞춘다(`app/agent-hooks.ts`) |
-| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 에이전트 파일(정확. Heron 훅이나 플러그인이 쓴 상태, 플러그인 상태줄의 모델 확인과 한도)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 아무것도 설치하지 않아도 동작). 훅이 한 번 보고하면 훅이 상태를 정한다. 단 Esc나 Ctrl+C는 작업을 멈춘 것으로 본다(Claude Code는 중단된 턴에 Stop 훅을 보내지 않는다). 작업 표시줄을 깜빡일 변화인지도 여기서 정한다 |
-| `agent/agent-board.ts` | pty별 에이전트와 가장 최근 한도를 보관. 모든 신호를 `agent-model.ts`로 계산하고, 바뀌면 구독자에게 어느 pane이 어떤 상태에서 어떤 상태로 바뀌었는지 알린다 |
+| `wire-agents.ts` | `main.ts`처럼 연결만: 에이전트 소식과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 에이전트가 있는 pane의 줄(번호, 폴더, 에이전트)을 만들어 사이드바, 하단바, pane 점(`pane-signals.ts`의 표시 함수)을 다시 그린다. 에이전트가 나를 기다리거나 끝나면 작업 표시줄 버튼을 깜빡인다(`ipc/attention.ts`). 사이드바 줄에 마우스를 올리면 그 pane 테두리를 밝힌다. 시작할 때 Claude Code 훅 상태를 맞춘다(`app/agent-hooks.ts`) |
+| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 컨텍스트 사용률, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 백엔드의 에이전트 소식(정확. Heron 훅이 쓴 상태, 백엔드의 모델 확인, heron-limits 플러그인의 컨텍스트 사용률)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 아무것도 설치하지 않아도 동작). 훅이 한 번 보고하면 훅이 상태를 정한다. 단 Esc나 Ctrl+C는 작업을 멈춘 것으로 본다(Claude Code는 중단된 턴에 Stop 훅을 보내지 않는다). 작업 표시줄을 깜빡일 변화인지도 여기서 정한다 |
+| `agent/usage.ts` | 순수 함수: heron-limits 플러그인의 상태 파일에서 계정의 사용 한도(5시간, 주간)와 컨텍스트 사용률, 막대 색(70%부터 노랑, 90%부터 빨강) |
+| `agent/agent-board.ts` | pty별 에이전트와 가장 최근 한도를 보관. 모든 신호를 `agent-model.ts`와 `usage.ts`로 계산하고, 바뀌면 구독자에게 어느 pane이 어떤 상태에서 어떤 상태로 바뀌었는지 알린다 |
 | `app/paths.ts` | 경로에서 마지막 폴더 이름 |
 | `app/perf-monitor.ts` | dev 전용 long task(50ms 초과) 로그 |
 | `app/theme.ts` | 앱 틀 테마(green, black) 적용과 저장 |
@@ -41,15 +42,16 @@
 | `ui/tidy-button.ts` | 자동 격자로 되돌리는 버튼. 수동 배치일 때만 보이고, action 맨 왼쪽이라 나타나도 다른 버튼 위치가 안 바뀐다 |
 | `ui/theme-toggle.ts` | 테마 선택 동그라미 두 개(설정 창 안) |
 | `ui/empty-state.ts` | 터미널 0개일 때 큰 + 버튼과 깜빡이는 `_` |
-| `ui/agent-sidebar.ts` | 왼쪽 사이드바: 에이전트가 있는 pane을 급한 순(나를 기다림, 끝남, 작업 중, 쉬는 중)으로, 맨 아래에 한도와 안내(`agent-hints.ts`). 에이전트가 없으면 숨는다. 점과 번호만 남게 접을 수 있고 기억한다. 줄은 보드가 바뀔 때만 새로 만들고, 1초 갱신은 경과 시간과 한도 글자만 바꾼다 |
-| `ui/agent-item.ts` | 사이드바 한 줄: 상태 점, pane 번호, 폴더, 경과 시간, 상태, 모델 경고. 누르면 그 pane으로, 마우스를 올리면 그 pane 강조 |
-| `ui/limit-meter.ts` | 한도 하나(5h, 7d): 막대, 사용률, 초기화까지 남은 시간. 70%부터 노랑, 90%부터 빨강 |
+| `ui/agent-sidebar.ts` | 왼쪽 사이드바: 에이전트가 있는 pane을 급한 순(나를 기다림, 끝남, 작업 중, 쉬는 중)으로, 맨 아래에 안내(`agent-hints.ts`). 에이전트가 없으면 숨는다. 번호 배지만 남게 접을 수 있고 기억한다. 줄은 보드가 바뀔 때만 새로 만들고, 1초 갱신은 경과 시간만 바꾼다 |
+| `ui/agent-item.ts` | 사이드바 한 줄: 상태 색 배지에 든 pane 번호, 폴더, 경과 시간, 상태(권한 요청과 질문이면 무엇인지도), 모델 경고. 누르면 그 pane으로, 마우스를 올리면 그 pane 강조 |
+| `ui/usage-bar.ts` | 창 아래 하단바(heron-limits 플러그인): 한도 블록 두 개와 에이전트마다 컨텍스트 사용률 칩(pane 순서, 누르면 그 pane으로). 한도도 컨텍스트도 없으면 숨고, 한도가 있을 때만 1초 시계를 구독한다 |
+| `ui/limit-meter.ts` | 하단바의 한도 하나(5시간, 주간): 이름, 초기화까지 남은 시간, 큰 사용률 숫자와 막대. 70%부터 노랑, 90%부터 빨강 |
 | `i18n/strings.ts` | 화면에 보이는 모든 글자의 영어·한국어 표. 셸 이름과 로그는 번역하지 않는다 |
 | `i18n/hooks-error.ts` | Claude Code 훅 명령의 오류 코드를 문장으로 |
 | `i18n/lang.ts` | 현재 언어와 `t()`. 저장된 선택이 없으면 Windows 표시 언어를 따른다. 화면 모듈은 `onLangChange`로 글자를 다시 쓴다 |
 | `ipc/launch.ts` | 시작 폴더 받기(`take_launch_dir`), 켜진 창으로 온 폴더(`open-folder` 이벤트) |
 | `ipc/pty.ts` | PTY 명령 타입 래퍼, 출력 Channel(ArrayBuffer), `pty-exit` 구독, 셸 목록 |
-| `ipc/agent.ts` | `agent-update` 이벤트 구독. 플러그인이 쓴 JSON을 검사 없이 넘기고, 검사는 `agent-model.ts`가 한다 |
+| `ipc/agent.ts` | `agent-update` 이벤트 구독. 종류는 `state`(Heron 훅), `check`(백엔드의 모델 확인), `status`(heron-limits 플러그인). JSON을 검사 없이 넘기고, 검사는 `agent-model.ts`와 `usage.ts`가 한다 |
 | `ipc/agent-hooks.ts` | Claude Code 훅 명령(`agent_hooks_presence`, `install_agent_hooks`, `remove_agent_hooks`). 실패하면 오류 코드 |
 | `ipc/attention.ts` | 작업 표시줄 깜빡임 명령(`flash_taskbar`) |
 | `terminal/terminal-view.ts` | xterm 생성, fit·webgl addon, context loss 시 DOM 렌더러로 fallback |
@@ -78,7 +80,7 @@
 | `layout/box-style.ts` | 절대 위치 요소에 px 박스 적용 |
 | `layout/fit-scheduler.ts` | ResizeObserver + requestAnimationFrame으로 fit을 묶음. 프레임당 10ms 예산, 남으면 다음 프레임 |
 | `layout/flip.ts` | 재배치 시 이전 위치에서 새 위치로 transform 애니메이션 |
-| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`(사이드바와 작업 영역을 나란히), `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-sidebar`(사이드바, 한도, 에이전트 상태 색), `agent-hints`(사이드바 아래 안내), `effects`(Animations 끄기 규칙 포함) |
+| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`(사이드바와 작업 영역을 나란히), `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-sidebar`(사이드바 틀), `agent-item`(사이드바 한 줄), `agent-marks`(배지와 pane 점의 에이전트 상태 색, 가리킨 pane 테두리), `agent-hints`(사이드바 아래 안내), `usage-bar`(하단바, 한도 블록, 컨텍스트 칩), `effects`(Animations 끄기 규칙 포함) |
 
 의존 방향: `main.ts`, `wire-agents.ts` → `ui/`, `pane/`, `layout/` → `agent/`, `terminal/`, `ipc/`, `app/`, `i18n/`.
 `agent/`는 `ipc/`의 타입과 `app/log.ts`만 import한다(화면 모듈을 모른다).
@@ -97,12 +99,18 @@
 | `launch.rs` | 명령줄 폴더 인자("Open in Heron"), 이미 켜져 있으면 그 창에 pane 추가(single-instance 플러그인, release 빌드만) |
 | `logging.rs` | dev용 stderr 로거. release에서는 로그 호출이 컴파일에서 빠진다 |
 | `commands.rs` | Tauri 명령. 인자만 넘기고 `pty`, `agent`, `claude_hooks` 모듈에 위임. 셸 명령에 pane의 에이전트 변수를 넣는 곳이 여기라 `pty`는 에이전트를 모른다 |
-| `agent/mod.rs` | `AgentLink`: pane마다 셸에 `HERON_PANE`(키 `<pid>-<pty id>`)와 `HERON_AGENT_DIR`(`%LOCALAPPDATA%\io.github.seonggyujo.heron\agents`)을 넣고, pane이 닫히면 그 pane 파일을 지운다. 파일은 Heron 훅(`claude_hooks/`)이나 플러그인이 쓴다 |
-| `agent/files.rs` | pane 파일 이름(`<키>.status.json`은 상태줄, `<키>.state.json`은 훅)과 키 검사(`claude_hooks/entry.rs`가 환경변수의 키로 파일 이름을 만들 때), 하루 지난 파일 정리 |
-| `agent/poll.rs` | 살아 있는 pane의 파일 두 개를 0.7초마다 수정 시각으로 확인. 바뀌면 읽어서 `agent-update` 이벤트로 프론트에 보낸다. 쓰는 쪽은 쓰고 나서 이름을 바꾸므로 반쯤 쓴 파일을 읽지 않는다 |
-| `claude_hooks/mod.rs` | Heron 자체 Claude Code 훅의 진입점: 상태 확인, 설치(먼저 버전 확인), 제거, 오류 코드. 플러그인 없이도 권한 요청, 질문, 끝남을 알게 한다 |
-| `claude_hooks/entry.rs` | `heron.exe --agent-hook`으로 실행됐을 때: 훅 입력(JSON)을 상태로 바꿔 pane의 상태 파일에 쓰고 끝난다. 아무것도 출력하지 않는다. Heron pane 밖이면 입력을 읽기 전에 끝난다 |
-| `claude_hooks/config.rs` | settings.json `hooks` 안의 Heron 항목 넣기, 빼기, 있는지 보기(순수 함수). heron.exe를 `--agent-hook`으로 부르는 항목만 우리 것으로 보고 사용자의 훅은 건드리지 않는다. 테스트는 `config_tests.rs` |
+| `claude_version.rs` | 순수 함수: Claude Code 버전 문자열(`claude --version` 출력, 기록 파일 항목의 `version`)을 숫자 셋으로. `claude_hooks/`와 `agent/`가 함께 쓴다 |
+| `agent/mod.rs` | `AgentLink`: pane마다 셸에 `HERON_PANE`(키 `<pid>-<pty id>`)와 `HERON_AGENT_DIR`(`%LOCALAPPDATA%\io.github.seonggyujo.heron\agents`)을 넣고, pane이 닫히면 그 pane 파일을 지운다. 파일은 Heron 훅(`claude_hooks/`)과 heron-limits 플러그인이 쓴다 |
+| `agent/files.rs` | pane 파일 이름(`<키>.state.json`과 `<키>.model.json`은 훅, `<키>.status.json`은 플러그인 상태줄)과 키 검사(`claude_hooks/entry.rs`가 환경변수의 키로 파일 이름을 만들 때), 하루 지난 파일 정리 |
+| `agent/poll.rs` | 0.7초마다 살아 있는 pane마다 `watch.rs`를 한 번 돌리고, 나온 소식을 `agent-update` 이벤트로 프론트에 보낸다 |
+| `agent/watch.rs` | pane 하나를 지켜보는 일: 파일의 수정 시각을 보고 바뀐 상태 파일과 상태줄 파일은 그대로 보낸다. 상태 파일이 알려 준 기록 파일을 따라 읽고, 모델 파일의 선택 모델로 모델 확인을 해서 판정이 바뀌면 `check`를 보낸다. 새 답을 먼저 판정하고 그다음 새 선택을 받아서, 바꾸기 전의 답은 바꾸기 전 모델과 비교한다. 쓰는 쪽은 쓰고 나서 이름을 바꾸므로 반쯤 쓴 파일을 읽지 않는다 |
+| `agent/transcript.rs` | 기록 파일 하나를 따라 읽기: 지난번 이후 새로 끝난 줄만 읽어 답을 한 번씩 돌려준다. 파일 끝에서 시작하고, 따라 읽기 전에 쓰인 답(재개한 세션, 갈래 친 세션의 사본)은 그때 선택 모델을 몰라서 판정하지 않는다 |
+| `agent/answers.rs` | 순수 함수: 기록 파일 한 줄에서 본 대화의 답(`message.id`, `message.model`, 시각)을 꺼낸다. 서브에이전트(`isSidechain`), `<synthetic>`, 모델 변경 훅이 없는 Claude Code(2.1.251 미만)가 쓴 답은 뺀다. `[1m]`, 날짜 꼬리를 빼고 모델 비교 |
+| `agent/model_check.rs` | 순수 함수: 답마다 그 답이 왔을 때의 선택 모델과 한 번만 비교한다. 판정은 ok, mismatch, pending(답이 없거나, 선택을 모르거나, 답 뒤에 모델을 바꿨을 때) |
+| `claude_hooks/mod.rs` | Heron 자체 Claude Code 훅의 진입점: 상태 확인, 설치(먼저 버전 확인), 제거, 오류 코드. 플러그인 없이도 권한 요청, 질문, 끝남, 모델 확인을 하게 한다 |
+| `claude_hooks/entry.rs` | `heron.exe --agent-hook`으로 실행됐을 때: 훅 입력(JSON)을 `records.rs`로 바꿔 pane의 상태 파일과 모델 파일에 쓰고 끝난다. 아무것도 출력하지 않는다. Heron pane 밖이면 입력을 읽기 전에 끝난다 |
+| `claude_hooks/records.rs` | 순수 함수: 훅 이벤트 하나가 쓰는 것. 상태 파일에는 상태, 권한 요청이나 알림 내용, 작업 폴더, 기록 파일 경로. 모델 파일에는 `SessionStart`의 `model`이나 `PostModelSwitch`의 `to_model` |
+| `claude_hooks/config.rs` | settings.json `hooks` 안의 Heron 항목 넣기, 빼기, 있는지 보기(순수 함수). 이벤트 8개(`PostModelSwitch` 포함. 이것을 모르는 버전은 그 항목만 건너뛴다). heron.exe를 `--agent-hook`으로 부르는 항목만 우리 것으로 보고 사용자의 훅은 건드리지 않는다. 이벤트가 하나라도 빠지면 오래된 설치로 보고 앱이 시작할 때 다시 넣는다. 테스트는 `config_tests.rs` |
 | `claude_hooks/settings_file.rs` | `settings.json`(CLAUDE_CONFIG_DIR 또는 `%USERPROFILE%.claude`) 읽기와 쓰기. 쓰기 전에 옆에 `.heron-backup` 사본, 임시 파일에 쓰고 이름 바꾸기. 올바른 JSON이 아니면 쓰지 않는다 |
 | `claude_hooks/version.rs` | `claude --version` 확인. 2.1.139 미만은 훅 항목의 `args`를 무시해서 이벤트마다 앱을 띄울 수 있으므로 설치하지 않는다 |
 | `pty/mod.rs` | `pty` 모듈 공개 API |
@@ -116,6 +124,26 @@
 | `pty/gate.rs` | pause 스위치(Mutex + Condvar) |
 | `pty/batcher.rs` | 12ms 간격 또는 64KB 단위 flush, `InvokeResponseBody::Raw`로 전송 |
 | `pty/waiter.rs` | 자식 종료 대기 → 콘솔 닫기 → 마지막 출력 flush → `pty-exit` 발행 |
+
+의존 방향: `lib.rs`, `commands.rs` → `claude_hooks/`, `agent/`, `pty/` → `claude_version.rs`.
+`claude_hooks/entry.rs`는 `agent`가 내보낸 파일 이름 함수만 쓰고, `agent/`는 `claude_hooks/`를 모른다.
+
+## 플러그인 `plugin/` (heron-limits)
+
+Claude Code가 상태줄로만 주는 값(5시간·주간 사용 한도, 컨텍스트 사용률)을 Heron에 넘기는 Claude Code 플러그인.
+저장소 맨 위 `.claude-plugin/marketplace.json`이 이 저장소를 마켓플레이스 `heron`으로 만들고, 플러그인은 `./plugin`을 가리킨다
+(`/plugin marketplace add seonggyujo/heron`, `/plugin install heron-limits@heron`). Heron 앱과 따로 버전을 매긴다(`plugin/.claude-plugin/plugin.json`).
+
+| 경로 | 역할 |
+| --- | --- |
+| `setup.js` | `sync`(SessionStart 훅): 상태줄 자리를 가져오고, 쓰던 상태줄은 저장해서 우리 것 안에서 돌린다(`refreshInterval`, `padding`은 그대로). 설치된 사본을 플러그인 버전에 맞춘다. `first-run`(UserPromptSubmit 훅): 처음 한 번만 `sync`. `disable`: 쓰던 상태줄을 돌려놓고 사본을 지운다. settings.json은 `~/.claude/heron-limits/`의 사본을 가리킨다(플러그인 폴더는 버전마다 바뀌고, 플러그인을 지워도 사본은 계속 돈다) |
+| `statusline.js` | 상태줄 진입점: Heron pane 안이면 `heron-file.js`로 파일을 쓰고, `previous.js`가 돌린 쓰던 상태줄의 출력을 그대로 찍는다. 없으면 아무것도 찍지 않는다 |
+| `heron-file.js` | `<키>.status.json`에 한도(사용률, 초기화 시각)와 컨텍스트 사용률. pane 키 모양이 아니면 쓰지 않는다 |
+| `previous.js` | 저장한 사용자 상태줄을 같은 입력으로 실행(Git Bash, 없으면 기본 셸). 3초 안에 끝나지 않거나 실패하면 출력 없음 |
+| `skills/disable/` | `/heron-limits:disable` |
+| `test/` | `node --test "test/*.test.js"`: 설정 가져오기와 되돌리기, 출력 그대로 전달, Heron 파일 |
+
+`plugin/package.json`은 `"type": "commonjs"`다. 저장소 맨 위 `package.json`이 ES 모듈이라서, 없으면 저장소 안에서 실행한 스크립트가 깨진다.
 
 ## 스크립트 `scripts/`
 

@@ -1,0 +1,99 @@
+/* One row of the agent sidebar (ui/agent-item.ts): the pane number in a
+   badge of the state's color (agent-marks.css), folder, working time,
+   state line and model warning. Collapsed, only the badge shows. */
+
+.agent-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--fg-dim);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.agent-item:hover {
+  background: var(--bg-hover);
+}
+
+.agent-item.need {
+  border-color: var(--agent-need);
+}
+
+.agent-n {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: var(--fg-muted);
+  color: var(--bg-app);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.agent-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agent-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.agent-name,
+.agent-line,
+.agent-warn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-name {
+  color: var(--fg-soft);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.agent-time {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.agent-line,
+.agent-warn {
+  font-size: 13px;
+}
+
+.agent-item.need .agent-line {
+  color: var(--agent-need);
+}
+
+.agent-warn {
+  color: var(--agent-bad);
+}
+
+.agent-sidebar.collapsed .agent-body {
+  display: none;
+}
+
+.agent-sidebar.collapsed .agent-item {
+  justify-content: center;
+  padding: 6px 0;
+}

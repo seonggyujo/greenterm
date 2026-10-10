@@ -95,7 +95,6 @@ export class Pane implements PaneItem {
     return folderName(this.where() ?? this.cwd ?? "") ?? SHELL_LABELS[this.shell];
   }
 
-
   /** The header, where a drag to move the pane starts (pane-drag.ts). */
   get handle(): HTMLElement {
     return this.header.el;

@@ -7,8 +7,9 @@ use std::os::windows::process::CommandExt;
 use std::process::Command;
 
 use super::HookError;
+use crate::claude_version::{self, Version};
 
-const MINIMUM: (u32, u32, u32) = (2, 1, 139);
+const MINIMUM: Version = (2, 1, 139);
 /// No console window flashes up while `claude` runs.
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
@@ -20,29 +21,10 @@ pub fn check() -> Result<(), HookError> {
         .output()
         .map_err(|_| HookError::ClaudeNotFound)?;
     let text = String::from_utf8_lossy(&output.stdout);
-    let version = parse(&text).filter(|_| output.status.success()).ok_or(HookError::ClaudeNotFound)?;
+    let version = claude_version::parse(&text).filter(|_| output.status.success()).ok_or(HookError::ClaudeNotFound)?;
     if version < MINIMUM {
         let (major, minor, patch) = version;
         return Err(HookError::ClaudeTooOld(format!("{major}.{minor}.{patch}")));
     }
     Ok(())
-}
-
-/// "2.1.296 (Claude Code)" is (2, 1, 296).
-pub fn parse(text: &str) -> Option<(u32, u32, u32)> {
-    let word = text.split_whitespace().next()?;
-    let mut parts = word.split('.').map(|p| p.parse::<u32>().ok());
-    Some((parts.next()??, parts.next()??, parts.next()??))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn reads_the_version_line() {
-        assert_eq!(parse("2.1.296 (Claude Code)\n"), Some((2, 1, 296)));
-        assert_eq!(parse("'claude' is not recognized"), None);
-        assert!(parse("2.1.100 (Claude Code)").unwrap() < MINIMUM);
-    }
 }

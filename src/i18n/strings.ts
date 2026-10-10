@@ -33,7 +33,7 @@ export const en = {
   closeOnExit: "Close pane on exit 0",
   closeOnExitHint: "Close pane when the shell exits cleanly",
   agentHooks: "Claude Code hooks",
-  agentHooksHint: "Show permission requests and questions in the sidebar. Adds Heron's hooks to Claude Code's settings.json",
+  agentHooksHint: "Show permission requests, questions and model checks in the sidebar. Adds Heron's hooks to Claude Code's settings.json",
   reset: "Reset",
   resetHint: "Theme, font size, language and the options above, except Claude Code hooks",
   sure: "Sure?",
@@ -50,9 +50,8 @@ export const en = {
   agentWaiting: "waiting for you",
   agentDone: "done",
   agentMismatch: (selected: string, actual: string) => `Selected ${selected}, answered by ${actual}`,
-  limitResets: (left: string) => `Resets in ${left}`,
-  agentPluginHint: "Install the routing-detector plugin for model checks and usage limits",
-  hooksOffer: "See permission requests and questions too: Heron adds its hooks to Claude Code's settings.json.",
+  agentPluginHint: "Install the heron-limits plugin to see usage limits and context use",
+  hooksOffer: "See permission requests, questions and model checks too: Heron adds its hooks to Claude Code's settings.json.",
   hooksTurnOn: "Turn on",
   hooksTurningOn: "Turning on…",
   hooksNoClaude: "Claude Code was not found. Check that claude runs in a terminal.",
@@ -60,6 +59,13 @@ export const en = {
   hooksBadSettings: "Claude Code's settings.json is not valid JSON, so it was left alone.",
   hooksFailed: "Could not change Claude Code's settings.",
   hide: "Hide",
+
+  // Usage bar
+  limitFiveHour: "5-hour limit",
+  limitWeekly: "Weekly limit",
+  limitResets: (left: string) => `resets in ${left}`,
+  context: "Context",
+  contextUsed: (folder: string, percent: number) => `${folder}: ${percent}% of the context window used`,
 };
 
 export type Strings = typeof en;
@@ -92,7 +98,7 @@ export const ko: Strings = {
   closeOnExit: "exit 0이면 pane 닫기",
   closeOnExitHint: "셸이 정상 종료되면 pane 닫기",
   agentHooks: "Claude Code 훅",
-  agentHooksHint: "사이드바에 권한 요청과 질문을 보여 줘요. Claude Code의 settings.json에 Heron 훅을 추가해요",
+  agentHooksHint: "사이드바에 권한 요청, 질문, 모델 확인을 보여 줘요. Claude Code의 settings.json에 Heron 훅을 추가해요",
   reset: "초기화",
   resetHint: "테마, 글씨 크기, 언어와 위의 설정(Claude Code 훅은 그대로)",
   sure: "정말요?",
@@ -108,9 +114,8 @@ export const ko: Strings = {
   agentWaiting: "입력 대기",
   agentDone: "끝남",
   agentMismatch: (selected, actual) => `선택 ${selected}, 실제 응답 ${actual}`,
-  limitResets: (left) => `${left} 뒤 초기화`,
-  agentPluginHint: "routing-detector 플러그인을 설치하면 모델 확인과 사용 한도도 보여요",
-  hooksOffer: "권한 요청과 질문도 볼 수 있어요. Claude Code의 settings.json에 Heron 훅을 추가해요.",
+  agentPluginHint: "heron-limits 플러그인을 설치하면 사용 한도와 컨텍스트 사용량도 보여요",
+  hooksOffer: "권한 요청, 질문, 모델 확인도 볼 수 있어요. Claude Code의 settings.json에 Heron 훅을 추가해요.",
   hooksTurnOn: "켜기",
   hooksTurningOn: "켜는 중…",
   hooksNoClaude: "Claude Code를 찾지 못했어요. 터미널에서 claude가 실행되는지 확인해 주세요.",
@@ -118,4 +123,10 @@ export const ko: Strings = {
   hooksBadSettings: "Claude Code의 settings.json이 올바른 JSON이 아니라서 건드리지 않았어요.",
   hooksFailed: "Claude Code 설정을 바꾸지 못했어요.",
   hide: "숨기기",
+
+  limitFiveHour: "5시간 한도",
+  limitWeekly: "주간 한도",
+  limitResets: (left) => `${left} 뒤 초기화`,
+  context: "컨텍스트",
+  contextUsed: (folder, percent) => `${folder}: 컨텍스트 창의 ${percent}% 사용`,
 };

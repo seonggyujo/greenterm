@@ -53,6 +53,14 @@ fn entries_for_another_exe_are_stale_and_get_replaced() {
 }
 
 #[test]
+fn an_install_without_a_newer_event_is_stale() {
+    let mut settings = user_settings();
+    add(&mut settings, EXE).unwrap();
+    settings["hooks"].as_object_mut().unwrap().remove("PostModelSwitch");
+    assert_eq!(presence(&settings, EXE), Presence::Stale);
+}
+
+#[test]
 fn hooks_of_other_programs_are_not_ours() {
     let mut settings = json!({"hooks": {"Stop": [{"hooks": [
         {"type": "command", "command": "node", "args": ["--agent-hook"]},

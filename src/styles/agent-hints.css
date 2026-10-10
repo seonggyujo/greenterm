@@ -11,6 +11,10 @@
   word-break: keep-all;
 }
 
+.agent-hint[hidden] {
+  display: none;
+}
+
 .agent-hint button {
   flex: none;
   padding: 0 4px;

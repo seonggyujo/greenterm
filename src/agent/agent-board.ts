@@ -1,20 +1,11 @@
 import { createLogger } from "../app/log";
 import type { AgentUpdate } from "../ipc/agent";
-import {
-  applyInput,
-  applySeen,
-  applyState,
-  applyStatus,
-  applyTitle,
-  limitsOf,
-  type Agent,
-  type AgentState,
-  type Limits,
-} from "./agent-model";
+import { applyCheck, applyInput, applySeen, applyState, applyStatus, applyTitle, type Agent, type AgentState } from "./agent-model";
+import { limitsOf, type Limits } from "./usage";
 
 // The agents of all panes, keyed by pty id, and the newest usage limits.
-// Every signal goes through the pure functions in agent-model.ts; listeners
-// hear about any change.
+// Every signal goes through the pure functions in agent-model.ts and
+// usage.ts; listeners hear about any change.
 
 /** What changed for one pane; a state is null while the pane has no agent. */
 export interface AgentChange {
@@ -38,15 +29,18 @@ export class AgentBoard {
     return this.agents.get(pty);
   }
 
-  /** A file the plugin wrote for a pane. */
+  /** What the hooks, the plugin or the model check reported for a pane. */
   update({ pty, kind, data }: AgentUpdate): void {
     const now = Date.now();
+    const prev = this.agents.get(pty);
     if (kind === "status") {
       const limits = limitsOf(data);
       if (limits && (!this.latestLimits || limits.at >= this.latestLimits.at)) this.latestLimits = limits;
-      this.set(pty, applyStatus(this.agents.get(pty), data, now));
+      this.set(pty, applyStatus(prev, data, now));
+    } else if (kind === "check") {
+      this.set(pty, applyCheck(prev, data));
     } else {
-      this.set(pty, applyState(this.agents.get(pty), data, now));
+      this.set(pty, applyState(prev, data, now));
     }
   }
 

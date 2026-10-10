@@ -11,9 +11,9 @@
 | 경로 | 역할 |
 | --- | --- |
 | `main.ts` | 부트스트랩만. 모듈을 만들고 서로 연결한다 |
-| `wire-agents.ts` | `main.ts`처럼 연결만: 플러그인 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 사이드바와 pane 점(`pane-signals.ts`의 표시 함수)을 다시 그린다. 사이드바 줄에 마우스를 올리면 그 pane 테두리를 밝힌다 |
-| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 플러그인 파일(정확)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 플러그인 없이도 동작). 플러그인 정보가 오면 그쪽이 상태를 정한다 |
-| `agent/agent-board.ts` | pty별 에이전트와 가장 최근 한도를 보관. 모든 신호를 `agent-model.ts`로 계산하고, 바뀌면 구독자에게 알린다 |
+| `wire-agents.ts` | `main.ts`처럼 연결만: 플러그인 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 사이드바와 pane 점(`pane-signals.ts`의 표시 함수)을 다시 그린다. 에이전트가 나를 기다리거나 끝나면 작업 표시줄 버튼을 깜빡인다(`ipc/attention.ts`). 사이드바 줄에 마우스를 올리면 그 pane 테두리를 밝힌다 |
+| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 플러그인 파일(정확)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 플러그인 없이도 동작). 플러그인 정보가 오면 그쪽이 상태를 정한다. 단 Esc나 Ctrl+C는 작업을 멈춘 것으로 본다(Claude Code는 중단된 턴에 Stop 훅을 보내지 않는다). 작업 표시줄을 깜빡일 변화인지도 여기서 정한다 |
+| `agent/agent-board.ts` | pty별 에이전트와 가장 최근 한도를 보관. 모든 신호를 `agent-model.ts`로 계산하고, 바뀌면 구독자에게 어느 pane이 어떤 상태에서 어떤 상태로 바뀌었는지 알린다 |
 | `app/paths.ts` | 경로에서 마지막 폴더 이름 |
 | `app/perf-monitor.ts` | dev 전용 long task(50ms 초과) 로그 |
 | `app/theme.ts` | 앱 틀 테마(green, black) 적용과 저장 |
@@ -48,6 +48,7 @@
 | `ipc/launch.ts` | 시작 폴더 받기(`take_launch_dir`), 켜진 창으로 온 폴더(`open-folder` 이벤트) |
 | `ipc/pty.ts` | PTY 명령 타입 래퍼, 출력 Channel(ArrayBuffer), `pty-exit` 구독, 셸 목록 |
 | `ipc/agent.ts` | `agent-update` 이벤트 구독. 플러그인이 쓴 JSON을 검사 없이 넘기고, 검사는 `agent-model.ts`가 한다 |
+| `ipc/attention.ts` | 작업 표시줄 깜빡임 명령(`flash_taskbar`) |
 | `terminal/terminal-view.ts` | xterm 생성, fit·webgl addon, context loss 시 DOM 렌더러로 fallback |
 | `terminal/flow-control.ts` | `write` 콜백으로 대기 바이트 추적, 256KB 넘으면 pause, 32KB 밑이면 resume |
 | `terminal/keys.ts` | WebView 단축키 차단, Ctrl+C/V |
@@ -56,7 +57,7 @@
 | `terminal/cwd.ts` | 셸이 보내는 현재 폴더 신호(OSC 9;9, OSC 7) 해석. 신호는 프롬프트마다 오므로 "프롬프트로 돌아옴"도 알린다 |
 | `pane/pane-item.ts` | pane 매니저, 배치, 끌기가 pane(`pane.ts`)에 요구하는 것. 이 모듈들이 터미널에 직접 기대지 않게 한다 |
 | `pane/pane.ts` | 터미널 pane 하나: 헤더, TerminalView, PtyLink, 글로우를 묶는다. 에이전트 상태 색, 폴더 이름 |
-| `pane/pane-signals.ts` | 터미널 제목과 폴더를 헤더에, 신호(제목, 프롬프트, 키 입력, 포커스, 닫힘)를 에이전트 보드로. 에이전트 상태에 따른 점 색과 사이드바에서 가리킬 때의 테두리 class |
+| `pane/pane-signals.ts` | 터미널 제목과 폴더를 헤더에, 신호(제목, 프롬프트, 키 입력과 그 키가 단독 Esc나 Ctrl+C인지, 포커스, 닫힘)를 에이전트 보드로. 에이전트 상태에 따른 점 색과 사이드바에서 가리킬 때의 테두리 class |
 | `pane/shell-exits.ts` | 셸 종료 처리: exit 0이면 pane 닫기(설정으로 끌 수 있음), 실패면 남기고 뱃지 |
 | `pane/pane-counts.ts` | 타이틀바 개수와 빈 화면용 숫자(터미널, 실행 중) |
 | `pane/pty-link.ts` | TerminalView와 백엔드 PTY 연결: 출력, 입력, 크기, kill |
@@ -88,6 +89,7 @@
 | `main.rs` | `greenterm_lib::run()` 호출만 |
 | `lib.rs` | Builder 구성, 명령 등록, `AgentLink` 생성. 앱 페이지(main)가 다시 로드되거나 앱이 끝나면 모든 PTY kill과 에이전트 파일 정리 |
 | `window.rs` | 메인 창 생성. 설정 파일로 못 켜는 옵션(클립보드 읽기 자동 허용) 때문에 코드에서 만든다 |
+| `attention.rs` | 다른 앱이 앞에 있을 때 작업 표시줄 버튼 깜빡임(`flash_taskbar`). Tauri의 `requestUserAttention`은 창이 자기 스레드의 활성 창이기만 해도 건너뛰어서(tao#942와 같은 원인) 맨 앞 창을 확인한 뒤 user32 `FlashWindowEx`를 직접 부른다 |
 | `launch.rs` | 명령줄 폴더 인자("Open in greenterm"), 이미 켜져 있으면 그 창에 pane 추가(single-instance 플러그인, release 빌드만) |
 | `logging.rs` | dev용 stderr 로거. release에서는 로그 호출이 컴파일에서 빠진다 |
 | `commands.rs` | Tauri 명령. 인자만 넘기고 `pty`, `agent` 모듈에 위임. 셸 명령에 pane의 에이전트 변수를 넣는 곳이 여기라 `pty`는 에이전트를 모른다 |
@@ -119,7 +121,7 @@
   `trace`는 출력 flush마다 한 줄을 찍으니 필요할 때만 쓴다.
   PowerShell: `$env:GREENTERM_LOG = "trace"; npm run tauri:dev`
 - 출력 청크마다 찍는 로그는 trace에만 둔다. 다른 레벨에서 hot path 로그 금지.
-- 기본(debug)에서 나오는 것: 셸 시작·종료·크기, 현재 폴더 변화(`[cwd]`), 배치 변화, 막힌 링크, 설정 변경(`[settings]`), 막힌 브라우저 단축키(`[keys]`), 다음 프레임으로 밀린 fit(`[fit]`), 에이전트 파일 변화(`agent:`).
+- 기본(debug)에서 나오는 것: 셸 시작·종료·크기, 현재 폴더 변화(`[cwd]`), 배치 변화, 막힌 링크, 설정 변경(`[settings]`), 막힌 브라우저 단축키(`[keys]`), 다음 프레임으로 밀린 fit(`[fit]`), 에이전트 파일 변화(`agent:`), 작업 표시줄 깜빡임(`attention:`).
 - `trace`에서만 나오는 것: 출력 flush.
 
 ## 설정

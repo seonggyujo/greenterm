@@ -60,7 +60,8 @@ settings); a failing exit keeps the pane open with a red exit-code badge.
 Start Claude Code in a pane and a sidebar appears on the left, with a row for each pane that runs
 an agent: the pane number, its folder and what the agent is doing (working, with a timer, or done).
 Agents that need you come first. Click a row to jump to that pane, or point at it to see which pane
-it is; the pane's status dot takes the same color. The sidebar folds into a narrow rail of dots,
+it is; the pane's status dot takes the same color. While greenterm is behind another window, its
+taskbar button flashes when an agent finishes or needs you. The sidebar folds into a narrow rail of dots,
 and hides while no agent runs. This needs nothing else: greenterm reads the title Claude Code gives
 the terminal.
 

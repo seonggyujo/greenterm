@@ -1,4 +1,5 @@
 mod agent;
+mod attention;
 mod commands;
 mod launch;
 mod logging;
@@ -44,6 +45,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::list_shells,
+            attention::flash_taskbar,
             launch::take_launch_dir,
             commands::spawn_pty,
             commands::write_pty,

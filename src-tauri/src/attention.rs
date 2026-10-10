@@ -1,0 +1,46 @@
+//! Flashes greenterm's taskbar button while another app is in front, so an
+//! agent that needs the user gets noticed. Tauri's request_user_attention is
+//! not used: it skips the flash whenever greenterm is the active window of
+//! its own thread, which it stays while another app is in front (the cause
+//! in tauri-apps/tao#942). The foreground window is checked instead.
+
+use std::ffi::c_void;
+
+const FLASHW_TRAY: u32 = 0x2;
+/// After these flashes the button stays highlighted until greenterm comes
+/// to the front.
+const FLASH_COUNT: u32 = 3;
+
+#[repr(C)]
+struct FlashInfo {
+    size: u32,
+    hwnd: *mut c_void,
+    flags: u32,
+    count: u32,
+    timeout: u32,
+}
+
+#[link(name = "user32")]
+extern "system" {
+    fn GetForegroundWindow() -> *mut c_void;
+    fn FlashWindowEx(info: *const FlashInfo) -> i32;
+}
+
+#[tauri::command]
+pub fn flash_taskbar(window: tauri::WebviewWindow) {
+    let Ok(hwnd) = window.hwnd() else { return };
+    let hwnd: *mut c_void = hwnd.0;
+    // SAFETY: plain user32 calls; `info` lives across the call.
+    if unsafe { GetForegroundWindow() } == hwnd {
+        return;
+    }
+    let info = FlashInfo {
+        size: std::mem::size_of::<FlashInfo>() as u32,
+        hwnd,
+        flags: FLASHW_TRAY,
+        count: FLASH_COUNT,
+        timeout: 0,
+    };
+    unsafe { FlashWindowEx(&info) };
+    log::debug!("attention: taskbar button flashed");
+}

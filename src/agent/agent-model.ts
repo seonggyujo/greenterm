@@ -112,8 +112,13 @@ export function applyTitle(prev: Agent | undefined, title: string, now: number):
   return withState(a, a.state === "working" || a.state === "done" ? "done" : "idle", now);
 }
 
-/** The user typed in the pane: an answered permission or question means work goes on. */
-export function applyInput(a: Agent, now: number): Agent {
+/**
+ * The user typed in the pane: an answered permission or question means work
+ * goes on. Esc or Ctrl+C stops the turn, and Claude Code runs no Stop hook
+ * for a stopped turn, so only the key tells that the agent is idle again.
+ */
+export function applyInput(a: Agent, now: number, interrupt: boolean): Agent {
+  if (interrupt && (a.state === "working" || a.state === "permission")) return withState(a, "idle", now);
   return a.state === "permission" || a.state === "question" ? withState(a, "working", now) : a;
 }
 
@@ -130,6 +135,12 @@ export function markOf(state: AgentState): AgentMark {
   if (state === "permission" || state === "question") return "need";
   if (state === "done" || state === "waiting") return "done";
   return "idle";
+}
+
+/** Worth a taskbar flash: the agent now needs the user, or just finished its turn. */
+export function wantsAttention(from: AgentState | null, to: AgentState | null): boolean {
+  if (to !== "permission" && to !== "question" && to !== "done") return false;
+  return from === null || markOf(from) !== markOf(to);
 }
 
 /** The pane got focus: a finished turn has been seen. */

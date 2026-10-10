@@ -1,15 +1,20 @@
 import { AgentBoard } from "./agent/agent-board";
-import { markOf } from "./agent/agent-model";
+import { markOf, wantsAttention } from "./agent/agent-model";
+import { createLogger } from "./app/log";
 import { folderName } from "./app/paths";
 import type { UptimeClock } from "./app/uptime-clock";
 import { onAgentUpdate } from "./ipc/agent";
+import { flashTaskbar } from "./ipc/attention";
 import type { PaneManager } from "./pane/pane-manager";
 import { markAgent, markHover, type PaneSignal } from "./pane/pane-signals";
 import { createAgentSidebar } from "./ui/agent-sidebar";
 
 // Wiring only, like main.ts: plugin files and pane signals go into the
 // agent board; every change of the board redraws the sidebar and the pane
-// dots.
+// dots, and an agent that needs the user or finishes flashes the taskbar
+// button.
+
+const log = createLogger("attention");
 
 export interface AgentWiring {
   /** The sidebar, to place left of the workspace. */
@@ -48,7 +53,11 @@ export function wireAgents(clock: UptimeClock, panes: () => PaneManager): AgentW
       markAgent(p.el, agent ? markOf(agent.state) : null);
     }
   };
-  board.subscribe(refresh);
+  board.subscribe((change) => {
+    refresh();
+    if (!wantsAttention(change.from, change.to)) return;
+    flashTaskbar().catch((err) => log.warn("taskbar flash failed", err));
+  });
 
   return {
     sidebar: sidebar.el,
@@ -58,7 +67,7 @@ export function wireAgents(clock: UptimeClock, panes: () => PaneManager): AgentW
         case "title":
           return board.title(pty, signal.title);
         case "key":
-          return board.input(pty);
+          return board.input(pty, signal.interrupt);
         case "focus":
           return board.seen(pty);
         case "prompt":

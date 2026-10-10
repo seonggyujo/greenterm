@@ -49,3 +49,8 @@ const MARKS: AgentMark[] = ["work", "need", "done"];
 export function markAgent(el: HTMLElement, mark: AgentMark | null): void {
   MARKS.forEach((m) => el.classList.toggle(`agent-${m}`, m === mark));
 }
+
+/** Lights the pane's border while its row in the agent sidebar is hovered. */
+export function markHover(el: HTMLElement, on: boolean): void {
+  el.classList.toggle("agent-hover", on);
+}

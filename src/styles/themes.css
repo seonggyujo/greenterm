@@ -33,7 +33,7 @@
   --light-off: #2a332d;
   --light-off-ring: rgb(134 166 147 / 0.25);
 
-  /* Coding agent states (agent-dock.css), the same in both themes:
+  /* Coding agent states (agent-sidebar.css), the same in both themes:
      working, needs you, done, wrong model or limit nearly used. */
   --agent-work: #8fd8a8;
   --agent-need: #e6b450;

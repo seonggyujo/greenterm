@@ -37,7 +37,10 @@ export const en = {
   sure: "Sure?",
   done: "Done",
 
-  // Agent dock
+  // Agent sidebar
+  agents: "Agents",
+  collapse: "Collapse",
+  expand: "Expand",
   agentIdle: "idle",
   agentWorking: "working",
   agentPermission: "needs permission",
@@ -84,6 +87,9 @@ export const ko: Strings = {
   sure: "정말요?",
   done: "완료",
 
+  agents: "에이전트",
+  collapse: "접기",
+  expand: "펼치기",
   agentIdle: "대기",
   agentWorking: "작업 중",
   agentPermission: "권한 필요",

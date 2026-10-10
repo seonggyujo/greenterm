@@ -5,7 +5,7 @@
 <h1 align="center">greenterm</h1>
 
 <p align="center">
-  A lightweight Windows terminal for running coding agents side by side: press <b>+</b> and the panes rearrange automatically, and a band at the bottom shows what each Claude Code is doing.
+  A lightweight Windows terminal for running coding agents side by side: press <b>+</b> and the panes rearrange automatically, and a sidebar shows what each Claude Code is doing.
   <br>
   <b>English</b> · <a href="README.ko.md">한국어</a>
 </p>
@@ -57,13 +57,15 @@ settings); a failing exit keeps the pane open with a red exit-code badge.
 
 ### Coding agents
 
-Start Claude Code in a pane and a thin band appears at the bottom of the window, with a chip for
-each pane that runs an agent: the pane number, its folder and what the agent is doing (working,
-with a timer, or done). Click a chip to jump to that pane; the pane's status dot takes the same
-color. This needs nothing else: greenterm reads the title Claude Code gives the terminal.
+Start Claude Code in a pane and a sidebar appears on the left, with a row for each pane that runs
+an agent: the pane number, its folder and what the agent is doing (working, with a timer, or done).
+Agents that need you come first. Click a row to jump to that pane, or point at it to see which pane
+it is; the pane's status dot takes the same color. The sidebar folds into a narrow rail of dots,
+and hides while no agent runs. This needs nothing else: greenterm reads the title Claude Code gives
+the terminal.
 
 With the [routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) plugin
-(0.3.1 or later) the band also shows when an agent needs your permission or asks a question, warns
+(0.3.1 or later) the sidebar also shows when an agent needs your permission or asks a question, warns
 when an answer came from a model other than the one you selected, and shows your 5-hour and weekly
 usage limits with the time until they reset. In Claude Code:
 

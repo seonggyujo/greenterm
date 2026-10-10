@@ -5,11 +5,10 @@ import type { UptimeClock } from "../app/uptime-clock";
 import type { ShellKind } from "../ipc/pty";
 import { TerminalView } from "../terminal/terminal-view";
 import { OutputGlow } from "./output-glow";
-import type { AgentMark } from "../agent/agent-model";
 import { createPaneHeader, type PaneHeader } from "./pane-header";
 import type { PaneItem } from "./pane-item";
 import { animateEnter, animateLeave } from "./pane-motion";
-import { markAgent, watchPaneTerminal, type PaneSignal } from "./pane-signals";
+import { watchPaneTerminal, type PaneSignal } from "./pane-signals";
 import { PtyLink } from "./pty-link";
 
 // One pane = header + xterm view + PTY link. The constructor only builds
@@ -96,9 +95,6 @@ export class Pane implements PaneItem {
     return folderName(this.where() ?? this.cwd ?? "") ?? SHELL_LABELS[this.shell];
   }
 
-  setAgentMark(mark: AgentMark | null): void {
-    markAgent(this.el, mark);
-  }
 
   /** The header, where a drag to move the pane starts (pane-drag.ts). */
   get handle(): HTMLElement {

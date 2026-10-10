@@ -9,7 +9,7 @@ import "./styles/pane.css";
 import "./styles/split.css";
 import "./styles/settings.css";
 import "./styles/empty-state.css";
-import "./styles/agent-dock.css";
+import "./styles/agent-sidebar.css";
 import "./styles/effects.css";
 import { loadFontSize, saveFontSize } from "./app/font-size";
 import { createLogger } from "./app/log";
@@ -51,10 +51,13 @@ async function main(): Promise<void> {
   const titlebar = createTitlebar();
   const workspace = document.createElement("main");
   workspace.id = "workspace";
-  // Coding agents in the panes: the dock sits under the workspace.
+  // Coding agents in the panes: their sidebar sits left of the workspace.
   const clock = new UptimeClock();
   const agents = wireAgents(clock, () => panes);
-  document.body.append(titlebar.el, workspace, agents.dock);
+  const middle = document.createElement("div");
+  middle.className = "app-middle";
+  middle.append(agents.sidebar, workspace);
+  document.body.append(titlebar.el, middle);
 
   const shells = await listShells();
   let defaultShell = loadDefaultShell(shells);
@@ -121,6 +124,7 @@ async function main(): Promise<void> {
       applyMotion();
       panes.setFontSize(loadFontSize());
       setDefaultShell(loadDefaultShell(shells));
+      agents.refresh();
     },
   });
   document.body.append(settings.panel);

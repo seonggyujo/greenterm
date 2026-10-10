@@ -11,8 +11,8 @@
 | 경로 | 역할 |
 | --- | --- |
 | `main.ts` | 부트스트랩만. 모듈을 만들고 서로 연결한다 |
-| `wire-agents.ts` | `main.ts`처럼 연결만: 플러그인 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 하단 띠와 pane 점을 다시 그린다 |
-| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도. 신호 두 가지: 플러그인 파일(정확)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 플러그인 없이도 동작). 플러그인 정보가 오면 그쪽이 상태를 정한다 |
+| `wire-agents.ts` | `main.ts`처럼 연결만: 플러그인 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 사이드바와 pane 점(`pane-signals.ts`의 표시 함수)을 다시 그린다. 사이드바 줄에 마우스를 올리면 그 pane 테두리를 밝힌다 |
+| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 플러그인 파일(정확)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 플러그인 없이도 동작). 플러그인 정보가 오면 그쪽이 상태를 정한다 |
 | `agent/agent-board.ts` | pty별 에이전트와 가장 최근 한도를 보관. 모든 신호를 `agent-model.ts`로 계산하고, 바뀌면 구독자에게 알린다 |
 | `app/paths.ts` | 경로에서 마지막 폴더 이름 |
 | `app/perf-monitor.ts` | dev 전용 long task(50ms 초과) 로그 |
@@ -22,7 +22,7 @@
 | `app/shells.ts` | 셸 표시 이름, + 버튼 기본 셸 저장 |
 | `app/font-size.ts` | 터미널 글씨 크기(10~24px) 저장 |
 | `app/uptime-clock.ts` | 앱 전체에 1초 `setInterval` 1개. 창이 숨거나 최소화되면 멈춘다 |
-| `app/prefs.ts` | 설정 창의 작은 설정값(애니메이션, exit 0이면 닫기) 저장. 실패하면 기본값 |
+| `app/prefs.ts` | 작은 설정값 저장: 설정 창(애니메이션, exit 0이면 닫기)과 화면이 스스로 기억하는 것(사이드바 접힘, 플러그인 안내 숨김). 실패하면 기본값 |
 | `app/motion.ts` | 설정 > Animations. 끄면 `<html class="no-motion">`으로 CSS 전환·애니메이션을 멈추고, pane 등장·FLIP·출력 글로우도 끈다 |
 | `app/reset.ts` | 설정 > Reset: 저장된 `greenterm.*` 값을 모두 지워 기본값으로. 화면 적용은 `main.ts`가 한다 |
 | `app/visibility.ts` | 창 숨김·최소화 감지(WebView2는 최소화해도 `document.hidden`이 false라 Tauri 창 상태도 본다), `app-hidden` class, 애니메이션 허용 여부 |
@@ -40,7 +40,8 @@
 | `ui/tidy-button.ts` | 자동 격자로 되돌리는 버튼. 수동 배치일 때만 보이고, action 맨 왼쪽이라 나타나도 다른 버튼 위치가 안 바뀐다 |
 | `ui/theme-toggle.ts` | 테마 선택 동그라미 두 개(설정 창 안) |
 | `ui/empty-state.ts` | 터미널 0개일 때 큰 + 버튼과 깜빡이는 `_` |
-| `ui/agent-dock.ts` | 하단 띠: 에이전트가 있는 pane마다 칩(번호, 폴더, 상태, 모델 경고)과 오른쪽 한도. 에이전트가 없으면 숨는다. 칩을 누르면 그 pane으로. 칩은 보드가 바뀔 때만 새로 만들고, 1초 갱신은 경과 시간과 한도 글자만 바꾼다. 플러그인 정보가 없으면 설치 안내(닫을 수 있음) |
+| `ui/agent-sidebar.ts` | 왼쪽 사이드바: 에이전트가 있는 pane을 급한 순(나를 기다림, 끝남, 작업 중, 쉬는 중)으로, 맨 아래에 한도와 플러그인 안내(닫을 수 있음). 에이전트가 없으면 숨는다. 점과 번호만 남게 접을 수 있고 기억한다. 줄은 보드가 바뀔 때만 새로 만들고, 1초 갱신은 경과 시간과 한도 글자만 바꾼다 |
+| `ui/agent-item.ts` | 사이드바 한 줄: 상태 점, pane 번호, 폴더, 경과 시간, 상태, 모델 경고. 누르면 그 pane으로, 마우스를 올리면 그 pane 강조 |
 | `ui/limit-meter.ts` | 한도 하나(5h, 7d): 막대, 사용률, 초기화까지 남은 시간. 70%부터 노랑, 90%부터 빨강 |
 | `i18n/strings.ts` | 화면에 보이는 모든 글자의 영어·한국어 표. 셸 이름과 로그는 번역하지 않는다 |
 | `i18n/lang.ts` | 현재 언어와 `t()`. 저장된 선택이 없으면 Windows 표시 언어를 따른다. 화면 모듈은 `onLangChange`로 글자를 다시 쓴다 |
@@ -55,7 +56,7 @@
 | `terminal/cwd.ts` | 셸이 보내는 현재 폴더 신호(OSC 9;9, OSC 7) 해석. 신호는 프롬프트마다 오므로 "프롬프트로 돌아옴"도 알린다 |
 | `pane/pane-item.ts` | pane 매니저, 배치, 끌기가 pane(`pane.ts`)에 요구하는 것. 이 모듈들이 터미널에 직접 기대지 않게 한다 |
 | `pane/pane.ts` | 터미널 pane 하나: 헤더, TerminalView, PtyLink, 글로우를 묶는다. 에이전트 상태 색, 폴더 이름 |
-| `pane/pane-signals.ts` | 터미널 제목과 폴더를 헤더에, 신호(제목, 프롬프트, 키 입력, 포커스, 닫힘)를 에이전트 보드로. 상태 점 색 class |
+| `pane/pane-signals.ts` | 터미널 제목과 폴더를 헤더에, 신호(제목, 프롬프트, 키 입력, 포커스, 닫힘)를 에이전트 보드로. 에이전트 상태에 따른 점 색과 사이드바에서 가리킬 때의 테두리 class |
 | `pane/shell-exits.ts` | 셸 종료 처리: exit 0이면 pane 닫기(설정으로 끌 수 있음), 실패면 남기고 뱃지 |
 | `pane/pane-counts.ts` | 타이틀바 개수와 빈 화면용 숫자(터미널, 실행 중) |
 | `pane/pty-link.ts` | TerminalView와 백엔드 PTY 연결: 출력, 입력, 크기, kill |
@@ -73,7 +74,7 @@
 | `layout/box-style.ts` | 절대 위치 요소에 px 박스 적용 |
 | `layout/fit-scheduler.ts` | ResizeObserver + requestAnimationFrame으로 fit을 묶음. 프레임당 10ms 예산, 남으면 다음 프레임 |
 | `layout/flip.ts` | 재배치 시 이전 위치에서 새 위치로 transform 애니메이션 |
-| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`, `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-dock`(하단 띠, 에이전트 상태 색), `effects`(Animations 끄기 규칙 포함) |
+| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`(사이드바와 작업 영역을 나란히), `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-sidebar`(사이드바, 한도, 에이전트 상태 색), `effects`(Animations 끄기 규칙 포함) |
 
 의존 방향: `main.ts`, `wire-agents.ts` → `ui/`, `pane/`, `layout/` → `agent/`, `terminal/`, `ipc/`, `app/`, `i18n/`.
 `agent/`는 `ipc/`의 타입과 `app/log.ts`만 import한다(화면 모듈을 모른다).

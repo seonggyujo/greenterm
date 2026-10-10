@@ -1,6 +1,7 @@
-// Small user preferences set in the settings panel. localStorage is a
-// convenience only: any failure keeps the default. Theme and font size
-// have their own modules (theme.ts, font-size.ts).
+// Small user preferences: the ones set in the settings panel and a few the
+// UI remembers on its own (agent sidebar). localStorage is a convenience
+// only: any failure keeps the default. Theme, font size and language have
+// their own modules (theme.ts, font-size.ts, i18n/lang.ts).
 
 export interface Pref<T> {
   get(): T;
@@ -41,6 +42,12 @@ export const motionPref = pref("greenterm.motion", true, bool);
 /** Close a terminal pane when its shell exits with code 0. */
 export const closeOnExitPref = pref("greenterm.closeOnExit", true, bool);
 
+/** The agent sidebar is folded to a rail of dots. */
+export const sidebarCollapsedPref = pref("greenterm.sidebarCollapsed", false, bool);
+
+/** The user closed the "install the plugin" hint in the agent sidebar. */
+export const pluginHintHiddenPref = pref("greenterm.pluginHintHidden", false, bool);
+
 export function resetPrefs(): void {
-  [motionPref, closeOnExitPref].forEach((p) => p.reset());
+  [motionPref, closeOnExitPref, sidebarCollapsedPref, pluginHintHiddenPref].forEach((p) => p.reset());
 }

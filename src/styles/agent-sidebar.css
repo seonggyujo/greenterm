@@ -1,0 +1,267 @@
+/* Agent sidebar (ui/agent-sidebar.ts, ui/agent-item.ts): left of the
+   workspace, one row per pane that runs a coding agent, the usage limits at
+   the bottom. Collapsed it is a rail of dots and pane numbers. Also the
+   pane status dot and border by the agent's state (pane/pane-signals.ts). */
+
+.agent-sidebar {
+  flex: none;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--bg-bar-bottom);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-dim);
+  transition: width 160ms ease-out;
+}
+
+.agent-sidebar.collapsed {
+  width: 44px;
+}
+
+.agent-sidebar[hidden],
+.agent-hint[hidden],
+.limit-meter[hidden] {
+  display: none;
+}
+
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  padding: 0 6px 0 12px;
+}
+
+.sidebar-title {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.sidebar-toggle {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-dim);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.sidebar-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 6px;
+}
+
+.agent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  width: 100%;
+  padding: 6px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--fg-soft);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.agent-item:hover {
+  background: var(--bg-hover);
+}
+
+.agent-item.need {
+  border-color: var(--agent-need);
+}
+
+.agent-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+}
+
+.agent-n {
+  flex: none;
+  min-width: 10px;
+  color: var(--fg-muted);
+}
+
+.agent-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.agent-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.agent-name,
+.agent-line,
+.agent-warn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-time,
+.agent-line {
+  color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.agent-item.need .agent-line {
+  color: var(--agent-need);
+}
+
+.agent-warn {
+  color: var(--agent-bad);
+}
+
+.agent-item.work .agent-dot,
+.pane.agent-work .pane-dot {
+  background: var(--agent-work);
+}
+
+.agent-item.need .agent-dot,
+.pane.agent-need .pane-dot {
+  background: var(--agent-need);
+}
+
+.agent-item.done .agent-dot,
+.pane.agent-done .pane-dot {
+  background: var(--agent-done);
+}
+
+/* The pane whose row is hovered. */
+.pane.agent-hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 1px var(--fg-dim);
+}
+
+/* Collapsed: dot and number only. */
+.agent-sidebar.collapsed .sidebar-head {
+  justify-content: center;
+  padding: 0;
+}
+
+.agent-sidebar.collapsed .sidebar-title,
+.agent-sidebar.collapsed .agent-body,
+.agent-sidebar.collapsed .agent-hint,
+.agent-sidebar.collapsed .limit-track,
+.agent-sidebar.collapsed .limit-reset {
+  display: none;
+}
+
+.agent-sidebar.collapsed .agent-item {
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+}
+
+.agent-sidebar.collapsed .agent-dot {
+  margin-top: 0;
+}
+
+.sidebar-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.agent-sidebar.collapsed .sidebar-foot {
+  align-items: center;
+  padding: 8px 0;
+}
+
+.limit-meter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.agent-sidebar.collapsed .limit-meter {
+  flex-direction: column;
+  gap: 0;
+  font-size: 10px;
+}
+
+.limit-label {
+  color: var(--fg-muted);
+}
+
+.limit-track {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border-soft);
+  overflow: hidden;
+}
+
+.limit-fill {
+  display: block;
+  height: 100%;
+  background: var(--agent-work);
+}
+
+.limit-meter.warn .limit-fill {
+  background: var(--agent-need);
+}
+
+.limit-meter.bad .limit-fill {
+  background: var(--agent-bad);
+}
+
+.limit-reset {
+  color: var(--fg-muted);
+}
+
+.agent-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+
+.agent-hint button {
+  flex: none;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  color: var(--fg-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.agent-hint button:hover {
+  color: var(--fg);
+}

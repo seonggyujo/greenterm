@@ -117,6 +117,11 @@ export function applyInput(a: Agent, now: number): Agent {
   return a.state === "permission" || a.state === "question" ? withState(a, "working", now) : a;
 }
 
+/** Sort key, most urgent first: needs you, finished, working, idle. */
+export function urgency(state: AgentState): number {
+  return { permission: 0, question: 0, waiting: 1, done: 1, working: 2, idle: 3 }[state];
+}
+
 /** How a state looks: green while working, yellow when it needs you, blue when done. */
 export type AgentMark = "work" | "need" | "done" | "idle";
 

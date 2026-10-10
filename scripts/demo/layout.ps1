@@ -13,15 +13,16 @@ $Target = @{
   Park    = @(600, 420)   # where the pointer rests between actions
 }
 
-$MenuItem = @{ powershell = @(1000, 62); cmd = @(975, 92); gitbash = @(1000, 122); web = @(993, 158) }
+$MenuItem = @{ powershell = @(1000, 62); cmd = @(975, 92); gitbash = @(1000, 122) }
 
 # Inside the settings panel, which opens right-aligned under the gear.
 $Settings = @{
   Green = @(818, 93); Black = @(840, 93)
   AMinus = @(777, 129); APlus = @(837, 129)
   Animations = @(835, 165)
-  WebHome = @(776, 237)
-  Clear = @(804, 289); Reset = @(804, 325)
+  # Computed from the old layout (36px rows, 52px across the separator);
+  # check with a capture before the next recording.
+  Reset = @(804, 253)
 }
 
 # Workspace content box (inside its padding) and the grid gap.

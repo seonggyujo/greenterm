@@ -3,8 +3,7 @@ import type { ShellKind } from "../ipc/pty";
 import { createPopover } from "./popover";
 
 // Dropdown listing the installed shells. The current default has a check
-// mark. Below them, "Web page" opens a web pane at once. Opening and
-// closing is popover.ts; picking an item closes it too.
+// mark. Opening and closing is popover.ts; picking an item closes it too.
 
 export interface ShellMenu {
   el: HTMLElement;
@@ -27,12 +26,11 @@ export function createShellMenu(
   shells: ShellKind[],
   initial: ShellKind,
   onPick: (shell: ShellKind) => void,
-  onWeb: () => void,
 ): ShellMenu {
   const el = document.createElement("div");
   el.className = "shell-menu";
   el.setAttribute("role", "menu");
-  const popover = createPopover(el, "shell-menu");
+  const popover = createPopover(el);
 
   const items = shells.map((shell) => {
     const item = menuItem("menuitemradio", "✓", SHELL_LABELS[shell], () => {
@@ -42,12 +40,7 @@ export function createShellMenu(
     item.dataset.shell = shell;
     return item;
   });
-  const web = menuItem("menuitem", "+", "Web page", () => {
-    popover.close();
-    onWeb();
-  });
-  web.classList.add("shell-menu-web");
-  el.append(...items, web);
+  el.append(...items);
 
   const setDefault = (shell: ShellKind) => {
     items.forEach((i) => i.setAttribute("aria-checked", String(i.dataset.shell === shell)));

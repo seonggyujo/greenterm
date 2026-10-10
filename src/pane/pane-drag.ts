@@ -1,5 +1,4 @@
 import { createLogger } from "../app/log";
-import { setOverlay } from "../app/overlay";
 import { setBox } from "../layout/box-style";
 import { previewBox, zoneAt, type Zone } from "../layout/drop-zone";
 import type { PaneItem as Pane } from "./pane-item";
@@ -9,8 +8,7 @@ import type { PaneItem as Pane } from "./pane-item";
 // translucent box shows where the pane will go; Esc cancels. Pointer
 // events, not HTML5 drag and drop: Tauri's native file drop turns that off
 // in the webview. The header keeps the pointer captured, so the terminals
-// underneath never start a text selection. Web pages are native views
-// above the app page, so they hide while a drag is on (app/overlay.ts).
+// underneath never start a text selection.
 
 const log = createLogger("pane-drag");
 
@@ -43,7 +41,6 @@ export function attachPaneDrag(pane: Pane, host: DropHost): void {
       host.workspace.append(el);
       pane.el.classList.add("dragging");
       document.body.classList.add("pane-dragging");
-      setOverlay("pane-drag", true);
       window.addEventListener("keydown", cancelKey, true);
       log.debug(`dragging ${pane.name}`);
       return el;
@@ -90,7 +87,6 @@ export function attachPaneDrag(pane: Pane, host: DropHost): void {
       preview.remove();
       pane.el.classList.remove("dragging");
       document.body.classList.remove("pane-dragging");
-      setOverlay("pane-drag", false);
       if (!drop) {
         log.debug(`drag of ${pane.name} cancelled`);
         return;

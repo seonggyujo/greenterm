@@ -10,11 +10,10 @@ import { Pane } from "./pane";
 import { countPanes, type PaneCounts } from "./pane-counts";
 import { attachPaneDrag, type DropHost } from "./pane-drag";
 import type { PaneCallbacks, PaneItem } from "./pane-item";
-import { WebPane } from "./web-pane";
 
-// Owns the list of panes, terminals and web pages: add, close, focus, font
-// size. Where each pane sits is up to SplitLayout (auto grid, or the user's
-// own splits); the ResizeObserver in FitScheduler then refits exactly the
+// Owns the list of terminal panes: add, close, focus, font size. Where
+// each pane sits is up to SplitLayout (auto grid, or the user's own
+// splits); the ResizeObserver in FitScheduler then refits exactly the
 // panes whose size changed.
 
 const log = createLogger("panes");
@@ -63,13 +62,6 @@ export class PaneManager {
     log.info(`added ${shell}, ${this.panes.length} panes`);
     await pane.start();
     this.notify();
-    return pane;
-  }
-
-  async addWeb(url: string): Promise<WebPane> {
-    const pane = this.insert((cb) => new WebPane(this.workspace, { url, ...cb }));
-    log.info(`added ${pane.name} (${url}), ${this.panes.length} panes`);
-    await pane.start();
     return pane;
   }
 

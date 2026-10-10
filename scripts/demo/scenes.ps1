@@ -4,11 +4,7 @@
 #   shells    starts from 1 PowerShell pane (record.ps1 resets before it)
 #   activity  continues from shells: PowerShell, cmd, Git Bash
 #   settings  continues from activity: PowerShell, cmd
-#   web       starts from 1 PowerShell pane with $WebHome as the web start
-#             page (record.ps1 resets and sets it before it)
 # The second number is the recording length in seconds.
-
-$WebHome = "en.wikipedia.org/wiki/Terminal_emulator"
 
 function Wait-Ms([int]$ms) { Start-Sleep -Milliseconds $ms }
 function Park { Move-Gt $Target.Park[0] $Target.Park[1] 200 }
@@ -57,15 +53,6 @@ $Scenes = [ordered]@{
     for ($i = 0; $i -lt 3; $i++) { Tap $Settings.AMinus; Wait-Ms 550 }
     Wait-Ms 500; Tap $Target.Gear; Wait-Ms 400
   })
-
-  web = @(14, {
-    Tap $Target.Menu; Wait-Ms 500; Tap $MenuItem.web; Wait-Ms 600
-    Park; Wait-Ms 3000
-    # Drag the web pane by its header to the left edge of the terminal.
-    $p = Get-Panes 2
-    Drag-Gt $p[1].Header $p[0].Left 1100
-    Park; Wait-Ms 1800
-  })
 }
 
 # Back to one PowerShell pane with every setting at its default (Settings >
@@ -77,10 +64,4 @@ function Reset-Scene([int]$panes) {
   Tap $Target.Gear; Wait-Ms 300
   Tap $Target.New; Wait-Ms 1200
   Park; Wait-Ms 800
-}
-
-function Set-WebHome([string]$url) {
-  Tap $Target.Gear; Wait-Ms 400
-  Tap $Settings.WebHome; Wait-Ms 200; CtrlKey-Gt 0x41; Type-Gt $url 12; Enter-Gt; Wait-Ms 300
-  Tap $Target.Gear; Park; Wait-Ms 500
 }

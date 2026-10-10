@@ -43,7 +43,7 @@ export function createSettings(actions: SettingsActions): Settings {
   button.title = "Settings";
   button.innerHTML = GEAR;
 
-  const popover = createPopover(panel, "settings", render);
+  const popover = createPopover(panel, render);
   button.addEventListener("click", () => popover.toggle(button));
   return { button, panel };
 }

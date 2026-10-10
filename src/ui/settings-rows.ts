@@ -1,10 +1,8 @@
 import { loadFontSize } from "../app/font-size";
 import { createLogger } from "../app/log";
 import { motionEnabled, setMotion } from "../app/motion";
-import { closeOnExitPref, webHomePref } from "../app/prefs";
+import { closeOnExitPref } from "../app/prefs";
 import { loadTheme, type Theme } from "../app/theme";
-import { clearWebData } from "../ipc/web";
-import { toUrl } from "../web/to-url";
 import { createConfirmButton } from "./confirm-button";
 import { createFontSizeControl } from "./font-size-control";
 import { createSwitch } from "./switch";
@@ -33,25 +31,6 @@ function row(label: string, control: HTMLElement): HTMLElement {
   return el;
 }
 
-function webHomeInput(): HTMLInputElement {
-  const input = document.createElement("input");
-  input.className = "settings-text";
-  input.spellcheck = false;
-  input.setAttribute("aria-label", "Web start page");
-  input.value = webHomePref.get();
-  input.addEventListener("change", () => {
-    if (input.value.trim()) {
-      webHomePref.set(toUrl(input.value));
-      log.info(`web start page ${webHomePref.get()}`);
-    }
-    input.value = webHomePref.get();
-  });
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") input.blur();
-  });
-  return input;
-}
-
 function preferenceRows(actions: SettingsActions): HTMLElement[] {
   return [
     row(
@@ -76,29 +55,17 @@ function preferenceRows(actions: SettingsActions): HTMLElement[] {
         closeOnExitPref.set(on);
       }),
     ),
-    row("Web start page", webHomeInput()),
   ];
 }
 
 function dataRows(actions: SettingsActions): HTMLElement[] {
-  const clear = createConfirmButton("Clear", async () => {
-    try {
-      await clearWebData();
-      log.info("web data cleared");
-      return "Cleared";
-    } catch (err) {
-      log.warn("clear web data failed", err);
-      return "In use, retry";
-    }
-  });
-  clear.title = "Cookies, history and site data of web panes";
   const reset = createConfirmButton("Reset", async () => {
     log.info("settings reset to defaults");
     actions.onReset();
     return "Done";
   });
   reset.title = "Theme, font size and every option above";
-  return [row("Web data", clear), row("Settings", reset)];
+  return [row("Settings", reset)];
 }
 
 export function buildRows(actions: SettingsActions): HTMLElement[] {

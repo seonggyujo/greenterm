@@ -1,5 +1,5 @@
 param(
-  [string[]]$Only = @("split", "arrange", "shells", "activity", "settings", "web"),
+  [string[]]$Only = @("split", "arrange", "shells", "activity", "settings"),
   [int]$Panes = 1,  # panes open right now
   # Which greenterm to drive: one built from this repo, never an installed
   # copy that may be running with real work in it.
@@ -40,7 +40,7 @@ try {
 
   Reset-Scene $Panes
   $open = 1  # panes open after each scene
-  $after = @{ split = 3; arrange = 3; shells = 3; activity = 2; settings = 2; web = 2 }
+  $after = @{ split = 3; arrange = 3; shells = 3; activity = 2; settings = 2 }
   foreach ($name in $Scenes.Keys) {
     if ($Only -notcontains $name) { continue }
     if ($name -eq "arrange" -and $open -ne 3) {
@@ -48,10 +48,6 @@ try {
       Tap $Target.New; Wait-Ms 900; Tap $Target.New; Wait-Ms 1200; Park
     }
     if ($name -eq "shells" -and $open -ne 1) { Reset-Scene $open }
-    if ($name -eq "web") {
-      if ($open -ne 1) { Reset-Scene $open }
-      Set-WebHome $WebHome
-    }
     $seconds, $body = $Scenes[$name]
     Start-Rec $name $seconds
     & $body

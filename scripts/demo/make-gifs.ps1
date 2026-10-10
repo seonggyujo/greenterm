@@ -1,5 +1,5 @@
 param(
-  [string[]]$Only = @("split", "arrange", "shells", "activity", "settings", "web"),
+  [string[]]$Only = @("split", "arrange", "shells", "activity", "settings"),
   [int]$Width = 0,  # 0 keeps the recorded width, so text stays sharp
   # 50 is the most a GIF can do: frame delays are in 1/100 s and browsers
   # slow anything under 2/100 s down to 1/10 s.

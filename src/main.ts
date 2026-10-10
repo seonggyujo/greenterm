@@ -7,7 +7,6 @@ import "./styles/shell-menu.css";
 import "./styles/workspace.css";
 import "./styles/pane.css";
 import "./styles/split.css";
-import "./styles/web-pane.css";
 import "./styles/settings.css";
 import "./styles/empty-state.css";
 import "./styles/effects.css";
@@ -16,7 +15,6 @@ import { createLogger } from "./app/log";
 import { installFileDrop } from "./app/file-drop";
 import { applyMotion } from "./app/motion";
 import { installLongTaskMonitor } from "./app/perf-monitor";
-import { webHomePref } from "./app/prefs";
 import { forgetSettings } from "./app/reset";
 import { loadDefaultShell, saveDefaultShell, SHELL_LABELS } from "./app/shells";
 import { applyTheme, loadTheme } from "./app/theme";
@@ -70,7 +68,7 @@ async function main(): Promise<void> {
     fontSize,
     (c) => {
       count.update(c);
-      empty.setVisible(c.total === 0);
+      empty.setVisible(c.terminals === 0);
     },
     (manual) => tidy.setVisible(manual),
   );
@@ -85,18 +83,12 @@ async function main(): Promise<void> {
     newButton.setShell(SHELL_LABELS[shell]);
   };
 
-  // The menu only selects the shell; the + button opens it. "Web page"
-  // in the same menu opens a web pane right away.
-  const menu = createShellMenu(
-    shells,
-    defaultShell,
-    (shell) => {
-      log.info(`default shell ${shell}`);
-      saveDefaultShell(shell);
-      setDefaultShell(shell);
-    },
-    () => void panes.addWeb(webHomePref.get()).catch((err) => log.error("add web page failed", err)),
-  );
+  // The menu only selects the shell; the + button opens it.
+  const menu = createShellMenu(shells, defaultShell, (shell) => {
+    log.info(`default shell ${shell}`);
+    saveDefaultShell(shell);
+    setDefaultShell(shell);
+  });
   document.body.append(menu.el);
 
   const newButton = createNewTerminalButton(

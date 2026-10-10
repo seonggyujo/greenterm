@@ -55,27 +55,12 @@ settings); a failing exit keeps the pane open with a red exit-code badge.
 
 ![Output activity](docs/media/activity.gif)
 
-### Web pages
-
-Pick **Web page** at the bottom of the ▾ menu to open a web page as a pane, YouTube by default.
-The pane header has back, reload and an address box that also takes search words, and web panes
-split, move and resize by dragging like terminals. Links that want a new window open in your
-default browser.
-
-Web panes run on WebView2 with a profile of their own, separate from your browser and from
-greenterm's settings. Google blocks signing in from embedded browsers, so YouTube works without an
-account. While a menu, the settings or a pane
-drag is on screen, web panes step aside and come back when it closes.
-
-![Web page pane](docs/media/web.gif)
-
 ### Settings
 
 The gear button in the title bar opens the settings: green or black window theme, terminal font
-size, animations on or off, whether a clean `exit` closes the pane, and the web start page.
-Every change applies at once and is remembered. Two buttons below them ask once more before they
-act: **Clear** deletes the cookies, history and site data of web panes, and **Reset** puts every
-setting back to its default.
+size, animations on or off, and whether a clean `exit` closes the pane. Every change applies at
+once and is remembered. **Reset** below them asks once more before it puts every setting back to
+its default.
 
 ![Settings](docs/media/settings.gif)
 

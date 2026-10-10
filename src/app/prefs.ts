@@ -41,11 +41,6 @@ export const motionPref = pref("greenterm.motion", true, bool);
 /** Close a terminal pane when its shell exits with code 0. */
 export const closeOnExitPref = pref("greenterm.closeOnExit", true, bool);
 
-/** Page a new web pane opens. */
-export const webHomePref = pref("greenterm.webHome", "https://www.youtube.com/", (raw) =>
-  /^https?:\/\/\S+$/i.test(raw) ? raw : undefined,
-);
-
 export function resetPrefs(): void {
-  [motionPref, closeOnExitPref, webHomePref].forEach((p) => p.reset());
+  [motionPref, closeOnExitPref].forEach((p) => p.reset());
 }

@@ -7,16 +7,29 @@ use serde_json::{json, Value};
 const DETAIL_CHARS: usize = 80;
 
 /// The state file's record, or None when the event changes no state. The
-/// transcript lets agent/ check the model of each answer.
-pub fn state_record(input: &Value) -> Option<Value> {
+/// transcript lets agent/ check the model of each answer. `previous` is the
+/// pane's record written just before, if any.
+pub fn state_record(input: &Value, previous: Option<&Value>) -> Option<Value> {
     let state = state_of(input)?;
+    let message = kept_permission_detail(input, previous).or_else(|| message_of(input));
     Some(json!({
         "session_id": input.get("session_id"),
         "cwd": input.get("cwd"),
         "transcript_path": input.get("transcript_path"),
         "state": state,
-        "message": message_of(input),
+        "message": message,
     }))
+}
+
+/// Claude Code sends a permission notification right after the
+/// PermissionRequest of the same prompt. Its text names no tool, so the
+/// request's tool and command stay.
+fn kept_permission_detail(input: &Value, previous: Option<&Value>) -> Option<String> {
+    let previous = previous?;
+    let notice = input.get("notification_type").and_then(Value::as_str) == Some("permission_prompt");
+    let same_prompt = previous.get("state").and_then(Value::as_str) == Some("permission")
+        && previous.get("session_id") == input.get("session_id");
+    (notice && same_prompt).then(|| previous.get("message")?.as_str().map(str::to_owned))?
 }
 
 /// The model file's record when the event tells the session's model:
@@ -85,50 +98,5 @@ fn shorten(text: &str) -> String {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn maps_events_to_states() {
-        let state = |v: Value| state_of(&v);
-        assert_eq!(state(json!({"hook_event_name": "UserPromptSubmit"})), Some("working"));
-        assert_eq!(state(json!({"hook_event_name": "StopFailure"})), Some("done"));
-        assert_eq!(state(json!({"hook_event_name": "PermissionRequest"})), Some("permission"));
-        let note = |t: &str| json!({"hook_event_name": "Notification", "notification_type": t});
-        assert_eq!(state(note("idle_prompt")), Some("waiting"));
-        assert_eq!(state(note("auth_success")), None);
-        assert_eq!(state(json!({"hook_event_name": "PreToolUse"})), None);
-        assert_eq!(state(json!({"hook_event_name": "PostModelSwitch"})), None);
-    }
-
-    #[test]
-    fn the_state_names_the_transcript() {
-        let input = json!({"hook_event_name": "Stop", "transcript_path": r"C:\t.jsonl", "cwd": r"C:\work"});
-        let record = state_record(&input).unwrap();
-        assert_eq!((record["state"].as_str(), record["transcript_path"].as_str()), (Some("done"), Some(r"C:\t.jsonl")));
-    }
-
-    #[test]
-    fn the_model_comes_from_session_start_and_model_switches() {
-        let model = |v: Value| model_record(&v).map(|r| r["model"].as_str().map(str::to_owned));
-        let start = json!({"hook_event_name": "SessionStart", "source": "startup", "model": "claude-opus-5-5"});
-        assert_eq!(model(start), Some(Some("claude-opus-5-5".into())));
-        assert_eq!(model(json!({"hook_event_name": "SessionStart", "source": "resume"})), Some(None), "unknown");
-        assert_eq!(model(json!({"hook_event_name": "SessionStart", "source": "clear"})), None, "unchanged");
-        let switch = json!({"hook_event_name": "PostModelSwitch", "from_model": "claude-opus-5-5", "to_model": "claude-sonnet-5-5"});
-        assert_eq!(model(switch), Some(Some("claude-sonnet-5-5".into())));
-        assert_eq!(model(json!({"hook_event_name": "Stop", "model": "x"})), None);
-    }
-
-    #[test]
-    fn permission_message_names_the_tool_and_its_command() {
-        let input = json!({
-            "hook_event_name": "PermissionRequest",
-            "tool_name": "Bash",
-            "tool_input": {"command": "ping -n 40 127.0.0.1\necho done"},
-        });
-        assert_eq!(message_of(&input).as_deref(), Some("Bash: ping -n 40 127.0.0.1"));
-        let long = "x".repeat(DETAIL_CHARS + 5);
-        assert_eq!(shorten(&long).chars().count(), DETAIL_CHARS + 1);
-    }
-}
+#[path = "records_tests.rs"]
+mod tests;

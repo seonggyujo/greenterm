@@ -108,8 +108,8 @@
 | `agent/answers.rs` | 순수 함수: 기록 파일 한 줄에서 본 대화의 답(`message.id`, `message.model`, 시각)을 꺼낸다. 서브에이전트(`isSidechain`), `<synthetic>`, 모델 변경 훅이 없는 Claude Code(2.1.251 미만)가 쓴 답은 뺀다. `[1m]`, 날짜 꼬리를 빼고 모델 비교 |
 | `agent/model_check.rs` | 순수 함수: 답마다 그 답이 왔을 때의 선택 모델과 한 번만 비교한다. 선택 모델은 훅이 알려 준 것, 훅이 모르면(이어서 연 세션) 지금 기록 파일의 세션에서 상태줄이 알려 준 것. 판정은 ok, mismatch, pending(답이 없거나, 선택을 모르거나, 답 뒤에 모델을 바꿨을 때) |
 | `claude_hooks/mod.rs` | Heron 자체 Claude Code 훅의 진입점: 상태 확인, 설치(먼저 버전 확인), 제거, 오류 코드. 플러그인 없이도 권한 요청, 질문, 끝남, 모델 확인을 하게 한다 |
-| `claude_hooks/entry.rs` | `heron.exe --agent-hook`으로 실행됐을 때: 훅 입력(JSON)을 `records.rs`로 바꿔 pane의 상태 파일과 모델 파일에 쓰고 끝난다. 아무것도 출력하지 않는다. Heron pane 밖이면 입력을 읽기 전에 끝난다 |
-| `claude_hooks/records.rs` | 순수 함수: 훅 이벤트 하나가 쓰는 것. 상태 파일에는 상태, 권한 요청이나 알림 내용, 작업 폴더, 기록 파일 경로. 모델 파일에는 `SessionStart`의 `model`이나 `PostModelSwitch`의 `to_model`. 모델이 없는 `SessionStart`(이어서 연 세션)는 "모름"(null)을 써서 같은 pane의 이전 세션 모델이 남지 않게 하고, `/clear`는 그대로 둔다 |
+| `claude_hooks/entry.rs` | `heron.exe --agent-hook`으로 실행됐을 때: 훅 입력(JSON)을 `records.rs`로 바꿔 pane의 상태 파일과 모델 파일에 쓰고 끝난다. 30초 안에 쓴 이전 상태 기록도 읽어 `records.rs`에 넘긴다. 아무것도 출력하지 않는다. Heron pane 밖이면 입력을 읽기 전에 끝난다 |
+| `claude_hooks/records.rs` | 순수 함수: 훅 이벤트 하나가 쓰는 것. 상태 파일에는 상태, 권한 요청이나 알림 내용, 작업 폴더, 기록 파일 경로. 모델 파일에는 `SessionStart`의 `model`이나 `PostModelSwitch`의 `to_model`. 모델이 없는 `SessionStart`(이어서 연 세션)는 "모름"(null)을 써서 같은 pane의 이전 세션 모델이 남지 않게 하고, `/clear`는 그대로 둔다. `PermissionRequest` 바로 뒤에 오는 권한 알림은 요청의 도구와 명령을 덮어쓰지 않는다. 테스트는 `records_tests.rs` |
 | `claude_hooks/config.rs` | settings.json `hooks` 안의 Heron 항목 넣기, 빼기, 있는지 보기(순수 함수). 이벤트 8개(`PostModelSwitch` 포함. 이것을 모르는 버전은 그 항목만 건너뛴다). heron.exe를 `--agent-hook`으로 부르는 항목만 우리 것으로 보고 사용자의 훅은 건드리지 않는다. 이벤트가 하나라도 빠지면 오래된 설치로 보고 앱이 시작할 때 다시 넣는다. 테스트는 `config_tests.rs` |
 | `claude_hooks/settings_file.rs` | `settings.json`(CLAUDE_CONFIG_DIR 또는 `%USERPROFILE%.claude`) 읽기와 쓰기. 쓰기 전에 옆에 `.heron-backup` 사본, 임시 파일에 쓰고 이름 바꾸기. 올바른 JSON이 아니면 쓰지 않는다 |
 | `claude_hooks/version.rs` | `claude --version` 확인. 2.1.139 미만은 훅 항목의 `args`를 무시해서 이벤트마다 앱을 띄울 수 있으므로 설치하지 않는다 |

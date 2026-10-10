@@ -1,9 +1,9 @@
 // What greenterm knows about the coding agent (Claude Code) in one pane, and
 // how each signal changes it. Pure: no DOM, no IPC. Two sources:
-//   - plugin files (exact): state, model check, limits (ipc/agent.ts)
-//   - the terminal title (rough, needs no plugin): Claude Code shows
-//     "✳ <title>" while idle and a turning half circle while it works
-// Once plugin data has arrived for a pane, it decides the state.
+//   - agent files (exact, ipc/agent.ts): the state from greenterm's hooks or
+//     the plugin's, the model check and limits from the plugin's status line
+//   - the terminal title (rough): "✳ <title>" idle, a turning half circle working
+// Once a hook has reported for a pane, hooks decide the state.
 
 export type AgentState = "idle" | "working" | "permission" | "question" | "waiting" | "done";
 export type CheckState = "ok" | "mismatch" | "pending";
@@ -18,14 +18,14 @@ export interface Agent {
   state: AgentState;
   /** When the state began (ms), for "working 2:14". */
   since: number;
-  /** Plugin data has arrived for this pane. */
-  fromPlugin: boolean;
+  /** A hook has reported for this pane. */
+  fromHooks: boolean;
   /** Session title from the terminal title. */
   title: string | null;
   /** Notification text, e.g. which tool needs permission. */
   message: string | null;
   check: ModelCheck | null;
-  /** The agent's working folder (plugin only). */
+  /** The agent's working folder (from the agent files). */
   cwd: string | null;
 }
 
@@ -53,7 +53,7 @@ const number = (v: unknown): number | null => (typeof v === "number" && Number.i
 const fresh = (now: number): Agent => ({
   state: "idle",
   since: now,
-  fromPlugin: false,
+  fromHooks: false,
   title: null,
   message: null,
   check: null,
@@ -64,23 +64,23 @@ function withState(a: Agent, state: AgentState, now: number): Agent {
   return a.state === state ? a : { ...a, state, since: now };
 }
 
-/** Plugin state file. Null when the session ended. */
+/** Hook state file. Null when the session ended. */
 export function applyState(prev: Agent | undefined, data: unknown, now: number): Agent | null | undefined {
   const d = record(data);
   if (d.state === "ended") return null;
   const state = STATES.find((s) => s === d.state);
   if (!state) return prev;
-  const a = withState({ ...(prev ?? fresh(now)), fromPlugin: true }, state, now);
+  const a = withState({ ...(prev ?? fresh(now)), fromHooks: true }, state, now);
   return { ...a, message: text(d.message), cwd: text(d.cwd) ?? a.cwd };
 }
 
-/** Plugin status file: the model check. Limits are read by limitsOf. */
+/** The plugin's status line file: the model check. Limits are read by limitsOf. */
 export function applyStatus(prev: Agent | undefined, data: unknown, now: number): Agent {
   const c = record(record(data).check);
   const state: CheckState | null = c.state === "ok" || c.state === "mismatch" || c.state === "pending" ? c.state : null;
   const check: ModelCheck | null = state ? { state, selected: text(c.selected), actual: text(c.actual) } : null;
   const a = prev ?? fresh(now);
-  return { ...a, fromPlugin: true, check, cwd: text(record(data).cwd) ?? a.cwd };
+  return { ...a, check, cwd: text(record(data).cwd) ?? a.cwd };
 }
 
 export function limitsOf(data: unknown): Limits | null {
@@ -107,7 +107,7 @@ export function applyTitle(prev: Agent | undefined, title: string, now: number):
   const read = readTitle(title);
   if (!read) return prev;
   const a = { ...(prev ?? fresh(now)), title: read.title };
-  if (a.fromPlugin) return a;
+  if (a.fromHooks) return a;
   if (read.working) return withState(a, "working", now);
   return withState(a, a.state === "working" || a.state === "done" ? "done" : "idle", now);
 }

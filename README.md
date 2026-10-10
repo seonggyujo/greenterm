@@ -65,26 +65,32 @@ taskbar button flashes when an agent finishes or needs you. The sidebar folds in
 and hides while no agent runs. This needs nothing else: greenterm reads the title Claude Code gives
 the terminal.
 
+To also see when an agent needs your permission or asks a question, press **Turn on** at the bottom
+of the sidebar (or switch on **Claude Code hooks** in the settings). greenterm then adds a few hooks
+to Claude Code's `~/.claude/settings.json` that run greenterm.exe itself, so there is nothing else to
+install. This needs Claude Code 2.1.139 or later. Your own hooks stay as they are, and the previous
+file is kept as `settings.json.greenterm-backup`. Switching it off, or uninstalling greenterm, takes
+the hooks out again; outside greenterm they do nothing.
+
 With the [routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) plugin
-(0.3.1 or later) the sidebar also shows when an agent needs your permission or asks a question, warns
-when an answer came from a model other than the one you selected, and shows your 5-hour and weekly
-usage limits with the time until they reset. In Claude Code:
+(0.3.1 or later) the sidebar also warns when an answer came from a model other than the one you
+selected, and shows your 5-hour and weekly usage limits with the time until they reset. In Claude Code:
 
 ```
 /plugin marketplace add seonggyujo/claude-code-routing-detector
 /plugin install routing-detector@routing-detector
 ```
 
-greenterm tells the plugin which pane it runs in through two environment variables in each shell
-(`GREENTERM_PANE`, `GREENTERM_AGENT_DIR`). The plugin writes two small files per pane under
-`%LOCALAPPDATA%\com.greenterm.app\agents`; they stay on your machine and are deleted when the pane
-closes. Outside greenterm the plugin writes nothing.
+Two environment variables in each shell (`GREENTERM_PANE`, `GREENTERM_AGENT_DIR`) tell the hooks
+and the plugin which pane they run in. They write two small files per pane under
+`%LOCALAPPDATA%\com.greenterm.app\agents`; the files stay on your machine and are deleted when the
+pane closes. Outside greenterm nothing is written.
 
 ### Settings
 
 The gear button in the title bar opens the settings: green or black window theme, language
 (English or Korean; it starts in the Windows display language), terminal font size, animations on
-or off, and whether a clean `exit` closes the pane. Every change applies at once and is remembered. **Reset** below them asks once more before it puts every setting back to
+or off, whether a clean `exit` closes the pane, and Claude Code hooks. Every change applies at once and is remembered. **Reset** below them asks once more before it puts every setting back to
 its default.
 
 ![Settings](docs/media/settings.gif)

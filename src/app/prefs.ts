@@ -48,6 +48,15 @@ export const sidebarCollapsedPref = pref("greenterm.sidebarCollapsed", false, bo
 /** The user closed the "install the plugin" hint in the agent sidebar. */
 export const pluginHintHiddenPref = pref("greenterm.pluginHintHidden", false, bool);
 
+/** The user closed the "turn on Claude Code hooks" offer in the agent sidebar. */
+export const hooksOfferHiddenPref = pref("greenterm.hooksOfferHidden", false, bool);
+
+/** The user turned greenterm's Claude Code hooks on (see app/agent-hooks.ts). */
+export const agentHooksWantedPref = pref("greenterm.agentHooks", false, bool);
+
 export function resetPrefs(): void {
-  [motionPref, closeOnExitPref, sidebarCollapsedPref, pluginHintHiddenPref].forEach((p) => p.reset());
+  // agentHooksWantedPref stays: the hooks stay in Claude Code's settings.
+  [motionPref, closeOnExitPref, sidebarCollapsedPref, pluginHintHiddenPref, hooksOfferHiddenPref].forEach((p) =>
+    p.reset(),
+  );
 }

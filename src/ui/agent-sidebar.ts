@@ -1,14 +1,16 @@
 import type { AgentBoard } from "../agent/agent-board";
 import { urgency } from "../agent/agent-model";
-import { pluginHintHiddenPref, sidebarCollapsedPref } from "../app/prefs";
+import { onAgentHooksChange } from "../app/agent-hooks";
+import { sidebarCollapsedPref } from "../app/prefs";
 import type { UptimeClock } from "../app/uptime-clock";
 import { onLangChange, t } from "../i18n/lang";
+import { createAgentHints } from "./agent-hints";
 import { createAgentItem, type AgentItem } from "./agent-item";
 import { createLimitMeter } from "./limit-meter";
 
 // Left sidebar listing the panes that run a coding agent, most urgent first
-// (needs you, finished, working, idle), with the usage limits at the
-// bottom. Hidden while no pane has an agent. It collapses to a narrow rail
+// (needs you, finished, working, idle), with the usage limits and the
+// notes of agent-hints.ts at the bottom. Hidden while no pane has an agent. It collapses to a narrow rail
 // of dots and pane numbers; the choice is remembered. Rows are rebuilt
 // when an agent changes; the 1-second tick only updates times and limits.
 
@@ -37,15 +39,15 @@ export function createAgentSidebar(board: AgentBoard, clock: UptimeClock, action
   el.classList.toggle("collapsed", sidebarCollapsedPref.get());
   el.innerHTML =
     '<div class="sidebar-head"><span class="sidebar-title"></span><button type="button" class="sidebar-toggle"></button></div>' +
-    '<div class="sidebar-list"></div><div class="sidebar-foot"><span class="agent-hint"><span></span><button type="button">×</button></span></div>';
+    '<div class="sidebar-list"></div><div class="sidebar-foot"></div>';
   const title = el.querySelector<HTMLElement>(".sidebar-title")!;
   const toggle = el.querySelector<HTMLButtonElement>(".sidebar-toggle")!;
   const list = el.querySelector<HTMLElement>(".sidebar-list")!;
   const foot = el.querySelector<HTMLElement>(".sidebar-foot")!;
-  const hint = el.querySelector<HTMLElement>(".agent-hint")!;
   const fiveHour = createLimitMeter("5h", (left) => t().limitResets(left));
   const sevenDay = createLimitMeter("7d", (left) => t().limitResets(left));
-  foot.prepend(fiveHour.el, sevenDay.el);
+  const hints = createAgentHints();
+  foot.append(fiveHour.el, sevenDay.el, hints.el);
 
   let panes: SidebarPane[] = [];
   let items: AgentItem[] = [];
@@ -76,9 +78,7 @@ export function createAgentSidebar(board: AgentBoard, clock: UptimeClock, action
     toggle.textContent = collapsed ? "›" : "‹";
     toggle.title = collapsed ? t().expand : t().collapse;
     toggle.setAttribute("aria-label", toggle.title);
-    hint.hidden = el.hidden || rows.some((r) => r.agent.fromPlugin) || pluginHintHiddenPref.get();
-    hint.firstElementChild!.textContent = t().agentPluginHint;
-    hint.lastElementChild!.setAttribute("aria-label", t().hide);
+    hints.render(board.limits !== null || rows.some((r) => r.agent.check !== null));
     tick();
     // The clock ticks only while the sidebar shows.
     if (!el.hidden && !stopClock) stopClock = clock.subscribe(tick);
@@ -92,11 +92,8 @@ export function createAgentSidebar(board: AgentBoard, clock: UptimeClock, action
     sidebarCollapsedPref.set(!sidebarCollapsedPref.get());
     draw();
   });
-  hint.lastElementChild!.addEventListener("click", () => {
-    pluginHintHiddenPref.set(true);
-    draw();
-  });
   onLangChange(draw);
+  onAgentHooksChange(draw);
 
   return {
     el,

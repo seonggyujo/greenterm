@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MSI fragment (tauri.conf.json > bundle.windows.wix.fragmentPaths).
+     On uninstall, runs greenterm.exe with remove-agent-hooks to take
+     greenterm's Claude Code hooks out of ~/.claude/settings.json. Also
+     during an upgrade; the new version puts them back when it starts.
+     Pulled in by the CustomActionRef in context-menu.wxs. -->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <CustomAction Id="RemoveAgentHooks" Directory="INSTALLDIR"
+                  ExeCommand="&quot;[INSTALLDIR]greenterm.exe&quot; --remove-agent-hooks"
+                  Execute="immediate" Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="RemoveAgentHooks" Before="RemoveFiles">REMOVE~="ALL"</Custom>
+    </InstallExecuteSequence>
+  </Fragment>
+</Wix>

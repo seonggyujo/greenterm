@@ -1,5 +1,5 @@
-//! Tauri commands. Thin layer: argument plumbing only, logic lives in `pty`
-//! and `agent`.
+//! Tauri commands. Thin layer: argument plumbing only, logic lives in `pty`,
+//! `agent` and `claude_hooks`.
 
 use std::path::Path;
 use std::thread;
@@ -8,6 +8,7 @@ use tauri::ipc::{Channel, InvokeResponseBody};
 use tauri::{AppHandle, State};
 
 use crate::agent::AgentLink;
+use crate::claude_hooks::{self, Presence};
 use crate::pty::{PtyRegistry, ShellKind};
 
 /// Shells installed on this machine, for the shell menu.
@@ -78,6 +79,23 @@ pub fn kill_pty(registry: State<'_, PtyRegistry>, agent: State<'_, AgentLink>, i
     if let Some(session) = registry.remove(id) {
         thread::spawn(move || session.kill());
     }
+}
+
+/// Whether greenterm's hooks are in Claude Code's settings (claude_hooks/).
+#[tauri::command(async)]
+pub fn agent_hooks_presence() -> Result<Presence, String> {
+    claude_hooks::presence().map_err(|e| e.code())
+}
+
+/// Async: it runs `claude --version` first.
+#[tauri::command(async)]
+pub fn install_agent_hooks() -> Result<(), String> {
+    claude_hooks::install().map_err(|e| e.code())
+}
+
+#[tauri::command(async)]
+pub fn remove_agent_hooks() -> Result<(), String> {
+    claude_hooks::remove().map_err(|e| e.code())
 }
 
 /// Frontend log lines, printed in the `tauri dev` terminal.

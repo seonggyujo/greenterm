@@ -44,7 +44,7 @@
       "wix": {
         "bannerPath": "installer/wix-banner.bmp",
         "dialogImagePath": "installer/wix-dialog.bmp",
-        "fragmentPaths": ["installer/context-menu.wxs"],
+        "fragmentPaths": ["installer/context-menu.wxs", "installer/agent-hooks.wxs"],
         "componentRefs": ["ContextMenu"]
       }
     },

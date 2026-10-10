@@ -10,6 +10,7 @@ import "./styles/split.css";
 import "./styles/settings.css";
 import "./styles/empty-state.css";
 import "./styles/agent-sidebar.css";
+import "./styles/agent-hints.css";
 import "./styles/effects.css";
 import { loadFontSize, saveFontSize } from "./app/font-size";
 import { createLogger } from "./app/log";

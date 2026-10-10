@@ -1,5 +1,6 @@
 import { AgentBoard } from "./agent/agent-board";
 import { markOf, wantsAttention } from "./agent/agent-model";
+import { syncAgentHooks } from "./app/agent-hooks";
 import { createLogger } from "./app/log";
 import { folderName } from "./app/paths";
 import type { UptimeClock } from "./app/uptime-clock";
@@ -9,7 +10,7 @@ import type { PaneManager } from "./pane/pane-manager";
 import { markAgent, markHover, type PaneSignal } from "./pane/pane-signals";
 import { createAgentSidebar } from "./ui/agent-sidebar";
 
-// Wiring only, like main.ts: plugin files and pane signals go into the
+// Wiring only, like main.ts: agent files and pane signals go into the
 // agent board; every change of the board redraws the sidebar and the pane
 // dots, and an agent that needs the user or finishes flashes the taskbar
 // button.
@@ -22,7 +23,7 @@ export interface AgentWiring {
   onSignal(pty: number, signal: PaneSignal): void;
   /** Panes were added, closed or renamed: redraw. */
   refresh(): void;
-  /** Starts listening to the plugin files. */
+  /** Starts listening to the agent files and checks greenterm's Claude Code hooks. */
   start(): Promise<void>;
 }
 
@@ -77,6 +78,8 @@ export function wireAgents(clock: UptimeClock, panes: () => PaneManager): AgentW
     },
     async start() {
       await onAgentUpdate((update) => board.update(update));
+      // Not awaited: putting hooks back runs `claude --version`.
+      void syncAgentHooks();
     },
   };
 }

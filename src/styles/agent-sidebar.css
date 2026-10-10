@@ -243,25 +243,3 @@
 .limit-reset {
   color: var(--fg-muted);
 }
-
-.agent-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 4px;
-  color: var(--fg-muted);
-  line-height: 1.4;
-}
-
-.agent-hint button {
-  flex: none;
-  padding: 0 4px;
-  border: none;
-  background: transparent;
-  color: var(--fg-muted);
-  font: inherit;
-  cursor: pointer;
-}
-
-.agent-hint button:hover {
-  color: var(--fg);
-}

@@ -33,8 +33,19 @@ pub fn key(pty: u32) -> String {
     format!("{}-{pty}", std::process::id())
 }
 
+/// A key as `key` makes it, so a file name built from it stays in `dir`.
+pub fn is_key(text: &str) -> bool {
+    let digits = |s: &str| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit());
+    text.split_once('-').is_some_and(|(pid, pty)| digits(pid) && digits(pty))
+}
+
+/// The file of pane `key` (see `key`).
+pub fn path_for(dir: &Path, key: &str, kind: Kind) -> PathBuf {
+    dir.join(format!("{key}.{}.json", kind.name()))
+}
+
 pub fn path(dir: &Path, pty: u32, kind: Kind) -> PathBuf {
-    dir.join(format!("{}.{}.json", key(pty), kind.name()))
+    path_for(dir, &key(pty), kind)
 }
 
 pub fn remove_pane(dir: &Path, pty: u32) {

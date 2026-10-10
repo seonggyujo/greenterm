@@ -64,26 +64,31 @@ pane 번호, 폴더, 에이전트가 하는 일(작업 중이면 경과 시간, 
 에이전트가 없으면 숨어요. 따로 설치할 것은 없어요. Claude Code가 터미널에 붙이는 제목을 읽어서
 알아내요.
 
+에이전트가 권한을 기다리거나 질문하는 것까지 보려면 사이드바 아래의 **Turn on**(켜기)을 누르세요.
+설정의 **Claude Code 훅** 스위치로 켜도 돼요. greenterm이 Claude Code의 `~/.claude/settings.json`에
+greenterm.exe를 부르는 훅 몇 개를 넣어서, 따로 설치할 것은 없어요. Claude Code 2.1.139 이상이
+필요해요. 사용자가 넣은 훅은 그대로 두고, 바꾸기 전 파일은 `settings.json.greenterm-backup`으로
+남겨요. 스위치를 끄거나 greenterm을 삭제하면 훅도 빠져요. greenterm 밖에서는 아무 일도 하지 않아요.
+
 [routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) 플러그인(0.3.1
-이상)을 설치하면 사이드바에 더 많은 것이 보여요. 에이전트가 권한을 기다리거나 질문할 때 알려 주고,
-선택한 모델과 다른 모델이 답하면 경고하고, 5시간·주간 사용 한도와 초기화까지 남은 시간도 보여
-줘요. Claude Code에서 설치해요.
+이상)을 설치하면 선택한 모델과 다른 모델이 답할 때 경고하고, 5시간·주간 사용 한도와 초기화까지
+남은 시간도 보여 줘요. Claude Code에서 설치해요.
 
 ```
 /plugin marketplace add seonggyujo/claude-code-routing-detector
 /plugin install routing-detector@routing-detector
 ```
 
-greenterm은 셸마다 환경변수 두 개(`GREENTERM_PANE`, `GREENTERM_AGENT_DIR`)로 플러그인에 어느
-pane인지 알려 줘요. 플러그인은 `%LOCALAPPDATA%\com.greenterm.app\agents` 아래에 pane마다 작은
+greenterm은 셸마다 환경변수 두 개(`GREENTERM_PANE`, `GREENTERM_AGENT_DIR`)로 훅과 플러그인에 어느
+pane인지 알려 줘요. 훅과 플러그인은 `%LOCALAPPDATA%\com.greenterm.app\agents` 아래에 pane마다 작은
 파일 두 개를 남기는데, 이 PC 밖으로 나가지 않고 pane을 닫으면 지워져요. greenterm 밖에서는
-플러그인이 아무것도 쓰지 않아요.
+아무것도 쓰지 않아요.
 
 ### 설정
 
 타이틀바의 톱니 버튼을 누르면 설정 창이 열려요. 창 테마(초록, 블랙), 언어(English, 한국어.
 처음에는 Windows 표시 언어를 따라가요), 터미널 글씨 크기, 애니메이션 켜고 끄기, 정상 `exit` 때
-pane 닫기를 바꿀 수 있어요. 바꾸면 바로 적용되고 다음
+pane 닫기, Claude Code 훅을 바꿀 수 있어요. 바꾸면 바로 적용되고 다음
 실행에도 기억해요. 아래 **Reset**은 한 번 더 물어본 뒤에 모든 설정을 기본값으로 되돌려요.
 
 ![설정](docs/media/settings.gif)

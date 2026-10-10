@@ -2,13 +2,16 @@
 //! two invisible variables in every shell:
 //!   GREENTERM_PANE       the pane's key, `<greenterm pid>-<pty id>`
 //!   GREENTERM_AGENT_DIR  the folder to write into
-//! An agent integration that sees them (the routing-detector status line and
-//! hooks) writes `<key>.status.json` and `<key>.state.json` there. This
-//! module watches those files for live panes and forwards each change to the
-//! frontend as an `agent-update` event. It never talks to the agent itself.
+//! An agent integration that sees them (greenterm's own hooks, see
+//! claude_hooks/, or the routing-detector status line and hooks) writes
+//! `<key>.status.json` and `<key>.state.json` there. This module watches
+//! those files for live panes and forwards each change to the frontend as an
+//! `agent-update` event. It never talks to the agent itself.
 
 mod files;
 mod poll;
+
+pub use files::{is_key as is_pane_key, path_for as pane_file, Kind as FileKind};
 
 use std::collections::HashSet;
 use std::path::PathBuf;

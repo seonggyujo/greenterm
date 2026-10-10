@@ -11,8 +11,8 @@
 | 경로 | 역할 |
 | --- | --- |
 | `main.ts` | 부트스트랩만. 모듈을 만들고 서로 연결한다 |
-| `wire-agents.ts` | `main.ts`처럼 연결만: 플러그인 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 사이드바와 pane 점(`pane-signals.ts`의 표시 함수)을 다시 그린다. 에이전트가 나를 기다리거나 끝나면 작업 표시줄 버튼을 깜빡인다(`ipc/attention.ts`). 사이드바 줄에 마우스를 올리면 그 pane 테두리를 밝힌다 |
-| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 플러그인 파일(정확)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 플러그인 없이도 동작). 플러그인 정보가 오면 그쪽이 상태를 정한다. 단 Esc나 Ctrl+C는 작업을 멈춘 것으로 본다(Claude Code는 중단된 턴에 Stop 훅을 보내지 않는다). 작업 표시줄을 깜빡일 변화인지도 여기서 정한다 |
+| `wire-agents.ts` | `main.ts`처럼 연결만: 에이전트 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 사이드바와 pane 점(`pane-signals.ts`의 표시 함수)을 다시 그린다. 에이전트가 나를 기다리거나 끝나면 작업 표시줄 버튼을 깜빡인다(`ipc/attention.ts`). 사이드바 줄에 마우스를 올리면 그 pane 테두리를 밝힌다. 시작할 때 Claude Code 훅 상태를 맞춘다(`app/agent-hooks.ts`) |
+| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 에이전트 파일(정확. greenterm 훅이나 플러그인이 쓴 상태, 플러그인 상태줄의 모델 확인과 한도)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 아무것도 설치하지 않아도 동작). 훅이 한 번 보고하면 훅이 상태를 정한다. 단 Esc나 Ctrl+C는 작업을 멈춘 것으로 본다(Claude Code는 중단된 턴에 Stop 훅을 보내지 않는다). 작업 표시줄을 깜빡일 변화인지도 여기서 정한다 |
 | `agent/agent-board.ts` | pty별 에이전트와 가장 최근 한도를 보관. 모든 신호를 `agent-model.ts`로 계산하고, 바뀌면 구독자에게 어느 pane이 어떤 상태에서 어떤 상태로 바뀌었는지 알린다 |
 | `app/paths.ts` | 경로에서 마지막 폴더 이름 |
 | `app/perf-monitor.ts` | dev 전용 long task(50ms 초과) 로그 |
@@ -22,7 +22,8 @@
 | `app/shells.ts` | 셸 표시 이름, + 버튼 기본 셸 저장 |
 | `app/font-size.ts` | 터미널 글씨 크기(10~24px) 저장 |
 | `app/uptime-clock.ts` | 앱 전체에 1초 `setInterval` 1개. 창이 숨거나 최소화되면 멈춘다 |
-| `app/prefs.ts` | 작은 설정값 저장: 설정 창(애니메이션, exit 0이면 닫기)과 화면이 스스로 기억하는 것(사이드바 접힘, 플러그인 안내 숨김). 실패하면 기본값 |
+| `app/prefs.ts` | 작은 설정값 저장: 설정 창(애니메이션, exit 0이면 닫기)과 화면이 스스로 기억하는 것(사이드바 접힘, 안내 숨김), Claude Code 훅을 켰는지(초기화해도 남는다). 실패하면 기본값 |
+| `app/agent-hooks.ts` | greenterm의 Claude Code 훅이 켜졌는지(사이드바와 설정이 함께 본다), 켜고 끄기. 켠 선택을 기억해서, 시작할 때 업데이트로 빠졌거나 다른 greenterm.exe를 가리키는 훅을 다시 넣는다 |
 | `app/motion.ts` | 설정 > Animations. 끄면 `<html class="no-motion">`으로 CSS 전환·애니메이션을 멈추고, pane 등장·FLIP·출력 글로우도 끈다 |
 | `app/reset.ts` | 설정 > Reset: 저장된 `greenterm.*` 값을 모두 지워 기본값으로. 화면 적용은 `main.ts`가 한다 |
 | `app/visibility.ts` | 창 숨김·최소화 감지(WebView2는 최소화해도 `document.hidden`이 false라 Tauri 창 상태도 본다), `app-hidden` class, 애니메이션 허용 여부 |
@@ -31,23 +32,25 @@
 | `ui/shell-menu.ts` | 설치된 셸 목록 드롭다운. 고르면 선택만 하고 기억한다(생성은 + 버튼) |
 | `ui/popover.ts` | 타이틀바 버튼 아래 패널 열고 닫기(바깥 클릭, Esc, 창 blur) |
 | `ui/settings-panel.ts` | 톱니 버튼과 설정 창. 열 때마다, Reset 뒤에, 열린 채 언어가 바뀌면 행을 다시 만든다 |
-| `ui/settings-rows.ts` | 설정 행: 테마, 언어, 글씨 크기, 애니메이션, exit 0이면 닫기, 설정 Reset. 저장된 값으로 만들고, 바꾸면 로그 |
+| `ui/settings-rows.ts` | 설정 행: 테마, 언어, 글씨 크기, 애니메이션, exit 0이면 닫기, Claude Code 훅(못 바꾸면 이유를 아래에), 설정 Reset. 저장된 값으로 만들고, 바꾸면 로그 |
 | `ui/lang-toggle.ts` | 언어 선택 버튼 두 개(English, 한국어). 언어 이름은 그 언어로 적어 어느 언어에서든 찾을 수 있다 |
 | `ui/confirm-button.ts` | 되돌릴 수 없는 동작용 버튼: 첫 클릭은 "Sure?"(정말요?), 3초 안에 다시 누르면 실행하고 결과를 잠깐 보인다 |
-| `ui/switch.ts` | 설정 창 켜기/끄기 스위치 |
+| `ui/switch.ts` | 설정 창 켜기/끄기 스위치. 바꾸는 일이 실패할 수 있으면(Promise) 기다렸다가 실제 상태를 보여 준다 |
 | `ui/font-size-control.ts` | `A−` `A+` 버튼(설정 창 안) |
 | `ui/terminal-count.ts` | 실행 중 터미널 개수 |
 | `ui/tidy-button.ts` | 자동 격자로 되돌리는 버튼. 수동 배치일 때만 보이고, action 맨 왼쪽이라 나타나도 다른 버튼 위치가 안 바뀐다 |
 | `ui/theme-toggle.ts` | 테마 선택 동그라미 두 개(설정 창 안) |
 | `ui/empty-state.ts` | 터미널 0개일 때 큰 + 버튼과 깜빡이는 `_` |
-| `ui/agent-sidebar.ts` | 왼쪽 사이드바: 에이전트가 있는 pane을 급한 순(나를 기다림, 끝남, 작업 중, 쉬는 중)으로, 맨 아래에 한도와 플러그인 안내(닫을 수 있음). 에이전트가 없으면 숨는다. 점과 번호만 남게 접을 수 있고 기억한다. 줄은 보드가 바뀔 때만 새로 만들고, 1초 갱신은 경과 시간과 한도 글자만 바꾼다 |
+| `ui/agent-sidebar.ts` | 왼쪽 사이드바: 에이전트가 있는 pane을 급한 순(나를 기다림, 끝남, 작업 중, 쉬는 중)으로, 맨 아래에 한도와 안내(`agent-hints.ts`). 에이전트가 없으면 숨는다. 점과 번호만 남게 접을 수 있고 기억한다. 줄은 보드가 바뀔 때만 새로 만들고, 1초 갱신은 경과 시간과 한도 글자만 바꾼다 |
 | `ui/agent-item.ts` | 사이드바 한 줄: 상태 점, pane 번호, 폴더, 경과 시간, 상태, 모델 경고. 누르면 그 pane으로, 마우스를 올리면 그 pane 강조 |
 | `ui/limit-meter.ts` | 한도 하나(5h, 7d): 막대, 사용률, 초기화까지 남은 시간. 70%부터 노랑, 90%부터 빨강 |
 | `i18n/strings.ts` | 화면에 보이는 모든 글자의 영어·한국어 표. 셸 이름과 로그는 번역하지 않는다 |
+| `i18n/hooks-error.ts` | Claude Code 훅 명령의 오류 코드를 문장으로 |
 | `i18n/lang.ts` | 현재 언어와 `t()`. 저장된 선택이 없으면 Windows 표시 언어를 따른다. 화면 모듈은 `onLangChange`로 글자를 다시 쓴다 |
 | `ipc/launch.ts` | 시작 폴더 받기(`take_launch_dir`), 켜진 창으로 온 폴더(`open-folder` 이벤트) |
 | `ipc/pty.ts` | PTY 명령 타입 래퍼, 출력 Channel(ArrayBuffer), `pty-exit` 구독, 셸 목록 |
 | `ipc/agent.ts` | `agent-update` 이벤트 구독. 플러그인이 쓴 JSON을 검사 없이 넘기고, 검사는 `agent-model.ts`가 한다 |
+| `ipc/agent-hooks.ts` | Claude Code 훅 명령(`agent_hooks_presence`, `install_agent_hooks`, `remove_agent_hooks`). 실패하면 오류 코드 |
 | `ipc/attention.ts` | 작업 표시줄 깜빡임 명령(`flash_taskbar`) |
 | `terminal/terminal-view.ts` | xterm 생성, fit·webgl addon, context loss 시 DOM 렌더러로 fallback |
 | `terminal/flow-control.ts` | `write` 콜백으로 대기 바이트 추적, 256KB 넘으면 pause, 32KB 밑이면 resume |
@@ -75,27 +78,33 @@
 | `layout/box-style.ts` | 절대 위치 요소에 px 박스 적용 |
 | `layout/fit-scheduler.ts` | ResizeObserver + requestAnimationFrame으로 fit을 묶음. 프레임당 10ms 예산, 남으면 다음 프레임 |
 | `layout/flip.ts` | 재배치 시 이전 위치에서 새 위치로 transform 애니메이션 |
-| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`(사이드바와 작업 영역을 나란히), `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-sidebar`(사이드바, 한도, 에이전트 상태 색), `effects`(Animations 끄기 규칙 포함) |
+| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`(사이드바와 작업 영역을 나란히), `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-sidebar`(사이드바, 한도, 에이전트 상태 색), `agent-hints`(사이드바 아래 안내), `effects`(Animations 끄기 규칙 포함) |
 
 의존 방향: `main.ts`, `wire-agents.ts` → `ui/`, `pane/`, `layout/` → `agent/`, `terminal/`, `ipc/`, `app/`, `i18n/`.
 `agent/`는 `ipc/`의 타입과 `app/log.ts`만 import한다(화면 모듈을 모른다).
 `ipc/`, `i18n/`, `layout/grid.ts`는 다른 앱 모듈을 import하지 않는다.
+`app/`에서 `ipc/`의 명령을 부르는 곳은 `app/agent-hooks.ts`뿐이다.
 `layout/split-tree.ts`, `split-rects.ts`, `drop-zone.ts`는 `layout/` 안의 순수 모듈만 import한다(DOM 없음).
 
 ## 백엔드 `src-tauri/src/`
 
 | 경로 | 역할 |
 | --- | --- |
-| `main.rs` | `greenterm_lib::run()` 호출만 |
-| `lib.rs` | Builder 구성, 명령 등록, `AgentLink` 생성. 앱 페이지(main)가 다시 로드되거나 앱이 끝나면 모든 PTY kill과 에이전트 파일 정리 |
+| `main.rs` | `run_cli()`가 훅 실행이나 훅 제거로 불린 것이면 창 없이 그 일만 하고 끝낸다. 아니면 `run()` |
+| `lib.rs` | `run_cli()`(`--agent-hook`, `--remove-agent-hooks`), Builder 구성, 명령 등록, `AgentLink` 생성. 앱 페이지(main)가 다시 로드되거나 앱이 끝나면 모든 PTY kill과 에이전트 파일 정리 |
 | `window.rs` | 메인 창 생성. 설정 파일로 못 켜는 옵션(클립보드 읽기 자동 허용) 때문에 코드에서 만든다 |
 | `attention.rs` | 다른 앱이 앞에 있을 때 작업 표시줄 버튼 깜빡임(`flash_taskbar`). Tauri의 `requestUserAttention`은 창이 자기 스레드의 활성 창이기만 해도 건너뛰어서(tao#942와 같은 원인) 맨 앞 창을 확인한 뒤 user32 `FlashWindowEx`를 직접 부른다 |
 | `launch.rs` | 명령줄 폴더 인자("Open in greenterm"), 이미 켜져 있으면 그 창에 pane 추가(single-instance 플러그인, release 빌드만) |
 | `logging.rs` | dev용 stderr 로거. release에서는 로그 호출이 컴파일에서 빠진다 |
-| `commands.rs` | Tauri 명령. 인자만 넘기고 `pty`, `agent` 모듈에 위임. 셸 명령에 pane의 에이전트 변수를 넣는 곳이 여기라 `pty`는 에이전트를 모른다 |
-| `agent/mod.rs` | `AgentLink`: pane마다 셸에 `GREENTERM_PANE`(키 `<pid>-<pty id>`)와 `GREENTERM_AGENT_DIR`(`%LOCALAPPDATA%\com.greenterm.app\agents`)을 넣고, pane이 닫히면 그 pane 파일을 지운다 |
-| `agent/files.rs` | pane 파일 이름(`<키>.status.json`은 상태줄, `<키>.state.json`은 훅), 하루 지난 파일 정리 |
+| `commands.rs` | Tauri 명령. 인자만 넘기고 `pty`, `agent`, `claude_hooks` 모듈에 위임. 셸 명령에 pane의 에이전트 변수를 넣는 곳이 여기라 `pty`는 에이전트를 모른다 |
+| `agent/mod.rs` | `AgentLink`: pane마다 셸에 `GREENTERM_PANE`(키 `<pid>-<pty id>`)와 `GREENTERM_AGENT_DIR`(`%LOCALAPPDATA%\com.greenterm.app\agents`)을 넣고, pane이 닫히면 그 pane 파일을 지운다. 파일은 greenterm 훅(`claude_hooks/`)이나 플러그인이 쓴다 |
+| `agent/files.rs` | pane 파일 이름(`<키>.status.json`은 상태줄, `<키>.state.json`은 훅)과 키 검사(`claude_hooks/entry.rs`가 환경변수의 키로 파일 이름을 만들 때), 하루 지난 파일 정리 |
 | `agent/poll.rs` | 살아 있는 pane의 파일 두 개를 0.7초마다 수정 시각으로 확인. 바뀌면 읽어서 `agent-update` 이벤트로 프론트에 보낸다. 쓰는 쪽은 쓰고 나서 이름을 바꾸므로 반쯤 쓴 파일을 읽지 않는다 |
+| `claude_hooks/mod.rs` | greenterm 자체 Claude Code 훅의 진입점: 상태 확인, 설치(먼저 버전 확인), 제거, 오류 코드. 플러그인 없이도 권한 요청, 질문, 끝남을 알게 한다 |
+| `claude_hooks/entry.rs` | `greenterm.exe --agent-hook`으로 실행됐을 때: 훅 입력(JSON)을 상태로 바꿔 pane의 상태 파일에 쓰고 끝난다. 아무것도 출력하지 않는다. greenterm pane 밖이면 입력을 읽기 전에 끝난다 |
+| `claude_hooks/config.rs` | settings.json `hooks` 안의 greenterm 항목 넣기, 빼기, 있는지 보기(순수 함수). greenterm.exe를 `--agent-hook`으로 부르는 항목만 우리 것으로 보고 사용자의 훅은 건드리지 않는다. 테스트는 `config_tests.rs` |
+| `claude_hooks/settings_file.rs` | `settings.json`(CLAUDE_CONFIG_DIR 또는 `%USERPROFILE%.claude`) 읽기와 쓰기. 쓰기 전에 옆에 `.greenterm-backup` 사본, 임시 파일에 쓰고 이름 바꾸기. 올바른 JSON이 아니면 쓰지 않는다 |
+| `claude_hooks/version.rs` | `claude --version` 확인. 2.1.139 미만은 훅 항목의 `args`를 무시해서 이벤트마다 앱을 띄울 수 있으므로 설치하지 않는다 |
 | `pty/mod.rs` | `pty` 모듈 공개 API |
 | `pty/registry.rs` | id → 세션 맵. 락은 조회·삽입·삭제 동안만. 새 id가 정해진 뒤 호출한 쪽에 셸 명령을 받아 실행한다 |
 | `pty/session.rs` | 세션 하나: 생성, 입력 큐, 크기 조정, pause, kill, close |
@@ -130,6 +139,8 @@
 - `src-tauri/capabilities/default.json`: 이벤트와 창 조작(닫기, 최소화, 최대화, 드래그)만 허용.
 - `tauri.conf.json` `bundle.windows`: 설치 파일 아이콘과 설치 창 이미지(`src-tauri/installer/*.bmp`).
 - `src-tauri/installer/hooks.nsh`, `context-menu.wxs`: 탐색기 우클릭 "Open in greenterm" 등록과 제거(NSIS, MSI). 서명 없는 클래식 메뉴라 Windows 11에서는 "추가 옵션 표시" 안에 나온다.
+- 삭제할 때 `greenterm.exe --remove-agent-hooks`로 Claude Code 훅을 뺀다(NSIS는 `hooks.nsh`, MSI는 `agent-hooks.wxs`). 업데이트할 때도 빠지지만 새 버전이 시작하면 다시 넣는다.
+- `Cargo.toml`: `serde_json`의 `preserve_order`를 켜서 사용자의 settings.json 키 순서를 그대로 둔다.
 - `build.rs`: `icons/`가 바뀌면 다시 실행되게 해서 exe에 새 아이콘이 들어가게 한다.
 - `Cargo.toml` release 프로필: `lto = true`, `codegen-units = 1`, `panic = "abort"`, `strip = true`, `opt-level = "s"`.
 

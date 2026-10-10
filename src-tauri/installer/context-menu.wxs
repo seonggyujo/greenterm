@@ -7,6 +7,8 @@
      entry [#Path] instead fails MSI check ICE69.) Removed on uninstall. -->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
+    <!-- Links agent-hooks.wxs, which nothing else references. -->
+    <CustomActionRef Id="RemoveAgentHooks" />
     <DirectoryRef Id="INSTALLDIR">
       <Component Id="ContextMenu" Guid="*">
         <RegistryKey Root="HKCU" Key="Software\Classes\Directory\shell\greenterm">

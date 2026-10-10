@@ -1,8 +1,10 @@
+import { agentHooksOn, setAgentHooks } from "../app/agent-hooks";
 import { loadFontSize } from "../app/font-size";
 import { createLogger } from "../app/log";
 import { motionEnabled, setMotion } from "../app/motion";
 import { closeOnExitPref } from "../app/prefs";
 import { loadTheme, type Theme } from "../app/theme";
+import { hooksErrorText } from "../i18n/hooks-error";
 import { getLang, setLang, t } from "../i18n/lang";
 import { createConfirmButton } from "./confirm-button";
 import { createFontSizeControl } from "./font-size-control";
@@ -31,6 +33,20 @@ function row(label: string, control: HTMLElement): HTMLElement {
   text.textContent = label;
   el.append(text, control);
   return el;
+}
+
+/** Claude Code hooks (app/agent-hooks.ts). Turning them on can fail; the reason shows under the row. */
+function hooksRows(): HTMLElement[] {
+  const s = t();
+  const note = document.createElement("div");
+  note.className = "settings-note";
+  const toggle = createSwitch(s.agentHooksHint, agentHooksOn(), async (on) => {
+    const code = await setAgentHooks(on);
+    note.textContent = code ? hooksErrorText(code) : "";
+    return code ? !on : on;
+  });
+  toggle.title = s.agentHooksHint;
+  return [row(s.agentHooks, toggle), note];
 }
 
 function preferenceRows(actions: SettingsActions): HTMLElement[] {
@@ -65,6 +81,7 @@ function preferenceRows(actions: SettingsActions): HTMLElement[] {
         closeOnExitPref.set(on);
       }),
     ),
+    ...hooksRows(),
   ];
 }
 

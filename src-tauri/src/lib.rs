@@ -1,5 +1,6 @@
 mod agent;
 mod attention;
+mod claude_hooks;
 mod commands;
 mod launch;
 mod logging;
@@ -8,6 +9,17 @@ mod window;
 
 use tauri::webview::PageLoadEvent;
 use tauri::{Manager, RunEvent};
+
+/// greenterm.exe started by Claude Code as a hook, or by the uninstaller to
+/// remove those hooks: does that and returns the exit code, before anything
+/// of the app starts. None for a normal start.
+pub fn run_cli() -> Option<i32> {
+    match std::env::args().nth(1).as_deref() {
+        Some(claude_hooks::HOOK_FLAG) => Some(claude_hooks::run_hook()),
+        Some(claude_hooks::REMOVE_FLAG) => Some(i32::from(claude_hooks::remove().is_err())),
+        _ => None,
+    }
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -54,6 +66,9 @@ pub fn run() {
             commands::resume_pty,
             commands::kill_pty,
             commands::frontend_log,
+            commands::agent_hooks_presence,
+            commands::install_agent_hooks,
+            commands::remove_agent_hooks,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

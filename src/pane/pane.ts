@@ -68,7 +68,7 @@ export class Pane implements PaneItem {
       this.header.startUptime();
     } catch (err) {
       log.error(`spawn ${this.shell} failed`, err);
-      this.setExited(null);
+      this.markExited(null);
     }
   }
 
@@ -122,12 +122,9 @@ export class Pane implements PaneItem {
     this.focus();
   }
 
-  markExited(code: number): void {
-    log.info(`pty ${this.id} exited with code ${code}`);
-    this.setExited(code);
-  }
-
-  private setExited(code: number | null): void {
+  /** The shell ended with `code`; null = it never started. */
+  markExited(code: number | null): void {
+    if (code !== null) log.info(`pty ${this.id} exited with code ${code}`);
     this.link.markClosed();
     this.el.classList.add("exited");
     this.header.showExit(code);

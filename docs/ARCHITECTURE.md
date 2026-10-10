@@ -52,7 +52,8 @@
 | `ui/recent-session-row.ts` | 최근 세션 한 줄(폴더 머리 아래): 제목과 얼마 전. 마우스를 올리면 시간 대신 "이어 열기", 누르면 연다. 오른쪽 클릭하면 줄 위에 "삭제할까요? [삭제] [취소]"(휴지통으로)(Esc나 바깥 클릭은 취소), 실패하면 잠깐 이유를 보인다 |
 | `ui/usage-bar.ts` | 창 아래 하단바(heron-limits 플러그인): 한도 블록 두 개와 에이전트마다 컨텍스트 사용률 칩(pane 순서, 누르면 그 pane으로). 한도도 컨텍스트도 없으면 숨고, 한도가 있을 때만 1초 시계를 구독한다 |
 | `ui/limit-meter.ts` | 하단바의 한도 하나(5시간, 주간): 이름, 초기화까지 남은 시간, 큰 사용률 숫자와 막대. 70%부터 노랑, 90%부터 빨강 |
-| `i18n/strings.ts` | 화면에 보이는 모든 글자의 영어·한국어 표. 셸 이름과 로그는 번역하지 않는다 |
+| `i18n/en.ts` | 화면에 보이는 모든 글자의 영어 표와 그 키 타입(`Strings`). 셸 이름과 로그는 번역하지 않는다 |
+| `i18n/ko.ts` | 같은 키의 한국어 표 |
 | `i18n/hooks-error.ts` | Claude Code 훅 명령의 오류 코드를 문장으로 |
 | `i18n/lang.ts` | 현재 언어와 `t()`. 저장된 선택이 없으면 Windows 표시 언어를 따른다. 화면 모듈은 `onLangChange`로 글자를 다시 쓴다 |
 | `i18n/time-ago.ts` | 얼마 전인지 앱 언어로("방금", "5분 전", "어제"). `Intl.RelativeTimeFormat`, 단위는 내림 |
@@ -80,7 +81,8 @@
 | `pane/pane-motion.ts` | pane 등장·퇴장 애니메이션 |
 | `pane/output-glow.ts` | 출력 시 테두리 글로우(0.3초)와 상태 점 pulse(3초). 조용한 셸에는 도는 애니메이션이 없다. pane당 최대 150ms에 한 번 class 토글 |
 | `pane/pane-drag.ts` | 헤더를 잡고 다른 pane에 놓기: 가장자리면 그쪽으로 분할, 가운데면 자리 교체, Esc 취소. Tauri 파일 드롭 때문에 HTML5 drag가 안 와서 pointer 이벤트와 pointer capture를 쓴다 |
-| `pane/pane-manager.ts` | pane 목록, 추가(첫 프롬프트에 칠 명령도)·닫기, 포커스와 선택된 pane, 글씨 크기. pane 신호를 pty id와 함께 넘긴다. 배치는 `SplitLayout`, 셸 종료는 `shell-exits.ts`에 맡긴다 |
+| `pane/pane-manager.ts` | pane 목록, 추가(첫 프롬프트에 칠 명령도)·닫기, 포커스와 선택된 pane, 글씨 크기. pane 신호를 pty id와 함께 넘긴다. 자리는 `pane-arranger.ts`, 셸 종료는 `shell-exits.ts`에 맡긴다 |
+| `pane/pane-arranger.ts` | pane이 놓이는 자리와 옮겨 가는 모습: `SplitLayout`으로 배치, 헤더 끌기(`pane-drag.ts`)로 옮기기, `flip`으로 미끄러지기, `FitScheduler`로 크기가 바뀐 pane만 다시 맞추기. 좌표 아래의 pane 찾기 |
 | `layout/grid.ts` | 순수 함수: 자동 격자에서 줄마다 pane 몇 개인지 계산 |
 | `layout/split-tree.ts` | 순수 함수: 분할 트리(가로 `row`, 세로 `column`, 비율 `sizes`). 자동 격자 트리, 삽입, 제거(형제가 공간을 나눠 가짐), 이동, 교체 |
 | `layout/split-rects.ts` | 순수 함수: 트리를 px 박스와 경계선 박스로. 가장자리를 정수로 반올림해 글자가 흐려지지 않게 한다 |
@@ -90,7 +92,8 @@
 | `layout/box-style.ts` | 절대 위치 요소에 px 박스 적용 |
 | `layout/fit-scheduler.ts` | ResizeObserver + requestAnimationFrame으로 fit을 묶음. 프레임당 10ms 예산, 남으면 다음 프레임 |
 | `layout/flip.ts` | 재배치 시 이전 위치에서 새 위치로 transform 애니메이션 |
-| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`(사이드바와 작업 영역을 나란히), `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-sidebar`(사이드바 틀), `agent-item`(사이드바 한 줄), `agent-marks`(배지와 pane 점의 에이전트 상태 색, 가리킨 pane 테두리), `agent-hints`(사이드바 아래 안내), `new-agent`(새 에이전트 버튼), `recent-sessions`(최근 세션 틀, 폴더 머리, 가장자리 "더 있음"), `recent-session-row`(세션 한 줄, 삭제 질문), `usage-bar`(하단바, 한도 블록, 컨텍스트 칩), `effects`(Animations 끄기 규칙 포함) |
+| `styles/stylesheets.ts` | 앱의 모든 스타일시트를 캐스케이드 순서대로 import(xterm, 테마 토큰과 기본 규칙, 기능별 파일) |
+| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`(사이드바와 작업 영역을 나란히), `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-sidebar`(사이드바 틀), `agent-item`(사이드바 한 줄), `agent-marks`(배지와 pane 점의 에이전트 상태 색, 가리킨 pane 테두리), `agent-hints`(사이드바 아래 안내), `new-agent`(새 에이전트 버튼), `recent-sessions`(최근 세션 틀, 가장자리 "더 있음"), `recent-group-head`(폴더 머리), `recent-session-row`(세션 한 줄, 삭제 질문), `usage-bar`(하단바, 한도 블록, 컨텍스트 칩), `effects`(Animations 끄기 규칙 포함) |
 
 의존 방향: `main.ts`, `wire-agents.ts`, `wire-sessions.ts` → `ui/`, `pane/`, `layout/` → `agent/`, `terminal/`, `ipc/`, `app/`, `i18n/`.
 `wire-agents.ts`는 `wire-sessions.ts`의 타입만 쓰고, `wire-sessions.ts`는 `wire-agents.ts`를 모른다.

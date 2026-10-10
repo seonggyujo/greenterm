@@ -1,4 +1,5 @@
-import { en, ko, type Strings } from "./strings";
+import { en, type Strings } from "./en";
+import { ko } from "./ko";
 
 // The UI language, English or Korean. Without a saved choice it follows the
 // Windows display language (what WebView2 reports in navigator.languages).

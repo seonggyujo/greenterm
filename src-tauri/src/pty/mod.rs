@@ -3,6 +3,7 @@
 //! frontend), waiter (exit code and cleanup).
 
 mod batcher;
+mod ctrl_c;
 mod cwd_report;
 mod gate;
 mod reader;
@@ -12,5 +13,6 @@ mod shell;
 mod waiter;
 mod writer;
 
+pub use ctrl_c::enable_for_shells as enable_ctrl_c;
 pub use registry::PtyRegistry;
 pub use shell::ShellKind;

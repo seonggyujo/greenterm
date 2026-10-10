@@ -106,6 +106,7 @@
 | `claude_hooks/settings_file.rs` | `settings.json`(CLAUDE_CONFIG_DIR 또는 `%USERPROFILE%.claude`) 읽기와 쓰기. 쓰기 전에 옆에 `.heron-backup` 사본, 임시 파일에 쓰고 이름 바꾸기. 올바른 JSON이 아니면 쓰지 않는다 |
 | `claude_hooks/version.rs` | `claude --version` 확인. 2.1.139 미만은 훅 항목의 `args`를 무시해서 이벤트마다 앱을 띄울 수 있으므로 설치하지 않는다 |
 | `pty/mod.rs` | `pty` 모듈 공개 API |
+| `pty/ctrl_c.rs` | 시작할 때 물려받은 "Ctrl+C 무시" 상태를 푼다(`SetConsoleCtrlHandler(NULL, FALSE)`). 새 프로세스 그룹으로 실행되면 이 상태가 셸까지 물려져서 pane에서 ^C가 안 먹는다. Windows Terminal과 같은 처리 |
 | `pty/registry.rs` | id → 세션 맵. 락은 조회·삽입·삭제 동안만. 새 id가 정해진 뒤 호출한 쪽에 셸 명령을 받아 실행한다 |
 | `pty/session.rs` | 세션 하나: 생성, 입력 큐, 크기 조정, pause, kill, close |
 | `pty/shell.rs` | 셸 종류(pwsh 7, Windows PowerShell, cmd, Git Bash), 설치 여부, 실행 명령 |

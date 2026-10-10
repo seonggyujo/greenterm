@@ -24,6 +24,7 @@ pub fn run_cli() -> Option<i32> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     logging::init();
+    pty::enable_ctrl_c();
 
     #[cfg_attr(debug_assertions, allow(unused_mut))]
     let mut builder = tauri::Builder::default();

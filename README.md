@@ -5,14 +5,16 @@
 <h1 align="center">Heron</h1>
 
 <p align="center">
-  A lightweight Windows terminal for running coding agents side by side: press <b>+</b> and the panes rearrange automatically, and a sidebar shows what each Claude Code is doing.
+  A lightweight Windows terminal for running coding agents side by side. Press <b>+</b> and the panes arrange themselves; a sidebar shows what each Claude Code is doing, and the taskbar flashes when one needs you.
   <br>
   <b>English</b> · <a href="README.ko.md">한국어</a>
 </p>
 
+![Three Claude Code sessions in Heron: the sidebar shows one waiting for permission, one done and one working](docs/media/agents.png)
+
 ---
 
-Heron opens several shells side by side in one window and lays them out for you. There are no
+Heron (formerly greenterm) opens several shells side by side in one window and lays them out for you. There are no
 split shortcuts to learn: every action is a button or a drag. The terminals themselves are left untouched
 (default colors, your shell's own output), while the window around them has a green (or black)
 theme that shows which shells are alive.
@@ -20,6 +22,37 @@ theme that shows which shells are alive.
 Built with Tauri v2, vanilla TypeScript, xterm.js (WebGL) and ConPTY.
 
 ## Features
+
+### Coding agents
+
+Start Claude Code in a pane and a sidebar appears on the left, with a row for each pane that runs
+an agent: the pane number, its folder and what the agent is doing (working, with a timer, or done).
+Agents that need you come first. Click a row to jump to that pane, or point at it to see which pane
+it is; the pane's status dot takes the same color. While Heron is behind another window, its
+taskbar button flashes when an agent finishes or needs you. The sidebar folds into a narrow rail of dots,
+and hides while no agent runs. This needs nothing else: Heron reads the title Claude Code gives
+the terminal.
+
+To also see when an agent needs your permission or asks a question, press **Turn on** at the bottom
+of the sidebar (or switch on **Claude Code hooks** in the settings). Heron then adds a few hooks
+to Claude Code's `~/.claude/settings.json` that run heron.exe itself, so there is nothing else to
+install. This needs Claude Code 2.1.139 or later. Your own hooks stay as they are, and the previous
+file is kept as `settings.json.heron-backup`. Switching it off, or uninstalling Heron, takes
+the hooks out again; outside Heron they do nothing.
+
+With the [routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) plugin
+(0.4.0 or later) the sidebar also warns when an answer came from a model other than the one you
+selected, and shows your 5-hour and weekly usage limits with the time until they reset. In Claude Code:
+
+```
+/plugin marketplace add seonggyujo/claude-code-routing-detector
+/plugin install routing-detector@routing-detector
+```
+
+Two environment variables in each shell (`HERON_PANE`, `HERON_AGENT_DIR`) tell the hooks
+and the plugin which pane they run in. They write two small files per pane under
+`%LOCALAPPDATA%\io.github.seonggyujo.heron\agents`; the files stay on your machine and are deleted when the
+pane closes. Outside Heron nothing is written.
 
 ### Automatic grid
 
@@ -54,37 +87,6 @@ stand out. `exit` closes the pane like Windows Terminal does (this can be turned
 settings); a failing exit keeps the pane open with a red exit-code badge.
 
 ![Output activity](docs/media/activity.gif)
-
-### Coding agents
-
-Start Claude Code in a pane and a sidebar appears on the left, with a row for each pane that runs
-an agent: the pane number, its folder and what the agent is doing (working, with a timer, or done).
-Agents that need you come first. Click a row to jump to that pane, or point at it to see which pane
-it is; the pane's status dot takes the same color. While Heron is behind another window, its
-taskbar button flashes when an agent finishes or needs you. The sidebar folds into a narrow rail of dots,
-and hides while no agent runs. This needs nothing else: Heron reads the title Claude Code gives
-the terminal.
-
-To also see when an agent needs your permission or asks a question, press **Turn on** at the bottom
-of the sidebar (or switch on **Claude Code hooks** in the settings). Heron then adds a few hooks
-to Claude Code's `~/.claude/settings.json` that run heron.exe itself, so there is nothing else to
-install. This needs Claude Code 2.1.139 or later. Your own hooks stay as they are, and the previous
-file is kept as `settings.json.heron-backup`. Switching it off, or uninstalling Heron, takes
-the hooks out again; outside Heron they do nothing.
-
-With the [routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) plugin
-(0.3.1 or later) the sidebar also warns when an answer came from a model other than the one you
-selected, and shows your 5-hour and weekly usage limits with the time until they reset. In Claude Code:
-
-```
-/plugin marketplace add seonggyujo/claude-code-routing-detector
-/plugin install routing-detector@routing-detector
-```
-
-Two environment variables in each shell (`HERON_PANE`, `HERON_AGENT_DIR`) tell the hooks
-and the plugin which pane they run in. They write two small files per pane under
-`%LOCALAPPDATA%\io.github.seonggyujo.heron\agents`; the files stay on your machine and are deleted when the
-pane closes. Outside Heron nothing is written.
 
 ### Settings
 

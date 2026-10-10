@@ -1,7 +1,6 @@
 import { createLogger } from "../app/log";
-import { closeOnExitPref } from "../app/prefs";
 import type { UptimeClock } from "../app/uptime-clock";
-import { onPtyExit, type ShellKind } from "../ipc/pty";
+import type { ShellKind } from "../ipc/pty";
 import type { Zone } from "../layout/drop-zone";
 import { FitScheduler } from "../layout/fit-scheduler";
 import { flip } from "../layout/flip";
@@ -10,6 +9,8 @@ import { Pane } from "./pane";
 import { countPanes, type PaneCounts } from "./pane-counts";
 import { attachPaneDrag, type DropHost } from "./pane-drag";
 import type { PaneCallbacks, PaneItem } from "./pane-item";
+import type { PaneSignal } from "./pane-signals";
+import { watchShellExits } from "./shell-exits";
 
 // Owns the list of terminal panes: add, close, focus, font size. Where
 // each pane sits is up to SplitLayout (auto grid, or the user's own
@@ -32,6 +33,8 @@ export class PaneManager {
     private readonly onChange: (counts: PaneCounts) => void,
     /** True while the user's own arrangement replaces the auto grid. */
     onLayoutMode: (manual: boolean) => void,
+    /** Signals of the terminal with pty id `pty`, for the agent board. */
+    private readonly onSignal: (pty: number, signal: PaneSignal) => void,
   ) {
     this.layout = new SplitLayout(workspace, () => this.panes, onLayoutMode);
     this.dropHost = {
@@ -41,23 +44,19 @@ export class PaneManager {
     };
   }
 
-  /** Subscribe to shell exits. Call once before adding panes. */
+  /** Subscribe to shell exits (shell-exits.ts). Call once before adding panes. */
   async init(): Promise<void> {
-    // Like Windows Terminal: a clean exit closes the pane (unless turned
-    // off in settings), a failure keeps it open so the output and exit
-    // code can be read.
-    await onPtyExit(({ id, code }) => {
-      const pane = this.panes.find((p): p is Pane => p instanceof Pane && p.id === id);
-      if (!pane) return;
-      pane.markExited(code);
-      if (code === 0 && closeOnExitPref.get()) this.close(pane);
-      else this.notify();
+    await watchShellExits({
+      find: (pty) => this.terminals().find((p) => p.id === pty),
+      close: (pane) => this.close(pane),
+      changed: () => this.notify(),
     });
   }
 
   async add(shell: ShellKind, cwd: string | null = null): Promise<Pane> {
+    const onSignal = (p: Pane, s: PaneSignal) => this.signal(p, s);
     const pane = this.insert(
-      (cb) => new Pane(this.workspace, { shell, cwd, fontSize: this.fontSize, clock: this.clock, ...cb }),
+      (cb) => new Pane(this.workspace, { shell, cwd, fontSize: this.fontSize, clock: this.clock, onSignal, ...cb }),
     );
     log.info(`added ${shell}, ${this.panes.length} panes`);
     await pane.start();
@@ -72,6 +71,7 @@ export class PaneManager {
     this.fits.unobserve(pane.el);
     if (this.focused === pane) this.focused = null;
     log.info(`closing ${pane.name}, ${this.panes.length} panes left`);
+    if (pane instanceof Pane) this.signal(pane, { kind: "closed" });
 
     const next = this.panes[Math.min(index, this.panes.length - 1)];
     next?.focus();
@@ -99,6 +99,11 @@ export class PaneManager {
     // event will come: ask for a fit explicitly.
     this.fits.requestAll();
     log.debug(`font size ${px}px`);
+  }
+
+  /** Terminal panes in the order they were opened. */
+  terminals(): Pane[] {
+    return this.panes.filter((p): p is Pane => p instanceof Pane);
   }
 
   /** The pane under a point in CSS pixels, if any. */
@@ -134,6 +139,11 @@ export class PaneManager {
     this.focused?.setFocused(false);
     this.focused = pane;
     pane.setFocused(true);
+    if (pane instanceof Pane) this.signal(pane, { kind: "focus" });
+  }
+
+  private signal(pane: Pane, signal: PaneSignal): void {
+    if (pane.id !== null) this.onSignal(pane.id, signal);
   }
 
   private elements(): HTMLElement[] {

@@ -1,13 +1,15 @@
 import { createLogger } from "../app/log";
+import { folderName } from "../app/paths";
 import { SHELL_LABELS } from "../app/shells";
-import { formatUptime, type UptimeClock } from "../app/uptime-clock";
+import type { UptimeClock } from "../app/uptime-clock";
 import type { ShellKind } from "../ipc/pty";
-import { watchCwd } from "../terminal/cwd";
 import { TerminalView } from "../terminal/terminal-view";
 import { OutputGlow } from "./output-glow";
+import type { AgentMark } from "../agent/agent-model";
 import { createPaneHeader, type PaneHeader } from "./pane-header";
 import type { PaneItem } from "./pane-item";
 import { animateEnter, animateLeave } from "./pane-motion";
+import { markAgent, watchPaneTerminal, type PaneSignal } from "./pane-signals";
 import { PtyLink } from "./pty-link";
 
 // One pane = header + xterm view + PTY link. The constructor only builds
@@ -24,6 +26,8 @@ export interface PaneOptions {
   clock: UptimeClock;
   onClose(pane: Pane): void;
   onFocus(pane: Pane): void;
+  /** Title, prompt and key signals for the agent board. */
+  onSignal(pane: Pane, signal: PaneSignal): void;
 }
 
 export class Pane implements PaneItem {
@@ -34,17 +38,16 @@ export class Pane implements PaneItem {
   private readonly view: TerminalView;
   private readonly link: PtyLink;
   private readonly glow: OutputGlow;
-  private readonly clock: UptimeClock;
-  private stopUptime: (() => void) | null = null;
   private exited = false;
+  /** Folder the shell last reported. */
+  private readonly where: () => string | null;
 
   constructor(parent: HTMLElement, opts: PaneOptions) {
     this.shell = opts.shell;
     this.cwd = opts.cwd;
-    this.clock = opts.clock;
     this.el = document.createElement("section");
     this.el.className = "pane";
-    this.header = createPaneHeader(SHELL_LABELS[opts.shell], () => opts.onClose(this));
+    this.header = createPaneHeader(SHELL_LABELS[opts.shell], opts.clock, () => opts.onClose(this));
     const body = document.createElement("div");
     body.className = "pane-body";
     const host = document.createElement("div");
@@ -57,8 +60,7 @@ export class Pane implements PaneItem {
     this.glow = new OutputGlow(this.el);
     this.link = new PtyLink(this.view, () => this.glow.ping());
 
-    this.view.term.onTitleChange((title) => this.header.setTitle(title));
-    watchCwd(this.view.term, () => this.name, (path) => this.header.setCwd(path));
+    this.where = watchPaneTerminal(this.view.term, () => this.name, this.header, (s) => opts.onSignal(this, s));
     this.el.addEventListener("focusin", () => opts.onFocus(this));
     this.header.el.addEventListener("mousedown", (e) => {
       e.preventDefault();
@@ -70,10 +72,7 @@ export class Pane implements PaneItem {
     const { cols, rows } = this.view.fit() ?? { cols: 80, rows: 24 };
     try {
       await this.link.spawn(this.shell, cols, rows, this.cwd);
-      const startedAt = Date.now();
-      this.stopUptime = this.clock.subscribe((now) =>
-        this.header.setUptime(formatUptime(now - startedAt)),
-      );
+      this.header.startUptime();
     } catch (err) {
       log.error(`spawn ${this.shell} failed`, err);
       this.setExited(null);
@@ -90,6 +89,15 @@ export class Pane implements PaneItem {
 
   get running(): boolean {
     return this.link.id !== null && !this.exited;
+  }
+
+  /** Last folder name, e.g. "greenterm"; the shell name until one is known. */
+  get folder(): string {
+    return folderName(this.where() ?? this.cwd ?? "") ?? SHELL_LABELS[this.shell];
+  }
+
+  setAgentMark(mark: AgentMark | null): void {
+    markAgent(this.el, mark);
   }
 
   /** The header, where a drag to move the pane starts (pane-drag.ts). */
@@ -130,8 +138,6 @@ export class Pane implements PaneItem {
   private setExited(code: number | null): void {
     this.exited = true;
     this.link.markClosed();
-    this.stopUptime?.();
-    this.stopUptime = null;
     this.el.classList.add("exited");
     this.header.showExit(code);
   }
@@ -146,7 +152,6 @@ export class Pane implements PaneItem {
 
   dispose(): void {
     this.link.kill();
-    this.stopUptime?.();
     this.glow.dispose();
     this.header.dispose();
     this.view.dispose();

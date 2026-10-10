@@ -9,6 +9,7 @@ import "./styles/pane.css";
 import "./styles/split.css";
 import "./styles/settings.css";
 import "./styles/empty-state.css";
+import "./styles/agent-dock.css";
 import "./styles/effects.css";
 import { loadFontSize, saveFontSize } from "./app/font-size";
 import { createLogger } from "./app/log";
@@ -32,6 +33,7 @@ import { createShellMenu } from "./ui/shell-menu";
 import { createTerminalCount } from "./ui/terminal-count";
 import { createTidyButton } from "./ui/tidy-button";
 import { createTitlebar } from "./ui/titlebar";
+import { wireAgents } from "./wire-agents";
 
 const log = createLogger("app");
 
@@ -49,7 +51,10 @@ async function main(): Promise<void> {
   const titlebar = createTitlebar();
   const workspace = document.createElement("main");
   workspace.id = "workspace";
-  document.body.append(titlebar.el, workspace);
+  // Coding agents in the panes: the dock sits under the workspace.
+  const clock = new UptimeClock();
+  const agents = wireAgents(clock, () => panes);
+  document.body.append(titlebar.el, workspace, agents.dock);
 
   const shells = await listShells();
   let defaultShell = loadDefaultShell(shells);
@@ -67,15 +72,18 @@ async function main(): Promise<void> {
   const fontSize = loadFontSize();
   const panes = new PaneManager(
     workspace,
-    new UptimeClock(),
+    clock,
     fontSize,
     (c) => {
       count.update(c);
       empty.setVisible(c.terminals === 0);
+      agents.refresh();
     },
     (manual) => tidy.setVisible(manual),
+    agents.onSignal,
   );
   await panes.init();
+  await agents.start();
   // "Open in greenterm" while this window runs: a new pane in that folder.
   await onOpenFolder((dir) => open(defaultShell, dir));
   await installFileDrop((x, y) => panes.paneAt(x, y));

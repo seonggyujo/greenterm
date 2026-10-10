@@ -36,6 +36,18 @@ export const en = {
   resetHint: "Theme, font size, language and every option above",
   sure: "Sure?",
   done: "Done",
+
+  // Agent dock
+  agentIdle: "idle",
+  agentWorking: "working",
+  agentPermission: "needs permission",
+  agentQuestion: "has a question",
+  agentWaiting: "waiting for you",
+  agentDone: "done",
+  agentMismatch: (selected: string, actual: string) => `Selected ${selected}, answered by ${actual}`,
+  limitResets: (left: string) => `Resets in ${left}`,
+  agentPluginHint: "Install the routing-detector plugin for permission alerts, model checks and limits",
+  hide: "Hide",
 };
 
 export type Strings = typeof en;
@@ -71,4 +83,15 @@ export const ko: Strings = {
   resetHint: "테마, 글씨 크기, 언어와 위의 모든 설정",
   sure: "정말요?",
   done: "완료",
+
+  agentIdle: "대기",
+  agentWorking: "작업 중",
+  agentPermission: "권한 필요",
+  agentQuestion: "질문 있음",
+  agentWaiting: "입력 대기",
+  agentDone: "끝남",
+  agentMismatch: (selected, actual) => `선택 ${selected}, 실제 응답 ${actual}`,
+  limitResets: (left) => `${left} 뒤 초기화`,
+  agentPluginHint: "routing-detector 플러그인을 설치하면 권한 알림, 모델 확인, 한도가 보여요",
+  hide: "숨기기",
 };

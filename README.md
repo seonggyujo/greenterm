@@ -5,7 +5,7 @@
 <h1 align="center">greenterm</h1>
 
 <p align="center">
-  A lightweight Windows terminal app that splits itself: press <b>+</b> and the panes rearrange automatically.
+  A lightweight Windows terminal for running coding agents side by side: press <b>+</b> and the panes rearrange automatically, and a band at the bottom shows what each Claude Code is doing.
   <br>
   <b>English</b> · <a href="README.ko.md">한국어</a>
 </p>
@@ -54,6 +54,28 @@ stand out. `exit` closes the pane like Windows Terminal does (this can be turned
 settings); a failing exit keeps the pane open with a red exit-code badge.
 
 ![Output activity](docs/media/activity.gif)
+
+### Coding agents
+
+Start Claude Code in a pane and a thin band appears at the bottom of the window, with a chip for
+each pane that runs an agent: the pane number, its folder and what the agent is doing (working,
+with a timer, or done). Click a chip to jump to that pane; the pane's status dot takes the same
+color. This needs nothing else: greenterm reads the title Claude Code gives the terminal.
+
+With the [routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) plugin
+(0.3.1 or later) the band also shows when an agent needs your permission or asks a question, warns
+when an answer came from a model other than the one you selected, and shows your 5-hour and weekly
+usage limits with the time until they reset. In Claude Code:
+
+```
+/plugin marketplace add seonggyujo/claude-code-routing-detector
+/plugin install routing-detector@routing-detector
+```
+
+greenterm tells the plugin which pane it runs in through two environment variables in each shell
+(`GREENTERM_PANE`, `GREENTERM_AGENT_DIR`). The plugin writes two small files per pane under
+`%LOCALAPPDATA%\com.greenterm.app\agents`; they stay on your machine and are deleted when the pane
+closes. Outside greenterm the plugin writes nothing.
 
 ### Settings
 

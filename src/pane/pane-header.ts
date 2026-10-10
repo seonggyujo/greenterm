@@ -1,3 +1,4 @@
+import { formatUptime, type UptimeClock } from "../app/uptime-clock";
 import { onLangChange, t } from "../i18n/lang";
 
 // Pane header DOM: status dot, shell name, exit badge, current folder,
@@ -10,10 +11,11 @@ export interface PaneHeader {
   setTitle(title: string): void;
   /** Current folder reported by the shell. */
   setCwd(path: string): void;
-  setUptime(text: string): void;
+  /** The shell started: count how long it runs, until it exits. */
+  startUptime(): void;
   /** Shows the exit code, or a start failure when `code` is null. */
   showExit(code: number | null): void;
-  /** Stops following language changes. */
+  /** Stops the uptime and following language changes. */
   dispose(): void;
 }
 
@@ -31,7 +33,7 @@ function setText(el: HTMLElement, text: string): void {
   el.title = text;
 }
 
-export function createPaneHeader(shellLabel: string, onClose: () => void): PaneHeader {
+export function createPaneHeader(shellLabel: string, clock: UptimeClock, onClose: () => void): PaneHeader {
   const el = document.createElement("header");
   el.className = "pane-header";
 
@@ -60,19 +62,33 @@ export function createPaneHeader(shellLabel: string, onClose: () => void): PaneH
   showText();
   const stopLang = onLangChange(showText);
 
+  let stopUptime: (() => void) | null = null;
+  const endUptime = () => {
+    stopUptime?.();
+    stopUptime = null;
+  };
+
   el.append(dot, shell, exit, cwd, title, uptime, close);
   return {
     el,
     setTitle: (text) => setText(title, text),
     setCwd: (path) => setText(cwd, path),
-    setUptime: (text) => {
-      if (uptime.textContent !== text) uptime.textContent = text;
+    startUptime() {
+      const startedAt = Date.now();
+      stopUptime = clock.subscribe((now) => {
+        const text = formatUptime(now - startedAt);
+        if (uptime.textContent !== text) uptime.textContent = text;
+      });
     },
     showExit(code) {
+      endUptime();
       exitCode = code;
       exit.classList.toggle("error", code !== 0);
       showText();
     },
-    dispose: stopLang,
+    dispose() {
+      endUptime();
+      stopLang();
+    },
   };
 }

@@ -5,7 +5,8 @@ import { createLogger } from "../app/log";
 //   OSC 9;9;<path>          Windows Terminal style (our shell hooks use it)
 //   OSC 7;file://host/path  common on Unix-like shells
 // The handlers consume the sequence; nothing is drawn. Shells report on
-// every prompt, so only a new folder is passed on (and logged).
+// every prompt: `onPrompt` hears each report, `onChange` only a new folder
+// (which is also logged).
 
 const log = createLogger("cwd");
 
@@ -17,9 +18,15 @@ function toWindowsPath(path: string): string {
 }
 
 /** `name` labels the log line, e.g. "pty 3". */
-export function watchCwd(term: Terminal, name: () => string, onChange: (path: string) => void): void {
+export function watchCwd(
+  term: Terminal,
+  name: () => string,
+  onChange: (path: string) => void,
+  onPrompt: () => void = () => {},
+): void {
   let last = "";
   const onCwd = (path: string) => {
+    onPrompt();
     if (path === last) return;
     last = path;
     log.debug(`${name()} in ${path}`);

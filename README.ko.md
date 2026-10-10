@@ -5,7 +5,7 @@
 <h1 align="center">greenterm</h1>
 
 <p align="center">
-  <b>+</b> 버튼만 누르면 알아서 화면을 나누는 가벼운 Windows 터미널 앱.
+  코딩 에이전트를 나란히 띄우는 가벼운 Windows 터미널. <b>+</b>만 누르면 알아서 화면을 나누고, 아래 띠에 Claude Code마다 지금 무엇을 하는지 보여 줘요.
   <br>
   <a href="README.md">English</a> · <b>한국어</b>
 </p>
@@ -53,6 +53,28 @@ pane 헤더를 잡고 다른 pane 위에 놓아요. 가장자리 쪽에 놓으�
 pane을 남긴 채 붉은 exit 뱃지를 보여 줘요.
 
 ![출력 표시](docs/media/activity.gif)
+
+### 코딩 에이전트
+
+pane에서 Claude Code를 켜면 창 아래에 얇은 띠가 나타나요. 에이전트가 있는 pane마다 칩이 하나씩
+생기고, pane 번호, 폴더, 에이전트가 하는 일(작업 중이면 경과 시간, 끝남)을 보여 줘요. 칩을 누르면
+그 pane으로 가고, pane의 상태 점도 같은 색으로 바뀌어요. 따로 설치할 것은 없어요. Claude Code가
+터미널에 붙이는 제목을 읽어서 알아내요.
+
+[routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) 플러그인(0.3.1
+이상)을 설치하면 띠에 더 많은 것이 보여요. 에이전트가 권한을 기다리거나 질문할 때 알려 주고,
+선택한 모델과 다른 모델이 답하면 경고하고, 5시간·주간 사용 한도와 초기화까지 남은 시간도 보여
+줘요. Claude Code에서 설치해요.
+
+```
+/plugin marketplace add seonggyujo/claude-code-routing-detector
+/plugin install routing-detector@routing-detector
+```
+
+greenterm은 셸마다 환경변수 두 개(`GREENTERM_PANE`, `GREENTERM_AGENT_DIR`)로 플러그인에 어느
+pane인지 알려 줘요. 플러그인은 `%LOCALAPPDATA%\com.greenterm.app\agents` 아래에 pane마다 작은
+파일 두 개를 남기는데, 이 PC 밖으로 나가지 않고 pane을 닫으면 지워져요. greenterm 밖에서는
+플러그인이 아무것도 쓰지 않아요.
 
 ### 설정
 

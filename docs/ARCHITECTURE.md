@@ -11,6 +11,10 @@
 | 경로 | 역할 |
 | --- | --- |
 | `main.ts` | 부트스트랩만. 모듈을 만들고 서로 연결한다 |
+| `wire-agents.ts` | `main.ts`처럼 연결만: 플러그인 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 하단 띠와 pane 점을 다시 그린다 |
+| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도. 신호 두 가지: 플러그인 파일(정확)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 플러그인 없이도 동작). 플러그인 정보가 오면 그쪽이 상태를 정한다 |
+| `agent/agent-board.ts` | pty별 에이전트와 가장 최근 한도를 보관. 모든 신호를 `agent-model.ts`로 계산하고, 바뀌면 구독자에게 알린다 |
+| `app/paths.ts` | 경로에서 마지막 폴더 이름 |
 | `app/perf-monitor.ts` | dev 전용 long task(50ms 초과) 로그 |
 | `app/theme.ts` | 앱 틀 테마(green, black) 적용과 저장 |
 | `app/file-drop.ts` | 파일을 pane에 끌어다 놓으면 경로를 입력(Windows Terminal 방식). Tauri 드래그 이벤트 사용 |
@@ -36,25 +40,30 @@
 | `ui/tidy-button.ts` | 자동 격자로 되돌리는 버튼. 수동 배치일 때만 보이고, action 맨 왼쪽이라 나타나도 다른 버튼 위치가 안 바뀐다 |
 | `ui/theme-toggle.ts` | 테마 선택 동그라미 두 개(설정 창 안) |
 | `ui/empty-state.ts` | 터미널 0개일 때 큰 + 버튼과 깜빡이는 `_` |
+| `ui/agent-dock.ts` | 하단 띠: 에이전트가 있는 pane마다 칩(번호, 폴더, 상태, 모델 경고)과 오른쪽 한도. 에이전트가 없으면 숨는다. 칩을 누르면 그 pane으로. 칩은 보드가 바뀔 때만 새로 만들고, 1초 갱신은 경과 시간과 한도 글자만 바꾼다. 플러그인 정보가 없으면 설치 안내(닫을 수 있음) |
+| `ui/limit-meter.ts` | 한도 하나(5h, 7d): 막대, 사용률, 초기화까지 남은 시간. 70%부터 노랑, 90%부터 빨강 |
 | `i18n/strings.ts` | 화면에 보이는 모든 글자의 영어·한국어 표. 셸 이름과 로그는 번역하지 않는다 |
 | `i18n/lang.ts` | 현재 언어와 `t()`. 저장된 선택이 없으면 Windows 표시 언어를 따른다. 화면 모듈은 `onLangChange`로 글자를 다시 쓴다 |
 | `ipc/launch.ts` | 시작 폴더 받기(`take_launch_dir`), 켜진 창으로 온 폴더(`open-folder` 이벤트) |
 | `ipc/pty.ts` | PTY 명령 타입 래퍼, 출력 Channel(ArrayBuffer), `pty-exit` 구독, 셸 목록 |
+| `ipc/agent.ts` | `agent-update` 이벤트 구독. 플러그인이 쓴 JSON을 검사 없이 넘기고, 검사는 `agent-model.ts`가 한다 |
 | `terminal/terminal-view.ts` | xterm 생성, fit·webgl addon, context loss 시 DOM 렌더러로 fallback |
 | `terminal/flow-control.ts` | `write` 콜백으로 대기 바이트 추적, 256KB 넘으면 pause, 32KB 밑이면 resume |
 | `terminal/keys.ts` | WebView 단축키 차단, Ctrl+C/V |
 | `terminal/clipboard.ts` | 복사·붙여넣기, 우클릭(선택 있으면 복사, 없으면 붙여넣기. 앱이 마우스 추적 중이면 앱에 넘김, Shift+우클릭은 항상 처리) |
 | `terminal/links.ts` | 출력 속 URL과 OSC 8 링크를 Ctrl+클릭으로 브라우저에서 열기(opener 플러그인, http/https만. 앱이 마우스 추적 중이어도 링크 위 Ctrl+클릭은 앱에 넘기지 않음) |
-| `terminal/cwd.ts` | 셸이 보내는 현재 폴더 신호(OSC 9;9, OSC 7) 해석 |
+| `terminal/cwd.ts` | 셸이 보내는 현재 폴더 신호(OSC 9;9, OSC 7) 해석. 신호는 프롬프트마다 오므로 "프롬프트로 돌아옴"도 알린다 |
 | `pane/pane-item.ts` | pane 매니저, 배치, 끌기가 pane(`pane.ts`)에 요구하는 것. 이 모듈들이 터미널에 직접 기대지 않게 한다 |
-| `pane/pane.ts` | 터미널 pane 하나: 헤더, TerminalView, PtyLink, 글로우, 실행 시간을 묶는다 |
+| `pane/pane.ts` | 터미널 pane 하나: 헤더, TerminalView, PtyLink, 글로우를 묶는다. 에이전트 상태 색, 폴더 이름 |
+| `pane/pane-signals.ts` | 터미널 제목과 폴더를 헤더에, 신호(제목, 프롬프트, 키 입력, 포커스, 닫힘)를 에이전트 보드로. 상태 점 색 class |
+| `pane/shell-exits.ts` | 셸 종료 처리: exit 0이면 pane 닫기(설정으로 끌 수 있음), 실패면 남기고 뱃지 |
 | `pane/pane-counts.ts` | 타이틀바 개수와 빈 화면용 숫자(터미널, 실행 중) |
 | `pane/pty-link.ts` | TerminalView와 백엔드 PTY 연결: 출력, 입력, 크기, kill |
-| `pane/pane-header.ts` | 헤더 DOM: 상태 점, 셸 이름, exit 뱃지, 폴더, 터미널 제목, 실행 시간, 닫기 |
+| `pane/pane-header.ts` | 헤더 DOM: 상태 점, 셸 이름, exit 뱃지, 폴더, 터미널 제목, 실행 시간(시계 구독, 셸이 끝나면 멈춤), 닫기 |
 | `pane/pane-motion.ts` | pane 등장·퇴장 애니메이션 |
 | `pane/output-glow.ts` | 출력 시 테두리 글로우(0.3초)와 상태 점 pulse(3초). 조용한 셸에는 도는 애니메이션이 없다. pane당 최대 150ms에 한 번 class 토글 |
 | `pane/pane-drag.ts` | 헤더를 잡고 다른 pane에 놓기: 가장자리면 그쪽으로 분할, 가운데면 자리 교체, Esc 취소. Tauri 파일 드롭 때문에 HTML5 drag가 안 와서 pointer 이벤트와 pointer capture를 쓴다 |
-| `pane/pane-manager.ts` | pane 목록, 추가·닫기, 포커스, 글씨 크기, exit 0이면 자동 닫기(설정으로 끌 수 있음). 배치는 `SplitLayout`에 맡긴다 |
+| `pane/pane-manager.ts` | pane 목록, 추가·닫기, 포커스, 글씨 크기. pane 신호를 pty id와 함께 넘긴다. 배치는 `SplitLayout`, 셸 종료는 `shell-exits.ts`에 맡긴다 |
 | `layout/grid.ts` | 순수 함수: 자동 격자에서 줄마다 pane 몇 개인지 계산 |
 | `layout/split-tree.ts` | 순수 함수: 분할 트리(가로 `row`, 세로 `column`, 비율 `sizes`). 자동 격자 트리, 삽입, 제거(형제가 공간을 나눠 가짐), 이동, 교체 |
 | `layout/split-rects.ts` | 순수 함수: 트리를 px 박스와 경계선 박스로. 가장자리를 정수로 반올림해 글자가 흐려지지 않게 한다 |
@@ -64,9 +73,10 @@
 | `layout/box-style.ts` | 절대 위치 요소에 px 박스 적용 |
 | `layout/fit-scheduler.ts` | ResizeObserver + requestAnimationFrame으로 fit을 묶음. 프레임당 10ms 예산, 남으면 다음 프레임 |
 | `layout/flip.ts` | 재배치 시 이전 위치에서 새 위치로 transform 애니메이션 |
-| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`, `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `effects`(Animations 끄기 규칙 포함) |
+| `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`, `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `agent-dock`(하단 띠, 에이전트 상태 색), `effects`(Animations 끄기 규칙 포함) |
 
-의존 방향: `main.ts` → `ui/`, `pane/`, `layout/` → `terminal/`, `ipc/`, `app/`, `i18n/`.
+의존 방향: `main.ts`, `wire-agents.ts` → `ui/`, `pane/`, `layout/` → `agent/`, `terminal/`, `ipc/`, `app/`, `i18n/`.
+`agent/`는 `ipc/`의 타입과 `app/log.ts`만 import한다(화면 모듈을 모른다).
 `ipc/`, `i18n/`, `layout/grid.ts`는 다른 앱 모듈을 import하지 않는다.
 `layout/split-tree.ts`, `split-rects.ts`, `drop-zone.ts`는 `layout/` 안의 순수 모듈만 import한다(DOM 없음).
 

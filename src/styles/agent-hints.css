@@ -7,6 +7,8 @@
   gap: 4px;
   color: var(--fg-muted);
   line-height: 1.4;
+  /* Korean wraps between words, not inside one. */
+  word-break: keep-all;
 }
 
 .agent-hint button {

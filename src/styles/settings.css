@@ -141,6 +141,7 @@
   font-size: 11px;
   line-height: 1.4;
   color: var(--agent-bad);
+  word-break: keep-all;
 }
 
 .settings-note:empty {

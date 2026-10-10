@@ -103,13 +103,13 @@
 | `agent/mod.rs` | `AgentLink`: pane마다 셸에 `HERON_PANE`(키 `<pid>-<pty id>`)와 `HERON_AGENT_DIR`(`%LOCALAPPDATA%\io.github.seonggyujo.heron\agents`)을 넣고, pane이 닫히면 그 pane 파일을 지운다. 파일은 Heron 훅(`claude_hooks/`)과 heron-limits 플러그인이 쓴다 |
 | `agent/files.rs` | pane 파일 이름(`<키>.state.json`과 `<키>.model.json`은 훅, `<키>.status.json`은 플러그인 상태줄)과 키 검사(`claude_hooks/entry.rs`가 환경변수의 키로 파일 이름을 만들 때), 하루 지난 파일 정리 |
 | `agent/poll.rs` | 0.7초마다 살아 있는 pane마다 `watch.rs`를 한 번 돌리고, 나온 소식을 `agent-update` 이벤트로 프론트에 보낸다 |
-| `agent/watch.rs` | pane 하나를 지켜보는 일: 파일의 수정 시각을 보고 바뀐 상태 파일과 상태줄 파일은 그대로 보낸다. 상태 파일이 알려 준 기록 파일을 따라 읽고, 모델 파일의 선택 모델로 모델 확인을 해서 판정이 바뀌면 `check`를 보낸다. 새 답을 먼저 판정하고 그다음 새 선택을 받아서, 바꾸기 전의 답은 바꾸기 전 모델과 비교한다. 쓰는 쪽은 쓰고 나서 이름을 바꾸므로 반쯤 쓴 파일을 읽지 않는다 |
+| `agent/watch.rs` | pane 하나를 지켜보는 일: 파일의 수정 시각을 보고 바뀐 상태 파일과 상태줄 파일은 그대로 보낸다. 상태 파일이 알려 준 기록 파일을 따라 읽고, 모델 파일의 선택 모델(훅이 모르면 상태줄 파일의 `model`)로 모델 확인을 해서 판정이 바뀌면 `check`를 보낸다. 새 답을 먼저 판정하고 그다음 새 선택을 받아서, 바꾸기 전의 답은 바꾸기 전 모델과 비교한다. 쓰는 쪽은 쓰고 나서 이름을 바꾸므로 반쯤 쓴 파일을 읽지 않는다 |
 | `agent/transcript.rs` | 기록 파일 하나를 따라 읽기: 지난번 이후 새로 끝난 줄만 읽어 답을 한 번씩 돌려준다. 파일 끝에서 시작하고, 따라 읽기 전에 쓰인 답(재개한 세션, 갈래 친 세션의 사본)은 그때 선택 모델을 몰라서 판정하지 않는다 |
 | `agent/answers.rs` | 순수 함수: 기록 파일 한 줄에서 본 대화의 답(`message.id`, `message.model`, 시각)을 꺼낸다. 서브에이전트(`isSidechain`), `<synthetic>`, 모델 변경 훅이 없는 Claude Code(2.1.251 미만)가 쓴 답은 뺀다. `[1m]`, 날짜 꼬리를 빼고 모델 비교 |
-| `agent/model_check.rs` | 순수 함수: 답마다 그 답이 왔을 때의 선택 모델과 한 번만 비교한다. 판정은 ok, mismatch, pending(답이 없거나, 선택을 모르거나, 답 뒤에 모델을 바꿨을 때) |
+| `agent/model_check.rs` | 순수 함수: 답마다 그 답이 왔을 때의 선택 모델과 한 번만 비교한다. 선택 모델은 훅이 알려 준 것, 훅이 모르면(이어서 연 세션) 지금 기록 파일의 세션에서 상태줄이 알려 준 것. 판정은 ok, mismatch, pending(답이 없거나, 선택을 모르거나, 답 뒤에 모델을 바꿨을 때) |
 | `claude_hooks/mod.rs` | Heron 자체 Claude Code 훅의 진입점: 상태 확인, 설치(먼저 버전 확인), 제거, 오류 코드. 플러그인 없이도 권한 요청, 질문, 끝남, 모델 확인을 하게 한다 |
 | `claude_hooks/entry.rs` | `heron.exe --agent-hook`으로 실행됐을 때: 훅 입력(JSON)을 `records.rs`로 바꿔 pane의 상태 파일과 모델 파일에 쓰고 끝난다. 아무것도 출력하지 않는다. Heron pane 밖이면 입력을 읽기 전에 끝난다 |
-| `claude_hooks/records.rs` | 순수 함수: 훅 이벤트 하나가 쓰는 것. 상태 파일에는 상태, 권한 요청이나 알림 내용, 작업 폴더, 기록 파일 경로. 모델 파일에는 `SessionStart`의 `model`이나 `PostModelSwitch`의 `to_model` |
+| `claude_hooks/records.rs` | 순수 함수: 훅 이벤트 하나가 쓰는 것. 상태 파일에는 상태, 권한 요청이나 알림 내용, 작업 폴더, 기록 파일 경로. 모델 파일에는 `SessionStart`의 `model`이나 `PostModelSwitch`의 `to_model`. 모델이 없는 `SessionStart`(이어서 연 세션)는 "모름"(null)을 써서 같은 pane의 이전 세션 모델이 남지 않게 하고, `/clear`는 그대로 둔다 |
 | `claude_hooks/config.rs` | settings.json `hooks` 안의 Heron 항목 넣기, 빼기, 있는지 보기(순수 함수). 이벤트 8개(`PostModelSwitch` 포함. 이것을 모르는 버전은 그 항목만 건너뛴다). heron.exe를 `--agent-hook`으로 부르는 항목만 우리 것으로 보고 사용자의 훅은 건드리지 않는다. 이벤트가 하나라도 빠지면 오래된 설치로 보고 앱이 시작할 때 다시 넣는다. 테스트는 `config_tests.rs` |
 | `claude_hooks/settings_file.rs` | `settings.json`(CLAUDE_CONFIG_DIR 또는 `%USERPROFILE%.claude`) 읽기와 쓰기. 쓰기 전에 옆에 `.heron-backup` 사본, 임시 파일에 쓰고 이름 바꾸기. 올바른 JSON이 아니면 쓰지 않는다 |
 | `claude_hooks/version.rs` | `claude --version` 확인. 2.1.139 미만은 훅 항목의 `args`를 무시해서 이벤트마다 앱을 띄울 수 있으므로 설치하지 않는다 |
@@ -138,7 +138,7 @@ Claude Code가 상태줄로만 주는 값(5시간·주간 사용 한도, 컨텍�
 | --- | --- |
 | `setup.js` | `sync`(SessionStart 훅): 상태줄 자리를 가져오고, 쓰던 상태줄은 저장해서 우리 것 안에서 돌린다(`refreshInterval`, `padding`은 그대로). 설치된 사본을 플러그인 버전에 맞춘다. `first-run`(UserPromptSubmit 훅): 처음 한 번만 `sync`. `disable`: 쓰던 상태줄을 돌려놓고 사본을 지운다. settings.json은 `~/.claude/heron-limits/`의 사본을 가리킨다(플러그인 폴더는 버전마다 바뀌고, 플러그인을 지워도 사본은 계속 돈다) |
 | `statusline.js` | 상태줄 진입점: Heron pane 안이면 `heron-file.js`로 파일을 쓰고, `previous.js`가 돌린 쓰던 상태줄의 출력을 그대로 찍는다. 없으면 아무것도 찍지 않는다 |
-| `heron-file.js` | `<키>.status.json`에 한도(사용률, 초기화 시각)와 컨텍스트 사용률. pane 키 모양이 아니면 쓰지 않는다 |
+| `heron-file.js` | `<키>.status.json`에 한도(사용률, 초기화 시각), 컨텍스트 사용률, 선택 모델(`model.id`, 훅이 모르는 이어서 연 세션용). pane 키 모양이 아니면 쓰지 않는다 |
 | `previous.js` | 저장한 사용자 상태줄을 같은 입력으로 실행(Git Bash, 없으면 기본 셸). 3초 안에 끝나지 않거나 실패하면 출력 없음 |
 | `skills/disable/` | `/heron-limits:disable` |
 | `test/` | `node --test "test/*.test.js"`: 설정 가져오기와 되돌리기, 출력 그대로 전달, Heron 파일 |

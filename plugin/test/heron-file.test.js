@@ -14,15 +14,15 @@ const INPUT = {
   rate_limits: { five_hour: { used_percentage: 42.5, resets_at: 1738425600 }, seven_day: { used_percentage: null } },
 };
 
-test('inside a Heron pane, writes the limits and the context use', () => {
+test('inside a Heron pane, writes the limits, the context use and the selected model', () => {
   const config = tempConfig();
   setup(config, 'sync');
   statusLine(config, INPUT, '123-4');
   const written = JSON.parse(fs.readFileSync(path.join(config.agentDir, '123-4.status.json'), 'utf8'));
   assert.ok(Number.isFinite(written.at));
   assert.deepStrictEqual(
-    { context: written.context, limits: written.limits },
-    { context: 34, limits: { five_hour: { used: 42.5, resets_at: 1738425600 }, seven_day: null } },
+    { model: written.model, context: written.context, limits: written.limits },
+    { model: 'claude-opus-5-5', context: 34, limits: { five_hour: { used: 42.5, resets_at: 1738425600 }, seven_day: null } },
   );
   assert.deepStrictEqual(fs.readdirSync(config.agentDir), ['123-4.status.json'], 'no temporary file is left');
 });
@@ -42,5 +42,5 @@ test('missing fields become null', () => {
   setup(config, 'sync');
   statusLine(config, {}, '1-1');
   const written = JSON.parse(fs.readFileSync(path.join(config.agentDir, '1-1.status.json'), 'utf8'));
-  assert.deepStrictEqual([written.context, written.limits], [null, { five_hour: null, seven_day: null }]);
+  assert.deepStrictEqual([written.model, written.context, written.limits], [null, null, { five_hour: null, seven_day: null }]);
 });

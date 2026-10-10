@@ -20,14 +20,21 @@ pub fn state_record(input: &Value) -> Option<Value> {
 }
 
 /// The model file's record when the event tells the session's model:
-/// SessionStart (not always, e.g. not after /clear) and PostModelSwitch.
+/// SessionStart and PostModelSwitch. A SessionStart without one (a resumed
+/// session) records the model as unknown, so the one of an earlier session
+/// in the pane is not used; after /clear the model stays as it was.
 pub fn model_record(input: &Value) -> Option<Value> {
-    let field = match input.get("hook_event_name")?.as_str()? {
+    let event = input.get("hook_event_name")?.as_str()?;
+    let field = match event {
         "SessionStart" => "model",
         "PostModelSwitch" => "to_model",
         _ => return None,
     };
-    let model = input.get(field)?.as_str().filter(|m| !m.is_empty())?;
+    let model = input.get(field).and_then(Value::as_str).filter(|m| !m.is_empty());
+    let cleared = input.get("source").and_then(Value::as_str) == Some("clear");
+    if model.is_none() && (event != "SessionStart" || cleared) {
+        return None;
+    }
     Some(json!({ "session_id": input.get("session_id"), "model": model }))
 }
 
@@ -103,11 +110,13 @@ mod tests {
 
     #[test]
     fn the_model_comes_from_session_start_and_model_switches() {
-        let model = |v: Value| model_record(&v).map(|r| r["model"].as_str().unwrap().to_owned());
-        assert_eq!(model(json!({"hook_event_name": "SessionStart", "model": "claude-opus-5-5"})).as_deref(), Some("claude-opus-5-5"));
-        assert_eq!(model(json!({"hook_event_name": "SessionStart", "source": "clear"})), None);
+        let model = |v: Value| model_record(&v).map(|r| r["model"].as_str().map(str::to_owned));
+        let start = json!({"hook_event_name": "SessionStart", "source": "startup", "model": "claude-opus-5-5"});
+        assert_eq!(model(start), Some(Some("claude-opus-5-5".into())));
+        assert_eq!(model(json!({"hook_event_name": "SessionStart", "source": "resume"})), Some(None), "unknown");
+        assert_eq!(model(json!({"hook_event_name": "SessionStart", "source": "clear"})), None, "unchanged");
         let switch = json!({"hook_event_name": "PostModelSwitch", "from_model": "claude-opus-5-5", "to_model": "claude-sonnet-5-5"});
-        assert_eq!(model(switch).as_deref(), Some("claude-sonnet-5-5"));
+        assert_eq!(model(switch), Some(Some("claude-sonnet-5-5".into())));
         assert_eq!(model(json!({"hook_event_name": "Stop", "model": "x"})), None);
     }
 

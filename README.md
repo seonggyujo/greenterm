@@ -45,7 +45,9 @@ With the hooks on, Heron also checks every answer of the conversation: when the 
 it is not the one you selected (`/model`), the agent's row warns with the model's name. Each
 answer is checked once, against the model selected when it arrived, so switching models does not
 turn earlier answers into warnings. This needs Claude Code 2.1.251 or later, which tells hooks
-about model switches.
+about model switches. A session you resume (`claude --continue`, `--resume`) does not tell hooks
+its model, so there Heron uses the model the heron-limits status line (below) shows; without the
+plugin, a resumed session is checked only after you switch models.
 
 Your 5-hour and weekly usage limits, and how full each agent's context window is, reach only
 Claude Code's status line. The **heron-limits** plugin in this repository ([plugin/](plugin/))

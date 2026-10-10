@@ -1,6 +1,7 @@
 //! Everything Heron watches for one pane, one round at a time: the agent
 //! files (sent on to the frontend as they are), and the model check, from
-//! the transcript the hooks name and the model they report.
+//! the transcript the hooks name and the model they report (or, while they
+//! do not know it, the model the heron-limits status line shows).
 
 use std::collections::HashMap;
 use std::path::Path;
@@ -43,18 +44,20 @@ impl PaneWatch {
             self.follow(&state);
             updates.push(Update { kind: "state", data: state });
         }
-        if let Some(status) = self.read_changed(dir, pty, Kind::Status) {
-            updates.push(Update { kind: "status", data: status });
-        }
+        let status = self.read_changed(dir, pty, Kind::Status);
         if let Some(transcript) = &mut self.transcript {
             for answer in transcript.read_new() {
                 self.check.answered(&answer.model);
             }
         }
         if let Some(model) = self.read_changed(dir, pty, Kind::Model) {
-            if let Some(model) = model.get("model").and_then(Value::as_str) {
-                self.check.select(model);
+            self.check.select(model.get("model").and_then(Value::as_str));
+        }
+        if let Some(status) = status {
+            if let Some(model) = status.get("model").and_then(Value::as_str) {
+                self.check.select_from_status_line(model);
             }
+            updates.push(Update { kind: "status", data: status });
         }
         let verdict = self.check.verdict();
         if verdict != self.sent {

@@ -3,34 +3,35 @@
    Every chrome color used in other style files must be one of these
    tokens, so a theme only needs to redefine this list. */
 
+/* Green: a calm sage on near-neutral dark grey, not neon on green-black. */
 :root {
-  --bg-app: #07110b;
-  --bg-pane: #0b1a11;
-  --bg-bar-top: #0d1f14;
-  --bg-bar-bottom: #0a1710;
-  --bg-raised: #0d1f14;
-  --bg-control: #0f2418;
-  --bg-hover: #143020;
-  --bg-active: #0c1d13;
-  --bg-inset: #0b1a11;
+  --bg-app: #101412;
+  --bg-pane: #151a17;
+  --bg-bar-top: #1a201c;
+  --bg-bar-bottom: #161b18;
+  --bg-raised: #1a201c;
+  --bg-control: #1d2420;
+  --bg-hover: #243029;
+  --bg-active: #171d19;
+  --bg-inset: #141915;
 
-  --border: #1f4d33;
-  --border-soft: #143322;
-  --border-strong: #2c6b47;
+  --border: #2c3a32;
+  --border-soft: #222c26;
+  --border-strong: #3f5548;
 
-  --fg: #39ff88;
-  --fg-soft: #9fd9b5;
-  --fg-dim: #5fae7f;
-  --fg-muted: #6b7f72;
+  --fg: #8fd8a8;
+  --fg-soft: #c2dccb;
+  --fg-dim: #86a693;
+  --fg-muted: #6c7a71;
 
-  --glow: #39ff8855;
-  --flash: #39ff88aa;
-  --flash-glow: #39ff8833;
+  --glow: #8fd8a840;
+  --flash: #8fd8a899;
+  --flash-glow: #8fd8a826;
 
-  --badge-bg: #1f2a24;
-  --badge-fg: #9aa9a0;
-  --light-off: #24382b;
-  --light-off-ring: rgb(95 174 127 / 0.25);
+  --badge-bg: #222a25;
+  --badge-fg: #a0ada5;
+  --light-off: #2a332d;
+  --light-off-ring: rgb(134 166 147 / 0.25);
 }
 
 :root[data-theme="black"] {

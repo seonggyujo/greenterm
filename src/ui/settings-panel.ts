@@ -1,8 +1,10 @@
+import { onLangChange, t } from "../i18n/lang";
 import { createPopover } from "./popover";
 import { buildRows, type SettingsActions } from "./settings-rows";
 
 // Gear button in the title bar and the panel it opens. The rows
-// (settings-rows.ts) are rebuilt on every open and after a reset.
+// (settings-rows.ts) are rebuilt on every open, after a reset and when the
+// language changes while the panel is open.
 
 const GEAR =
   '<svg viewBox="0 0 16 16" aria-hidden="true">' +
@@ -19,11 +21,9 @@ export function createSettings(actions: SettingsActions): Settings {
   const panel = document.createElement("div");
   panel.className = "settings-panel";
   panel.setAttribute("role", "dialog");
-  panel.setAttribute("aria-label", "Settings");
 
   const title = document.createElement("div");
   title.className = "settings-title";
-  title.textContent = "Settings";
 
   const render = () => panel.replaceChildren(title, ...buildRows(withRefresh));
   const withRefresh: SettingsActions = {
@@ -38,10 +38,20 @@ export function createSettings(actions: SettingsActions): Settings {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "tb-button tb-icon tb-settings";
-  button.setAttribute("aria-label", "Settings");
   button.setAttribute("aria-haspopup", "dialog");
-  button.title = "Settings";
   button.innerHTML = GEAR;
+
+  const showText = () => {
+    title.textContent = t().settings;
+    panel.setAttribute("aria-label", t().settings);
+    button.setAttribute("aria-label", t().settings);
+    button.title = t().settings;
+  };
+  showText();
+  onLangChange(() => {
+    showText();
+    if (panel.classList.contains("open")) render();
+  });
 
   const popover = createPopover(panel, render);
   button.addEventListener("click", () => popover.toggle(button));

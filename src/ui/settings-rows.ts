@@ -3,8 +3,10 @@ import { createLogger } from "../app/log";
 import { motionEnabled, setMotion } from "../app/motion";
 import { closeOnExitPref } from "../app/prefs";
 import { loadTheme, type Theme } from "../app/theme";
+import { getLang, setLang, t } from "../i18n/lang";
 import { createConfirmButton } from "./confirm-button";
 import { createFontSizeControl } from "./font-size-control";
+import { createLangToggle } from "./lang-toggle";
 import { createSwitch } from "./switch";
 import { createThemeToggle } from "./theme-toggle";
 
@@ -32,25 +34,33 @@ function row(label: string, control: HTMLElement): HTMLElement {
 }
 
 function preferenceRows(actions: SettingsActions): HTMLElement[] {
+  const s = t();
   return [
     row(
-      "Theme",
+      s.theme,
       createThemeToggle(loadTheme(), (theme) => {
         log.info(`theme ${theme}`);
         actions.onTheme(theme);
       }),
     ),
-    row("Font size", createFontSizeControl(loadFontSize(), actions.onFontSize)),
     row(
-      "Animations",
-      createSwitch("Animations", motionEnabled(), (on) => {
+      s.language,
+      createLangToggle(getLang(), s.language, (lang) => {
+        log.info(`language ${lang}`);
+        setLang(lang);
+      }),
+    ),
+    row(s.fontSize, createFontSizeControl(loadFontSize(), actions.onFontSize)),
+    row(
+      s.animations,
+      createSwitch(s.animations, motionEnabled(), (on) => {
         log.info(`animations ${on ? "on" : "off"}`);
         setMotion(on);
       }),
     ),
     row(
-      "Close pane on exit 0",
-      createSwitch("Close pane when the shell exits cleanly", closeOnExitPref.get(), (on) => {
+      s.closeOnExit,
+      createSwitch(s.closeOnExitHint, closeOnExitPref.get(), (on) => {
         log.info(`close pane on exit 0 ${on ? "on" : "off"}`);
         closeOnExitPref.set(on);
       }),
@@ -59,13 +69,14 @@ function preferenceRows(actions: SettingsActions): HTMLElement[] {
 }
 
 function dataRows(actions: SettingsActions): HTMLElement[] {
-  const reset = createConfirmButton("Reset", async () => {
+  const s = t();
+  const reset = createConfirmButton(s.reset, async () => {
     log.info("settings reset to defaults");
     actions.onReset();
-    return "Done";
+    return t().done;
   });
-  reset.title = "Theme, font size and every option above";
-  return [row("Settings", reset)];
+  reset.title = s.resetHint;
+  return [row(s.settings, reset)];
 }
 
 export function buildRows(actions: SettingsActions): HTMLElement[] {

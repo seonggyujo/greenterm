@@ -20,6 +20,7 @@ import { loadDefaultShell, saveDefaultShell, SHELL_LABELS } from "./app/shells";
 import { applyTheme, loadTheme } from "./app/theme";
 import { UptimeClock } from "./app/uptime-clock";
 import { installVisibilityTracking } from "./app/visibility";
+import { applyLang } from "./i18n/lang";
 import { onOpenFolder, takeLaunchDir } from "./ipc/launch";
 import { listShells, type ShellKind } from "./ipc/pty";
 import { PaneManager } from "./pane/pane-manager";
@@ -35,9 +36,11 @@ import { createTitlebar } from "./ui/titlebar";
 const log = createLogger("app");
 
 async function main(): Promise<void> {
-  // Before any DOM is built, so the first paint already has the theme.
+  // Before any DOM is built, so the first paint already has the theme
+  // and the language.
   const theme = loadTheme();
   applyTheme(theme);
+  applyLang();
   applyMotion();
   installShortcutGuard();
   await installVisibilityTracking();
@@ -106,6 +109,7 @@ async function main(): Promise<void> {
     onReset: () => {
       forgetSettings();
       applyTheme(loadTheme());
+      applyLang();
       applyMotion();
       panes.setFontSize(loadFontSize());
       setDefaultShell(loadDefaultShell(shells));

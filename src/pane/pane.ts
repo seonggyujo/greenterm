@@ -148,6 +148,7 @@ export class Pane implements PaneItem {
     this.link.kill();
     this.stopUptime?.();
     this.glow.dispose();
+    this.header.dispose();
     this.view.dispose();
     this.el.remove();
   }

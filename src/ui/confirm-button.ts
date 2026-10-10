@@ -1,3 +1,5 @@
+import { t } from "../i18n/lang";
+
 // Button for actions that cannot be undone. The first click only asks
 // ("Sure?"); a second click within CONFIRM_MS runs the action. The action
 // returns a short result that shows on the button for a moment.
@@ -24,7 +26,7 @@ export function createConfirmButton(label: string, action: () => Promise<string>
   };
 
   el.addEventListener("click", async () => {
-    if (!el.classList.contains("confirm")) return show("Sure?", true, CONFIRM_MS);
+    if (!el.classList.contains("confirm")) return show(t().sure, true, CONFIRM_MS);
     el.disabled = true;
     const result = await action();
     el.disabled = false;

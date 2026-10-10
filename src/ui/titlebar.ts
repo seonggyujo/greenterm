@@ -1,4 +1,5 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { onLangChange, t } from "../i18n/lang";
 
 // macOS-style unified title bar: brand on the left, app actions and then
 // the traffic lights on the right. The empty space drags the window, and a
@@ -12,17 +13,14 @@ const GLYPHS = {
 
 type LightKind = keyof typeof GLYPHS;
 
-const LABELS: Record<LightKind, string> = {
-  close: "Close",
-  minimize: "Minimize",
-  zoom: "Maximize",
-};
+function label(kind: LightKind): string {
+  return kind === "close" ? t().close : kind === "minimize" ? t().minimize : t().maximize;
+}
 
 function light(kind: LightKind): HTMLButtonElement {
   const btn = document.createElement("button");
   btn.className = `light ${kind}`;
   btn.type = "button";
-  btn.setAttribute("aria-label", LABELS[kind]);
   btn.innerHTML = `<svg viewBox="0 0 10 10" aria-hidden="true">${GLYPHS[kind]}</svg>`;
   return btn;
 }
@@ -50,6 +48,12 @@ export function createTitlebar(): Titlebar {
   zoom.addEventListener("click", () => void win.toggleMaximize());
   // Windows order: close sits at the far right edge.
   lights.append(minimize, zoom, close);
+  const labelLights = () =>
+    ([["close", close], ["minimize", minimize], ["zoom", zoom]] as const).forEach(([kind, btn]) =>
+      btn.setAttribute("aria-label", label(kind)),
+    );
+  labelLights();
+  onLangChange(labelLights);
 
   const brand = document.createElement("div");
   brand.className = "brand";

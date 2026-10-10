@@ -1,7 +1,8 @@
 import { clampFontSize, FONT_MAX, FONT_MIN } from "../app/font-size";
+import { t } from "../i18n/lang";
 
-// A− [14] A+ buttons in the title bar. Owns no state beyond what it shows;
-// the caller applies and persists the size.
+// A− [14] A+ buttons in the settings panel. Owns no state beyond what it
+// shows; the caller applies and persists the size.
 
 export function createFontSizeControl(
   initial: number,
@@ -12,12 +13,12 @@ export function createFontSizeControl(
   const el = document.createElement("div");
   el.className = "tb-group";
   el.setAttribute("role", "group");
-  el.setAttribute("aria-label", "Font size");
+  el.setAttribute("aria-label", t().fontSize);
 
-  const smaller = button("A−", "Smaller font", "tb-font-small");
+  const smaller = button("A−", t().fontSmaller, "tb-font-small");
   const value = document.createElement("span");
   value.className = "tb-font-value";
-  const larger = button("A+", "Larger font", "tb-font-large");
+  const larger = button("A+", t().fontLarger, "tb-font-large");
   el.append(smaller, value, larger);
 
   const render = () => {

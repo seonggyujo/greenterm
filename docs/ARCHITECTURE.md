@@ -26,15 +26,18 @@
 | `ui/new-terminal-button.ts` | [+ 새 터미널 (선택된 셸)][▾] split 버튼. + 를 눌러야 생성 |
 | `ui/shell-menu.ts` | 설치된 셸 목록 드롭다운. 고르면 선택만 하고 기억한다(생성은 + 버튼) |
 | `ui/popover.ts` | 타이틀바 버튼 아래 패널 열고 닫기(바깥 클릭, Esc, 창 blur) |
-| `ui/settings-panel.ts` | 톱니 버튼과 설정 창. 열 때마다와 Reset 뒤에 행을 다시 만든다 |
-| `ui/settings-rows.ts` | 설정 행: 테마, 글씨 크기, 애니메이션, exit 0이면 닫기, 설정 Reset. 저장된 값으로 만들고, 바꾸면 로그 |
-| `ui/confirm-button.ts` | 되돌릴 수 없는 동작용 버튼: 첫 클릭은 "Sure?", 3초 안에 다시 누르면 실행하고 결과를 잠깐 보인다 |
+| `ui/settings-panel.ts` | 톱니 버튼과 설정 창. 열 때마다, Reset 뒤에, 열린 채 언어가 바뀌면 행을 다시 만든다 |
+| `ui/settings-rows.ts` | 설정 행: 테마, 언어, 글씨 크기, 애니메이션, exit 0이면 닫기, 설정 Reset. 저장된 값으로 만들고, 바꾸면 로그 |
+| `ui/lang-toggle.ts` | 언어 선택 버튼 두 개(English, 한국어). 언어 이름은 그 언어로 적어 어느 언어에서든 찾을 수 있다 |
+| `ui/confirm-button.ts` | 되돌릴 수 없는 동작용 버튼: 첫 클릭은 "Sure?"(정말요?), 3초 안에 다시 누르면 실행하고 결과를 잠깐 보인다 |
 | `ui/switch.ts` | 설정 창 켜기/끄기 스위치 |
 | `ui/font-size-control.ts` | `A−` `A+` 버튼(설정 창 안) |
 | `ui/terminal-count.ts` | 실행 중 터미널 개수 |
 | `ui/tidy-button.ts` | 자동 격자로 되돌리는 버튼. 수동 배치일 때만 보이고, action 맨 왼쪽이라 나타나도 다른 버튼 위치가 안 바뀐다 |
 | `ui/theme-toggle.ts` | 테마 선택 동그라미 두 개(설정 창 안) |
 | `ui/empty-state.ts` | 터미널 0개일 때 큰 + 버튼과 깜빡이는 `_` |
+| `i18n/strings.ts` | 화면에 보이는 모든 글자의 영어·한국어 표. 셸 이름과 로그는 번역하지 않는다 |
+| `i18n/lang.ts` | 현재 언어와 `t()`. 저장된 선택이 없으면 Windows 표시 언어를 따른다. 화면 모듈은 `onLangChange`로 글자를 다시 쓴다 |
 | `ipc/launch.ts` | 시작 폴더 받기(`take_launch_dir`), 켜진 창으로 온 폴더(`open-folder` 이벤트) |
 | `ipc/pty.ts` | PTY 명령 타입 래퍼, 출력 Channel(ArrayBuffer), `pty-exit` 구독, 셸 목록 |
 | `terminal/terminal-view.ts` | xterm 생성, fit·webgl addon, context loss 시 DOM 렌더러로 fallback |
@@ -63,8 +66,8 @@
 | `layout/flip.ts` | 재배치 시 이전 위치에서 새 위치로 transform 애니메이션 |
 | `styles/*.css` | 기능별 스타일: `themes`(색 토큰, green/black), `base`, `titlebar`, `controls`, `shell-menu`, `workspace`, `pane`, `split`(경계선, 드롭 미리보기), `settings`, `empty-state`, `effects`(Animations 끄기 규칙 포함) |
 
-의존 방향: `main.ts` → `ui/`, `pane/`, `layout/` → `terminal/`, `ipc/`, `app/`.
-`ipc/`와 `layout/grid.ts`는 다른 앱 모듈을 import하지 않는다.
+의존 방향: `main.ts` → `ui/`, `pane/`, `layout/` → `terminal/`, `ipc/`, `app/`, `i18n/`.
+`ipc/`, `i18n/`, `layout/grid.ts`는 다른 앱 모듈을 import하지 않는다.
 `layout/split-tree.ts`, `split-rects.ts`, `drop-zone.ts`는 `layout/` 안의 순수 모듈만 import한다(DOM 없음).
 
 ## 백엔드 `src-tauri/src/`

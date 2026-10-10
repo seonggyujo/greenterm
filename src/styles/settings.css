@@ -63,22 +63,17 @@
   box-shadow: 0 0 0 2px var(--bg-raised), 0 0 0 3px var(--fg-dim);
 }
 
-.settings-text {
-  width: 150px;
+/* Language choice: two joined buttons, the current one lit. */
+.lang-toggle .tb-button {
   height: 24px;
-  padding: 0 8px;
-  border: 1px solid var(--border-soft);
-  border-radius: 6px;
-  background: var(--bg-inset);
-  color: var(--fg-soft);
-  font-family: var(--font-mono);
+  padding: 0 9px;
   font-size: 11px;
-  outline: none;
 }
 
-.settings-text:focus {
-  border-color: var(--border-strong);
+.lang-toggle .tb-button[aria-checked="true"] {
+  background: var(--bg-hover);
   color: var(--fg);
+  border-color: var(--border-strong);
 }
 
 .switch {

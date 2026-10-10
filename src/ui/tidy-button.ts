@@ -1,8 +1,8 @@
+import { onLangChange, t } from "../i18n/lang";
+
 // Title bar button that puts the panes back into the automatic grid. Shown
 // only while the user's own arrangement is active. It sits left of the
 // other controls, so showing it never moves them.
-
-const LABEL = "Back to automatic grid";
 
 const ICON =
   '<svg viewBox="0 0 14 14" aria-hidden="true">' +
@@ -21,11 +21,15 @@ export function createTidyButton(onTidy: () => void): TidyButton {
   const el = document.createElement("button");
   el.type = "button";
   el.className = "tb-button tb-icon tb-tidy";
-  el.setAttribute("aria-label", LABEL);
-  el.title = LABEL;
   el.innerHTML = ICON;
   el.hidden = true;
   el.addEventListener("click", onTidy);
+  const label = () => {
+    el.setAttribute("aria-label", t().tidy);
+    el.title = t().tidy;
+  };
+  label();
+  onLangChange(label);
   return {
     el,
     setVisible(visible) {

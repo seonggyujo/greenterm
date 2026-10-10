@@ -57,9 +57,9 @@ settings); a failing exit keeps the pane open with a red exit-code badge.
 
 ### Settings
 
-The gear button in the title bar opens the settings: green or black window theme, terminal font
-size, animations on or off, and whether a clean `exit` closes the pane. Every change applies at
-once and is remembered. **Reset** below them asks once more before it puts every setting back to
+The gear button in the title bar opens the settings: green or black window theme, language
+(English or Korean; it starts in the Windows display language), terminal font size, animations on
+or off, and whether a clean `exit` closes the pane. Every change applies at once and is remembered. **Reset** below them asks once more before it puts every setting back to
 its default.
 
 ![Settings](docs/media/settings.gif)

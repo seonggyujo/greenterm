@@ -1,3 +1,5 @@
+import { onLangChange, t } from "../i18n/lang";
+
 // Pane header DOM: status dot, shell name, exit badge, current folder,
 // terminal title, uptime, close button. Status lives here, never inside the
 // terminal: the terminal shows only what the shell prints.
@@ -11,6 +13,8 @@ export interface PaneHeader {
   setUptime(text: string): void;
   /** Shows the exit code, or a start failure when `code` is null. */
   showExit(code: number | null): void;
+  /** Stops following language changes. */
+  dispose(): void;
 }
 
 function span(className: string, text = ""): HTMLSpanElement {
@@ -41,12 +45,20 @@ export function createPaneHeader(shellLabel: string, onClose: () => void): PaneH
   const close = document.createElement("button");
   close.type = "button";
   close.className = "pane-close";
-  close.setAttribute("aria-label", "Close terminal");
   close.textContent = "×";
   close.addEventListener("click", (e) => {
     e.stopPropagation();
     onClose();
   });
+
+  /** undefined while the shell runs, null when it failed to start. */
+  let exitCode: number | null | undefined;
+  const showText = () => {
+    close.setAttribute("aria-label", t().closeTerminal);
+    if (exitCode !== undefined) exit.textContent = exitCode === null ? t().failedToStart : t().exitCode(exitCode);
+  };
+  showText();
+  const stopLang = onLangChange(showText);
 
   el.append(dot, shell, exit, cwd, title, uptime, close);
   return {
@@ -57,8 +69,10 @@ export function createPaneHeader(shellLabel: string, onClose: () => void): PaneH
       if (uptime.textContent !== text) uptime.textContent = text;
     },
     showExit(code) {
-      exit.textContent = code === null ? "failed to start" : `exit ${code}`;
+      exitCode = code;
       exit.classList.toggle("error", code !== 0);
+      showText();
     },
+    dispose: stopLang,
   };
 }

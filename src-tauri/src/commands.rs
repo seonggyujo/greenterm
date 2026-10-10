@@ -1,5 +1,5 @@
 //! Tauri commands. Thin layer: argument plumbing only, logic lives in `pty`,
-//! `agent` and `claude_hooks`.
+//! `agent`, `claude_hooks` and `sessions`.
 
 use std::path::Path;
 use std::thread;
@@ -10,6 +10,10 @@ use tauri::{AppHandle, State};
 use crate::agent::AgentLink;
 use crate::claude_hooks::{self, Presence};
 use crate::pty::{PtyRegistry, ShellKind};
+use crate::sessions;
+
+/// Sessions the sidebar lists.
+const RECENT_SESSIONS: usize = 20;
 
 /// Shells installed on this machine, for the shell menu.
 #[tauri::command(async)]
@@ -96,6 +100,19 @@ pub fn install_agent_hooks() -> Result<(), String> {
 #[tauri::command(async)]
 pub fn remove_agent_hooks() -> Result<(), String> {
     claude_hooks::remove().map_err(|e| e.code())
+}
+
+/// Claude Code's recent sessions, newest first, for the sidebar (sessions/).
+/// Async: it reads the end of each session file.
+#[tauri::command(async)]
+pub fn recent_sessions() -> Vec<sessions::RecentSession> {
+    sessions::recent(RECENT_SESSIONS)
+}
+
+/// Moves a session to the Recycle Bin. Rejects with "not-found", "running" or "io".
+#[tauri::command(async)]
+pub fn delete_session(id: String) -> Result<(), String> {
+    sessions::delete(&id).map_err(str::to_owned)
 }
 
 /// Frontend log lines, printed in the `tauri dev` terminal.

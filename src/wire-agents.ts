@@ -11,11 +11,13 @@ import { markAgent, markHover, type PaneSignal } from "./pane/pane-signals";
 import type { AgentRow } from "./ui/agent-item";
 import { createAgentSidebar } from "./ui/agent-sidebar";
 import { createUsageBar } from "./ui/usage-bar";
+import type { SessionWiring } from "./wire-sessions";
 
 // Wiring only, like main.ts: agent updates and pane signals go into the
 // agent board; every change of the board redraws the sidebar, the usage bar
 // and the pane dots, and an agent that needs the user or finishes flashes
-// the taskbar button.
+// the taskbar button. The sidebar also holds the parts of wire-sessions.ts,
+// which hears which sessions run in panes.
 
 const log = createLogger("attention");
 
@@ -32,7 +34,7 @@ export interface AgentWiring {
 }
 
 /** `panes` is read lazily: the pane manager is built after this. */
-export function wireAgents(clock: UptimeClock, panes: () => PaneManager): AgentWiring {
+export function wireAgents(clock: UptimeClock, panes: () => PaneManager, sessions: SessionWiring): AgentWiring {
   const board = new AgentBoard();
   const byPty = (pty: number) => panes().terminals().find((p) => p.id === pty);
   // A click focuses that pane and counts as having seen it.
@@ -40,12 +42,16 @@ export function wireAgents(clock: UptimeClock, panes: () => PaneManager): AgentW
     byPty(pty)?.focus();
     board.seen(pty);
   };
-  const sidebar = createAgentSidebar(clock, {
-    onPick: pick,
-    onHover(pty) {
-      for (const p of panes().terminals()) markHover(p.el, p.id !== null && p.id === pty);
+  const sidebar = createAgentSidebar(
+    clock,
+    {
+      onPick: pick,
+      onHover(pty) {
+        for (const p of panes().terminals()) markHover(p.el, p.id !== null && p.id === pty);
+      },
     },
-  });
+    sessions.parts,
+  );
   const usageBar = createUsageBar(clock, pick);
 
   // The agent's own folder when the hooks report it, else the shell's.
@@ -58,6 +64,7 @@ export function wireAgents(clock: UptimeClock, panes: () => PaneManager): AgentW
     });
     sidebar.render(rows, board.limits !== null || rows.some((r) => r.agent.context !== null));
     usageBar.render(rows, board.limits);
+    sessions.setRunning(rows.flatMap((r) => (r.agent.sessionId ? [r.agent.sessionId] : [])));
     for (const p of terminals) {
       const agent = p.id === null ? undefined : board.get(p.id);
       markAgent(p.el, agent ? markOf(agent.state) : null);

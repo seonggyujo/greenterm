@@ -1,7 +1,8 @@
 /* Agent sidebar frame (ui/agent-sidebar.ts): left of the workspace, a
-   head with the collapse button, the list of agent rows (agent-item.css)
-   and a foot with the notes (agent-hints.css). Collapsed it is a narrow
-   rail of numbered badges. */
+   head with the collapse button, the "New agent" button, the list of agent
+   rows (agent-item.css) or a line saying none runs, the recent sessions
+   (agent-sessions.css) and a foot with the notes (agent-hints.css).
+   Collapsed it is a narrow rail of numbered badges. */
 
 .agent-sidebar {
   flex: none;
@@ -18,10 +19,6 @@
 
 .agent-sidebar.collapsed {
   width: 48px;
-}
-
-.agent-sidebar[hidden] {
-  display: none;
 }
 
 .sidebar-head {
@@ -58,13 +55,23 @@
 }
 
 .sidebar-list {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 0 10px;
+}
+
+.sidebar-empty {
+  padding: 2px 16px 4px;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.sidebar-empty[hidden] {
+  display: none;
 }
 
 .sidebar-foot {
@@ -85,6 +92,7 @@
 }
 
 .agent-sidebar.collapsed .sidebar-title,
+.agent-sidebar.collapsed .sidebar-empty,
 .agent-sidebar.collapsed .sidebar-foot {
   display: none;
 }

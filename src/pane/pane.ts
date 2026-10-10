@@ -10,6 +10,7 @@ import type { PaneItem } from "./pane-item";
 import { animateEnter, animateLeave } from "./pane-motion";
 import { watchPaneTerminal, type PaneSignal } from "./pane-signals";
 import { PtyLink } from "./pty-link";
+import { typeAtFirstPrompt } from "./start-command";
 
 // One pane = header + xterm view + PTY link. The constructor only builds
 // DOM; start() spawns the shell once the pane is laid out in the grid, so
@@ -27,6 +28,8 @@ export interface PaneOptions {
   onFocus(pane: Pane): void;
   /** Title, prompt and key signals for the agent board. */
   onSignal(pane: Pane, signal: PaneSignal): void;
+  /** Typed into the shell at its first prompt (start-command.ts). */
+  run?: string;
 }
 
 export class Pane implements PaneItem {
@@ -59,7 +62,9 @@ export class Pane implements PaneItem {
     this.glow = new OutputGlow(this.el);
     this.link = new PtyLink(this.view, () => this.glow.ping());
 
-    this.where = watchPaneTerminal(this.view.term, () => this.name, this.header, (s) => opts.onSignal(this, s));
+    const type = (text: string) => this.view.term.input(text, true);
+    const emit = typeAtFirstPrompt(opts.run, type, (s) => opts.onSignal(this, s));
+    this.where = watchPaneTerminal(this.view.term, () => this.name, this.header, emit);
     this.el.addEventListener("focusin", () => opts.onFocus(this));
     this.header.el.addEventListener("mousedown", (e) => {
       e.preventDefault();
@@ -90,9 +95,14 @@ export class Pane implements PaneItem {
     return this.link.id !== null && !this.exited;
   }
 
+  /** The folder the shell is in, as far as known; null = home. */
+  get path(): string | null {
+    return this.where() ?? this.cwd;
+  }
+
   /** Last folder name, e.g. "heron"; the shell name until one is known. */
   get folder(): string {
-    return folderName(this.where() ?? this.cwd ?? "") ?? SHELL_LABELS[this.shell];
+    return folderName(this.path ?? "") ?? SHELL_LABELS[this.shell];
   }
 
   /** The header, where a drag to move the pane starts (pane-drag.ts). */

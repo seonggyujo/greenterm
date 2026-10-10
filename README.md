@@ -25,14 +25,18 @@ Built with Tauri v2, vanilla TypeScript, xterm.js (WebGL) and ConPTY.
 
 ### Coding agents
 
-Start Claude Code in a pane and a sidebar appears on the left, with a row for each pane that runs
-an agent: the pane number in a badge of the agent's color, its folder and what the agent is doing
+The sidebar on the left has a row for each pane that runs a coding agent: the pane number in a badge of the agent's color, its folder and what the agent is doing
 (working, with a timer, or done).
 Agents that need you come first. Click a row to jump to that pane, or point at it to see which pane
 it is; the pane's status dot takes the same color. While Heron is behind another window, its
-taskbar button flashes when an agent finishes or needs you. The sidebar folds into a narrow rail of badges,
-and hides while no agent runs. This needs nothing else: Heron reads the title Claude Code gives
-the terminal.
+taskbar button flashes when an agent finishes or needs you. The sidebar folds into a narrow rail of
+badges. This needs nothing else: Heron reads the title Claude Code gives the terminal.
+
+**New agent** at the top of the sidebar opens a pane in the selected pane's folder and starts Claude
+Code there. Below the agents, **Recent sessions** lists the Claude Code sessions of this PC by folder, newest
+at the bottom; click a folder to fold it. Click a session to pick it up again (`claude --resume`)
+in a new pane, in the folder it last ran in, or right-click it to move it to the Recycle Bin.
+Sessions that run right now, in Heron or in another terminal, are left out.
 
 To also see when an agent needs your permission (and for what) or asks a question, press **Turn on**
 at the bottom of the sidebar (or switch on **Claude Code hooks** in the settings). Heron then adds a few hooks

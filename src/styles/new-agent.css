@@ -1,0 +1,68 @@
+/* "New agent" at the top of the agent sidebar (ui/new-agent-button.ts):
+   plus, label and the folder a new agent starts in. Collapsed, only the
+   "+" shows. */
+
+.sidebar-start {
+  padding: 0 10px 8px;
+}
+
+.new-agent {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--bg-control);
+  color: var(--fg-soft);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.new-agent:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.new-agent-plus {
+  flex: none;
+  color: var(--agent-work);
+  font-size: 16px;
+}
+
+/* The label keeps its line; a long folder name shrinks instead. */
+.new-agent-label {
+  flex: none;
+  white-space: nowrap;
+}
+
+.new-agent-folder {
+  margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--fg-muted);
+}
+
+.agent-sidebar.collapsed .sidebar-start {
+  padding: 0 6px 8px;
+}
+
+.agent-sidebar.collapsed .new-agent {
+  justify-content: center;
+  padding: 0;
+}
+
+.agent-sidebar.collapsed .new-agent-label,
+.agent-sidebar.collapsed .new-agent-folder {
+  display: none;
+}

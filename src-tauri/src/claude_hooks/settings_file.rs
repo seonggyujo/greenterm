@@ -1,7 +1,7 @@
-//! Claude Code's user settings file: `settings.json` in CLAUDE_CONFIG_DIR, or
-//! in `%USERPROFILE%\.claude`. Reads it, and writes it back atomically after
-//! copying the previous version next to it. A file that is not valid JSON is
-//! never written over.
+//! Claude Code's user settings file: `settings.json` in its config folder
+//! (claude_dir.rs). Reads it, and writes it back atomically after copying
+//! the previous version next to it. A file that is not valid JSON is never
+//! written over.
 
 use std::fs;
 use std::path::PathBuf;
@@ -9,15 +9,12 @@ use std::path::PathBuf;
 use serde_json::Value;
 
 use super::{write_atomic, HookError};
+use crate::claude_dir::config_dir;
 
 const BACKUP_SUFFIX: &str = ".heron-backup";
 
 pub fn path() -> Option<PathBuf> {
-    let dir = match std::env::var_os("CLAUDE_CONFIG_DIR") {
-        Some(dir) => PathBuf::from(dir),
-        None => PathBuf::from(std::env::var_os("USERPROFILE")?).join(".claude"),
-    };
-    Some(dir.join("settings.json"))
+    Some(config_dir()?.join("settings.json"))
 }
 
 /// The parsed file; an empty object when there is none yet.

@@ -1,0 +1,152 @@
+/* Recent Claude Code sessions in the agent sidebar (ui/recent-sessions.ts),
+   grouped under folder heads, oldest at the top. The list scrolls with the
+   wheel, without a scrollbar; a faded edge counts the sessions out of
+   sight. Hidden when collapsed. */
+
+.recent-sessions {
+  flex: 1 1 0;
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.recent-sessions[hidden] {
+  display: none;
+}
+
+.recent-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px 6px;
+}
+
+.recent-hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.recent-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-list {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 10px 8px;
+}
+
+.recent-list::-webkit-scrollbar {
+  display: none;
+}
+
+.recent-more {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+
+.recent-more[hidden] {
+  display: none;
+}
+
+.recent-more.up {
+  top: 0;
+  align-items: flex-start;
+  padding-top: 2px;
+  background: linear-gradient(var(--bg-bar-bottom) 35%, transparent);
+}
+
+.recent-more.down {
+  bottom: 0;
+  align-items: flex-end;
+  padding-bottom: 6px;
+  background: linear-gradient(transparent, var(--bg-bar-bottom) 65%);
+}
+
+/* A folder's head (ui/recent-group-head.ts): arrow, name, count, newest time. */
+.recent-group {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px 4px 4px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg-soft);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recent-group:hover {
+  background: var(--bg-hover);
+}
+
+.recent-arrow {
+  flex: none;
+  width: 14px;
+  color: var(--fg-dim);
+  font-size: 14px;
+  line-height: 1;
+  text-align: center;
+}
+
+.recent-group-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-count {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--bg-control);
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.recent-group-when {
+  flex: none;
+  margin-left: auto;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.agent-sidebar.collapsed .recent-sessions {
+  display: none;
+}

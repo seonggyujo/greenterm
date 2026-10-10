@@ -11,6 +11,9 @@ import "./styles/settings.css";
 import "./styles/empty-state.css";
 import "./styles/agent-sidebar.css";
 import "./styles/agent-item.css";
+import "./styles/new-agent.css";
+import "./styles/recent-sessions.css";
+import "./styles/recent-session-row.css";
 import "./styles/agent-marks.css";
 import "./styles/usage-bar.css";
 import "./styles/agent-hints.css";
@@ -38,6 +41,7 @@ import { createTerminalCount } from "./ui/terminal-count";
 import { createTidyButton } from "./ui/tidy-button";
 import { createTitlebar } from "./ui/titlebar";
 import { wireAgents } from "./wire-agents";
+import { wireSessions } from "./wire-sessions";
 
 const log = createLogger("app");
 
@@ -56,9 +60,11 @@ async function main(): Promise<void> {
   const workspace = document.createElement("main");
   workspace.id = "workspace";
   // Coding agents in the panes: their sidebar sits left of the workspace,
-  // their usage bar along the bottom.
+  // their usage bar along the bottom. The sidebar also starts new agents and
+  // reopens recent sessions, with the default shell.
   const clock = new UptimeClock();
-  const agents = wireAgents(clock, () => panes);
+  const sessions = wireSessions(() => panes, () => defaultShell);
+  const agents = wireAgents(clock, () => panes, sessions);
   const middle = document.createElement("div");
   middle.className = "app-middle";
   middle.append(agents.sidebar, workspace);
@@ -88,10 +94,14 @@ async function main(): Promise<void> {
       agents.refresh();
     },
     (manual) => tidy.setVisible(manual),
-    agents.onSignal,
+    (pty, signal) => {
+      agents.onSignal(pty, signal);
+      if (signal.kind === "focus" || signal.kind === "prompt") sessions.refreshFolder();
+    },
   );
   await panes.init();
   await agents.start();
+  sessions.start();
   // "Open in Heron" while this window runs: a new pane in that folder.
   await onOpenFolder((dir) => open(defaultShell, dir));
   await installFileDrop((x, y) => panes.paneAt(x, y));

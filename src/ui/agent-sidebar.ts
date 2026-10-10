@@ -6,11 +6,12 @@ import { onLangChange, t } from "../i18n/lang";
 import { createAgentHints } from "./agent-hints";
 import { createAgentItem, type AgentItem, type AgentRow } from "./agent-item";
 
-// Left sidebar listing the panes that run a coding agent, most urgent first
-// (needs you, finished, working, idle), with the notes of agent-hints.ts at
-// the bottom. Hidden while no pane has an agent. It collapses to a narrow
-// rail of numbered badges; the choice is remembered. Rows are rebuilt when
-// an agent changes; the 1-second tick only updates working times.
+// Left sidebar for coding agents, always shown: the "New agent" button, the
+// panes that run an agent, most urgent first (needs you, finished, working,
+// idle), the recent sessions, and the notes of agent-hints.ts at the bottom.
+// The button and the sessions come from wire-sessions.ts. It collapses to a
+// narrow rail of numbered badges; the choice is remembered. Rows are rebuilt
+// when an agent changes; the 1-second tick only updates working times.
 
 export interface AgentSidebar {
   el: HTMLElement;
@@ -24,18 +25,27 @@ export interface SidebarActions {
   onHover(pty: number | null): void;
 }
 
-export function createAgentSidebar(clock: UptimeClock, actions: SidebarActions): AgentSidebar {
+/** Parts of the sidebar made elsewhere: the "New agent" button and the recent sessions. */
+export interface SidebarParts {
+  start: HTMLElement;
+  sessions: HTMLElement;
+}
+
+export function createAgentSidebar(clock: UptimeClock, actions: SidebarActions, parts: SidebarParts): AgentSidebar {
   const el = document.createElement("aside");
   el.className = "agent-sidebar";
-  el.hidden = true;
   el.classList.toggle("collapsed", sidebarCollapsedPref.get());
   el.innerHTML =
     '<div class="sidebar-head"><span class="sidebar-title"></span><button type="button" class="sidebar-toggle"></button></div>' +
-    '<div class="sidebar-list"></div><div class="sidebar-foot"></div>';
+    '<div class="sidebar-start"></div><div class="sidebar-list"></div><div class="sidebar-empty"></div>' +
+    '<div class="sidebar-foot"></div>';
   const title = el.querySelector<HTMLElement>(".sidebar-title")!;
   const toggle = el.querySelector<HTMLButtonElement>(".sidebar-toggle")!;
   const list = el.querySelector<HTMLElement>(".sidebar-list")!;
+  const empty = el.querySelector<HTMLElement>(".sidebar-empty")!;
   const foot = el.querySelector<HTMLElement>(".sidebar-foot")!;
+  el.querySelector(".sidebar-start")!.append(parts.start);
+  empty.after(parts.sessions);
   const hints = createAgentHints();
   foot.append(hints.el);
 
@@ -49,10 +59,11 @@ export function createAgentSidebar(clock: UptimeClock, actions: SidebarActions):
   const draw = () => {
     const sorted = [...rows].sort((a, b) => urgency(a.agent.state) - urgency(b.agent.state) || a.number - b.number);
     // Replaced rows never get mouseleave: drop any pane highlight first.
-    actions.onHover(null);
+    if (items.length > 0) actions.onHover(null);
     items = sorted.map((row) => createAgentItem(row, actions.onPick, actions.onHover));
     list.replaceChildren(...items.map((item) => item.el));
-    el.hidden = sorted.length === 0;
+    empty.hidden = sorted.length > 0;
+    empty.textContent = t().noAgents;
     const collapsed = sidebarCollapsedPref.get();
     el.classList.toggle("collapsed", collapsed);
     title.textContent = t().agents;
@@ -61,9 +72,9 @@ export function createAgentSidebar(clock: UptimeClock, actions: SidebarActions):
     toggle.setAttribute("aria-label", toggle.title);
     hints.render(pluginSeen);
     tick(Date.now());
-    // The clock ticks only while the sidebar shows.
-    if (!el.hidden && !stopClock) stopClock = clock.subscribe(tick);
-    else if (el.hidden && stopClock) {
+    // The clock ticks only while a row shows a working time.
+    if (sorted.length > 0 && !stopClock) stopClock = clock.subscribe(tick);
+    else if (sorted.length === 0 && stopClock) {
       stopClock();
       stopClock = null;
     }
@@ -75,6 +86,7 @@ export function createAgentSidebar(clock: UptimeClock, actions: SidebarActions):
   });
   onLangChange(draw);
   onAgentHooksChange(draw);
+  draw();
 
   return {
     el,

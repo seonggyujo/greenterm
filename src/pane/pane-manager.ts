@@ -53,10 +53,11 @@ export class PaneManager {
     });
   }
 
-  async add(shell: ShellKind, cwd: string | null = null): Promise<Pane> {
+  /** `run`: a command to type at the shell's first prompt. */
+  async add(shell: ShellKind, cwd: string | null = null, run?: string): Promise<Pane> {
     const onSignal = (p: Pane, s: PaneSignal) => this.signal(p, s);
     const pane = this.insert(
-      (cb) => new Pane(this.workspace, { shell, cwd, fontSize: this.fontSize, clock: this.clock, onSignal, ...cb }),
+      (cb) => new Pane(this.workspace, { shell, cwd, fontSize: this.fontSize, clock: this.clock, onSignal, run, ...cb }),
     );
     log.info(`added ${shell}, ${this.panes.length} panes`);
     await pane.start();
@@ -104,6 +105,11 @@ export class PaneManager {
   /** Terminal panes in the order they were opened. */
   terminals(): Pane[] {
     return this.panes.filter((p): p is Pane => p instanceof Pane);
+  }
+
+  /** The selected terminal pane, if any. */
+  selected(): Pane | null {
+    return this.focused instanceof Pane ? this.focused : null;
   }
 
   /** The pane under a point in CSS pixels, if any. */

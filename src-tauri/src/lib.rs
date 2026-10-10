@@ -1,11 +1,13 @@
 mod agent;
 mod attention;
+mod claude_dir;
 mod claude_hooks;
 mod claude_version;
 mod commands;
 mod launch;
 mod logging;
 mod pty;
+mod sessions;
 mod window;
 
 use tauri::webview::PageLoadEvent;
@@ -71,6 +73,8 @@ pub fn run() {
             commands::agent_hooks_presence,
             commands::install_agent_hooks,
             commands::remove_agent_hooks,
+            commands::recent_sessions,
+            commands::delete_session,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

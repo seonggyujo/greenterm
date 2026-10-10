@@ -32,6 +32,8 @@ export interface Agent {
   context: number | null;
   /** The agent's working folder (from the hooks). */
   cwd: string | null;
+  /** Claude Code's session id (from the hooks), to leave it out of the recent sessions. */
+  sessionId: string | null;
 }
 
 const STATES: readonly AgentState[] = ["idle", "working", "permission", "question", "waiting", "done"];
@@ -50,6 +52,7 @@ const fresh = (now: number): Agent => ({
   check: null,
   context: null,
   cwd: null,
+  sessionId: null,
 });
 
 function withState(a: Agent, state: AgentState, now: number): Agent {
@@ -63,7 +66,7 @@ export function applyState(prev: Agent | undefined, data: unknown, now: number):
   const state = STATES.find((s) => s === d.state);
   if (!state) return prev;
   const a = withState({ ...(prev ?? fresh(now)), fromHooks: true }, state, now);
-  return { ...a, message: text(d.message), cwd: text(d.cwd) ?? a.cwd };
+  return { ...a, message: text(d.message), cwd: text(d.cwd) ?? a.cwd, sessionId: text(d.session_id) ?? a.sessionId };
 }
 
 /** The plugin's status line file: context use. Its limits: usage.ts. */

@@ -1,0 +1,122 @@
+/* One row of the recent sessions (ui/recent-session-row.ts), indented under
+   its folder's head: title and time on one line. Hovered, the time gives
+   way to "Resume". A right click puts the delete question over the row. */
+
+.recent-item {
+  position: relative;
+  flex: none;
+  margin-left: 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.recent-item:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+}
+
+.recent-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg-dim);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recent-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-item:hover .recent-title {
+  color: var(--fg-soft);
+}
+
+.recent-when,
+.recent-open {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.recent-open {
+  display: none;
+  color: var(--agent-work);
+}
+
+.recent-item:hover .recent-when {
+  display: none;
+}
+
+.recent-item:hover .recent-open {
+  display: inline;
+}
+
+/* The right-click question, over the whole row on one line. */
+.recent-ask {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px 0 8px;
+  border: 1px solid var(--agent-bad);
+  border-radius: 8px;
+  background: var(--bg-raised);
+  color: var(--fg-soft);
+  font-size: 12px;
+}
+
+.recent-ask[hidden] {
+  display: none;
+}
+
+.recent-ask-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-ask-buttons {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+
+.recent-ask-yes,
+.recent-ask-no {
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-control);
+  color: var(--fg-soft);
+  font: inherit;
+  cursor: pointer;
+}
+
+.recent-ask-yes {
+  border-color: var(--agent-bad);
+  background: var(--agent-bad);
+  color: var(--bg-app);
+  font-weight: 600;
+}
+
+.recent-ask-yes[hidden],
+.recent-ask-no[hidden] {
+  display: none;
+}

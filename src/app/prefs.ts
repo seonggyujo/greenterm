@@ -1,5 +1,5 @@
 // Small user preferences: the ones set in the settings panel and a few the
-// UI remembers on its own (agent sidebar). localStorage is a convenience
+// UI remembers on its own (agent sidebar, folded session folders). localStorage is a convenience
 // only: any failure keeps the default. Theme, font size and language have
 // their own modules (theme.ts, font-size.ts, i18n/lang.ts).
 
@@ -10,7 +10,12 @@ export interface Pref<T> {
   reset(): void;
 }
 
-function pref<T>(key: string, fallback: T, parse: (raw: string) => T | undefined): Pref<T> {
+function pref<T>(
+  key: string,
+  fallback: T,
+  parse: (raw: string) => T | undefined,
+  format: (value: T) => string = String,
+): Pref<T> {
   let value = fallback;
   try {
     const raw = localStorage.getItem(key);
@@ -26,7 +31,7 @@ function pref<T>(key: string, fallback: T, parse: (raw: string) => T | undefined
     set(next) {
       value = next;
       try {
-        localStorage.setItem(key, String(next));
+        localStorage.setItem(key, format(next));
       } catch {
         /* storage unavailable */
       }
@@ -35,6 +40,15 @@ function pref<T>(key: string, fallback: T, parse: (raw: string) => T | undefined
 }
 
 const bool = (raw: string) => (raw === "true" ? true : raw === "false" ? false : undefined);
+
+function strings(raw: string): string[] | undefined {
+  try {
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /** Pane, menu and glow animations. */
 export const motionPref = pref("heron.motion", true, bool);
@@ -51,12 +65,14 @@ export const pluginHintHiddenPref = pref("heron.pluginHintHidden", false, bool);
 /** The user closed the "turn on Claude Code hooks" offer in the agent sidebar. */
 export const hooksOfferHiddenPref = pref("heron.hooksOfferHidden", false, bool);
 
+/** Folders whose recent sessions the user folded (keys of agent/session-groups.ts). */
+export const foldedSessionGroupsPref = pref<string[]>("heron.foldedSessionGroups", [], strings, JSON.stringify);
+
 /** The user turned Heron's Claude Code hooks on (see app/agent-hooks.ts). */
 export const agentHooksWantedPref = pref("heron.agentHooks", false, bool);
 
 export function resetPrefs(): void {
   // agentHooksWantedPref stays: the hooks stay in Claude Code's settings.
-  [motionPref, closeOnExitPref, sidebarCollapsedPref, pluginHintHiddenPref, hooksOfferHiddenPref].forEach((p) =>
-    p.reset(),
-  );
+  const prefs = [motionPref, closeOnExitPref, sidebarCollapsedPref, pluginHintHiddenPref, hooksOfferHiddenPref];
+  [...prefs, foldedSessionGroupsPref].forEach((p) => p.reset());
 }

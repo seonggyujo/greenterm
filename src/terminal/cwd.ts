@@ -25,12 +25,14 @@ export function watchCwd(
   onPrompt: () => void = () => {},
 ): void {
   let last = "";
+  // The folder first, so whoever hears the prompt reads the new one.
   const onCwd = (path: string) => {
+    if (path !== last) {
+      last = path;
+      log.debug(`${name()} in ${path}`);
+      onChange(path);
+    }
     onPrompt();
-    if (path === last) return;
-    last = path;
-    log.debug(`${name()} in ${path}`);
-    onChange(path);
   };
 
   term.parser.registerOscHandler(9, (data) => {

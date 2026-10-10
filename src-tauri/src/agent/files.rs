@@ -28,7 +28,7 @@ impl Kind {
     }
 }
 
-/// Unique among running greenterm windows: the process id, then the pty id.
+/// Unique among running Heron windows: the process id, then the pty id.
 pub fn key(pty: u32) -> String {
     format!("{}-{pty}", std::process::id())
 }

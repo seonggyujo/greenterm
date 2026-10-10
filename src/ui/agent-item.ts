@@ -3,7 +3,7 @@ import { formatUptime } from "../app/uptime-clock";
 import { t } from "../i18n/lang";
 
 // One row of the agent sidebar:
-//   ● 1  greenterm        2m 14s
+//   ● 1  heron        2m 14s
 //        working
 //        ⚠ sonnet-5
 // Collapsed, only the dot and the pane number show; the tooltip says the rest.

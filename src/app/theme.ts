@@ -3,7 +3,7 @@
 
 export type Theme = "green" | "black";
 
-const KEY = "greenterm.theme";
+const KEY = "heron.theme";
 
 export function loadTheme(): Theme {
   try {

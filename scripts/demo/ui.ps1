@@ -1,7 +1,7 @@
 # Input driver for the demo: mouse and keyboard through SendInput.
 # Dot-source it. Coordinates are relative to the window's visible frame.
 #
-# Safety: every click and key goes out only while greenterm is the
+# Safety: every click and key goes out only while Heron is the
 # foreground window. If anything else takes focus the script throws, so no
 # input can leak into another app.
 
@@ -44,12 +44,12 @@ public static class Ui {
 }
 "@
 
-# Only a greenterm built from this repo ($GtExe, set by record.ps1), never an
+# Only a Heron built from this repo ($GtExe, set by record.ps1), never an
 # installed one that may be running with real work in it.
 function Get-GtWindow {
-  $p = Get-Process greenterm -ErrorAction SilentlyContinue |
+  $p = Get-Process heron -ErrorAction SilentlyContinue |
     Where-Object { $_.MainWindowHandle -ne 0 -and $_.Path -like $GtExe } | Select-Object -First 1
-  if (-not $p) { throw "no greenterm matching $GtExe is running" }
+  if (-not $p) { throw "no Heron matching $GtExe is running" }
   $p.MainWindowHandle
 }
 
@@ -61,7 +61,7 @@ function Get-GtFrame {
 }
 
 function Assert-GtFocus {
-  if ([Ui]::GetForegroundWindow() -ne (Get-GtWindow)) { throw "greenterm lost focus; demo stopped" }
+  if ([Ui]::GetForegroundWindow() -ne (Get-GtWindow)) { throw "Heron lost focus; demo stopped" }
 }
 
 function Click-Gt([int]$x, [int]$y) { Assert-GtFocus; $f = Get-GtFrame; [Ui]::Click($f.L + $x, $f.T + $y) }

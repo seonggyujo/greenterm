@@ -10,7 +10,7 @@ export const SHELL_LABELS: Record<ShellKind, string> = {
   gitbash: "Git Bash",
 };
 
-const KEY = "greenterm.defaultShell";
+const KEY = "heron.defaultShell";
 
 /** The saved default if still installed, else the first installed shell. */
 export function loadDefaultShell(available: ShellKind[]): ShellKind {

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="src-tauri/icons/128x128.png" width="96" alt="greenterm icon">
+  <img src="src-tauri/icons/128x128.png" width="96" alt="Heron icon">
 </p>
 
-<h1 align="center">greenterm</h1>
+<h1 align="center">Heron</h1>
 
 <p align="center">
   A lightweight Windows terminal for running coding agents side by side: press <b>+</b> and the panes rearrange automatically, and a sidebar shows what each Claude Code is doing.
@@ -12,7 +12,7 @@
 
 ---
 
-greenterm opens several shells side by side in one window and lays them out for you. There are no
+Heron opens several shells side by side in one window and lays them out for you. There are no
 split shortcuts to learn: every action is a button or a drag. The terminals themselves are left untouched
 (default colors, your shell's own output), while the window around them has a green (or black)
 theme that shows which shells are alive.
@@ -60,17 +60,17 @@ settings); a failing exit keeps the pane open with a red exit-code badge.
 Start Claude Code in a pane and a sidebar appears on the left, with a row for each pane that runs
 an agent: the pane number, its folder and what the agent is doing (working, with a timer, or done).
 Agents that need you come first. Click a row to jump to that pane, or point at it to see which pane
-it is; the pane's status dot takes the same color. While greenterm is behind another window, its
+it is; the pane's status dot takes the same color. While Heron is behind another window, its
 taskbar button flashes when an agent finishes or needs you. The sidebar folds into a narrow rail of dots,
-and hides while no agent runs. This needs nothing else: greenterm reads the title Claude Code gives
+and hides while no agent runs. This needs nothing else: Heron reads the title Claude Code gives
 the terminal.
 
 To also see when an agent needs your permission or asks a question, press **Turn on** at the bottom
-of the sidebar (or switch on **Claude Code hooks** in the settings). greenterm then adds a few hooks
-to Claude Code's `~/.claude/settings.json` that run greenterm.exe itself, so there is nothing else to
+of the sidebar (or switch on **Claude Code hooks** in the settings). Heron then adds a few hooks
+to Claude Code's `~/.claude/settings.json` that run heron.exe itself, so there is nothing else to
 install. This needs Claude Code 2.1.139 or later. Your own hooks stay as they are, and the previous
-file is kept as `settings.json.greenterm-backup`. Switching it off, or uninstalling greenterm, takes
-the hooks out again; outside greenterm they do nothing.
+file is kept as `settings.json.heron-backup`. Switching it off, or uninstalling Heron, takes
+the hooks out again; outside Heron they do nothing.
 
 With the [routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) plugin
 (0.3.1 or later) the sidebar also warns when an answer came from a model other than the one you
@@ -81,10 +81,10 @@ selected, and shows your 5-hour and weekly usage limits with the time until they
 /plugin install routing-detector@routing-detector
 ```
 
-Two environment variables in each shell (`GREENTERM_PANE`, `GREENTERM_AGENT_DIR`) tell the hooks
+Two environment variables in each shell (`HERON_PANE`, `HERON_AGENT_DIR`) tell the hooks
 and the plugin which pane they run in. They write two small files per pane under
-`%LOCALAPPDATA%\com.greenterm.app\agents`; the files stay on your machine and are deleted when the
-pane closes. Outside greenterm nothing is written.
+`%LOCALAPPDATA%\io.github.seonggyujo.heron\agents`; the files stay on your machine and are deleted when the
+pane closes. Outside Heron nothing is written.
 
 ### Settings
 
@@ -97,7 +97,7 @@ its default.
 
 ### Also
 
-- **Open in greenterm** in the Explorer context menu of folders and drives (on Windows 11 under "Show more options"). If greenterm is already running, the folder opens as a new pane.
+- **Open in Heron** in the Explorer context menu of folders and drives (on Windows 11 under "Show more options"). If Heron is already running, the folder opens as a new pane.
 - Ctrl+click a link in the output to open it in your browser (http and https only).
   In apps that track the mouse (Claude Code, vim), that click is not passed to the app, so the link opens once.
 - Drop files on a pane to type their paths, like Windows Terminal (handy for attaching images in CLI tools).
@@ -133,12 +133,12 @@ and went back down afterwards, and no long task (> 50 ms) was recorded.
 ```powershell
 npm install
 npm run tauri:dev                    # development, with logs in the terminal
-npm run tauri build -- --no-bundle   # release exe: src-tauri\target\release\greenterm.exe
+npm run tauri build -- --no-bundle   # release exe: src-tauri\target\release\heron.exe
 npm run tauri build                  # release exe plus installers
 ```
 
 Development logs from both Rust and the frontend appear in the `tauri:dev` terminal. Set
-`GREENTERM_LOG` to `error`, `warn`, `info`, `debug` (default) or `trace` to change the level.
+`HERON_LOG` to `error`, `warn`, `info`, `debug` (default) or `trace` to change the level.
 
 ## Project layout
 

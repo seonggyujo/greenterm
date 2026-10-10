@@ -4,7 +4,7 @@ import { hooksErrorText } from "../i18n/hooks-error";
 import { t } from "../i18n/lang";
 
 // The notes at the bottom of the agent sidebar. First an offer to turn on
-// greenterm's Claude Code hooks (permission requests and questions); once
+// Heron's Claude Code hooks (permission requests and questions); once
 // they are on, or the offer is closed, a pointer to the routing-detector
 // plugin for model checks and usage limits. Each can be closed for good.
 

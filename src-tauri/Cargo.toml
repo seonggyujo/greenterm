@@ -1,5 +1,5 @@
 [package]
-name = "greenterm"
+name = "heron"
 version = "0.1.9"
 description = "Green multi-pane terminal"
 authors = ["seonggyujo"]
@@ -9,7 +9,7 @@ edition = "2021"
 [lib]
 # The `_lib` suffix avoids a lib/bin name clash on Windows,
 # see https://github.com/rust-lang/cargo/issues/8519
-name = "greenterm_lib"
+name = "heron_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

@@ -10,7 +10,7 @@ use serde_json::Value;
 
 use super::{write_atomic, HookError};
 
-const BACKUP_SUFFIX: &str = ".greenterm-backup";
+const BACKUP_SUFFIX: &str = ".heron-backup";
 
 pub fn path() -> Option<PathBuf> {
     let dir = match std::env::var_os("CLAUDE_CONFIG_DIR") {

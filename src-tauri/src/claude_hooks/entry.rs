@@ -1,7 +1,7 @@
-//! greenterm.exe run by Claude Code as a hook (`greenterm.exe --agent-hook`).
+//! heron.exe run by Claude Code as a hook (`heron.exe --agent-hook`).
 //! It writes the state the hook event stands for into the pane's state file
 //! (the file agent/ watches) and exits. It prints nothing, because the
-//! output of some hooks is added to the conversation. Outside a greenterm
+//! output of some hooks is added to the conversation. Outside a Heron
 //! pane it exits before reading anything.
 
 use std::io::Read;
@@ -35,10 +35,10 @@ pub fn run() -> i32 {
     0
 }
 
-/// The pane's state file, from the variables greenterm gives each shell.
+/// The pane's state file, from the variables Heron gives each shell.
 fn state_file() -> Option<PathBuf> {
-    let pane = std::env::var("GREENTERM_PANE").ok()?;
-    let dir = std::env::var_os("GREENTERM_AGENT_DIR")?;
+    let pane = std::env::var("HERON_PANE").ok()?;
+    let dir = std::env::var_os("HERON_AGENT_DIR")?;
     is_pane_key(&pane).then(|| pane_file(Path::new(&dir), &pane, FileKind::State))
 }
 

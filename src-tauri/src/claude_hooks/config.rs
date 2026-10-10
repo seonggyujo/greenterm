@@ -1,14 +1,14 @@
-//! greenterm's entries in the `hooks` of Claude Code's settings, as pure
+//! Heron's entries in the `hooks` of Claude Code's settings, as pure
 //! edits of the parsed file: add them (replacing older ones), remove them,
-//! and tell whether they are there. An entry is greenterm's when it runs
-//! greenterm.exe with `--agent-hook`; the user's own hooks are never touched.
+//! and tell whether they are there. An entry is Heron's when it runs
+//! heron.exe with `--agent-hook`; the user's own hooks are never touched.
 
 use serde::Serialize;
 use serde_json::{json, Map, Value};
 
 use super::HOOK_FLAG;
 
-/// The events greenterm listens to, with the matcher of each. All exist
+/// The events Heron listens to, with the matcher of each. All exist
 /// since Claude Code 2.1.78 (StopFailure is the newest); the `args` form
 /// of the entries needs 2.1.139, which version.rs checks.
 const EVENTS: [(&str, Option<&str>); 7] = [
@@ -29,9 +29,9 @@ const TIMEOUT_SECONDS: u64 = 10;
 #[serde(rename_all = "lowercase")]
 pub enum Presence {
     Absent,
-    /// Every event runs this greenterm.exe.
+    /// Every event runs this heron.exe.
     Current,
-    /// Some entries are missing or run another greenterm.exe (moved, or an
+    /// Some entries are missing or run another heron.exe (moved, or an
     /// older install).
     Stale,
 }
@@ -53,7 +53,7 @@ pub fn presence(settings: &Value, exe: &str) -> Presence {
     }
 }
 
-/// Puts greenterm's entries in, running `exe`. Fails when the file's shape
+/// Puts Heron's entries in, running `exe`. Fails when the file's shape
 /// is not what Claude Code expects, so nothing of it is overwritten.
 pub fn add(settings: &mut Value, exe: &str) -> Result<(), &'static str> {
     remove(settings);
@@ -74,7 +74,7 @@ pub fn add(settings: &mut Value, exe: &str) -> Result<(), &'static str> {
     Ok(())
 }
 
-/// Takes greenterm's entries out, and any group, event or `hooks` object
+/// Takes Heron's entries out, and any group, event or `hooks` object
 /// that only they filled. Returns whether anything changed.
 pub fn remove(settings: &mut Value) -> bool {
     let Some(hooks) = settings.get_mut("hooks").and_then(Value::as_object_mut) else { return false };
@@ -110,5 +110,5 @@ fn entries<'a>(hooks: Option<&'a Value>, event: &str) -> impl Iterator<Item = &'
 fn is_ours(hook: &Value) -> bool {
     let flag = hook.get("args").and_then(Value::as_array).is_some_and(|a| a.len() == 1 && a[0] == HOOK_FLAG);
     let exe = hook.get("command").and_then(Value::as_str);
-    flag && exe.is_some_and(|c| c.to_ascii_lowercase().ends_with("greenterm.exe"))
+    flag && exe.is_some_and(|c| c.to_ascii_lowercase().ends_with("heron.exe"))
 }

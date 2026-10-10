@@ -7,7 +7,7 @@ import { en, ko, type Strings } from "./strings";
 
 export type Lang = "en" | "ko";
 
-const KEY = "greenterm.lang";
+const KEY = "heron.lang";
 const TABLES: Record<Lang, Strings> = { en, ko };
 const listeners = new Set<() => void>();
 

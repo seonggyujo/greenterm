@@ -1,13 +1,13 @@
-//! Flashes greenterm's taskbar button while another app is in front, so an
+//! Flashes Heron's taskbar button while another app is in front, so an
 //! agent that needs the user gets noticed. Tauri's request_user_attention is
-//! not used: it skips the flash whenever greenterm is the active window of
+//! not used: it skips the flash whenever Heron is the active window of
 //! its own thread, which it stays while another app is in front (the cause
 //! in tauri-apps/tao#942). The foreground window is checked instead.
 
 use std::ffi::c_void;
 
 const FLASHW_TRAY: u32 = 0x2;
-/// After these flashes the button stays highlighted until greenterm comes
+/// After these flashes the button stays highlighted until Heron comes
 /// to the front.
 const FLASH_COUNT: u32 = 3;
 

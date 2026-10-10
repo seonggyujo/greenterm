@@ -10,7 +10,7 @@ mod window;
 use tauri::webview::PageLoadEvent;
 use tauri::{Manager, RunEvent};
 
-/// greenterm.exe started by Claude Code as a hook, or by the uninstaller to
+/// heron.exe started by Claude Code as a hook, or by the uninstaller to
 /// remove those hooks: does that and returns the exit code, before anything
 /// of the app starts. None for a normal start.
 pub fn run_cli() -> Option<i32> {
@@ -27,9 +27,9 @@ pub fn run() {
 
     #[cfg_attr(debug_assertions, allow(unused_mut))]
     let mut builder = tauri::Builder::default();
-    // One window per user: a second launch (e.g. "Open in greenterm") hands
+    // One window per user: a second launch (e.g. "Open in Heron") hands
     // its folder to the running window. Off in dev builds so a dev run does
-    // not attach to an installed greenterm.
+    // not attach to an installed Heron.
     #[cfg(not(debug_assertions))]
     {
         builder = builder.plugin(tauri_plugin_single_instance::init(launch::on_second_instance));
@@ -41,7 +41,7 @@ pub fn run() {
         .manage(pty::PtyRegistry::default())
         .manage(launch::LaunchDir::from_args())
         .setup(|app| {
-            // Agents in the panes report to %LOCALAPPDATA%\com.greenterm.app\agents.
+            // Agents in the panes report to %LOCALAPPDATA%\io.github.seonggyujo.heron\agents.
             let link = agent::AgentLink::new(app.path().app_local_data_dir()?.join("agents"));
             link.start(app.handle().clone());
             app.manage(link);

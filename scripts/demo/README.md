@@ -1,6 +1,6 @@
 # Demo GIFs
 
-Scripts that drive greenterm with synthetic mouse and keyboard input,
+Scripts that drive Heron with synthetic mouse and keyboard input,
 record five scenes with ffmpeg at 60 fps, and turn them into the GIFs in
 `docs/media/` used by the READMEs: 50 fps at the recorded width. 50 is the
 most a GIF can do; browsers slow shorter frame delays down to 1/10 s.
@@ -23,14 +23,14 @@ npm run tauri:dev                                       # start a dev build
 .\scripts\demo\make-gifs.ps1
 ```
 
-The scripts only drive a greenterm built from this repo (`-Exe`, default
-`*\src-tauri\target\*\greenterm.exe`), never an installed copy. Use the
-dev build while an installed greenterm runs: a release build would hand
+The scripts only drive a Heron built from this repo (`-Exe`, default
+`*\src-tauri\target\*\heron.exe`), never an installed copy. Use the
+dev build while an installed Heron runs: a release build would hand
 itself over to the installed one (single instance). `record.ps1` starts
 with Settings > Reset, so that build's settings go back to their defaults.
 
 Do not touch the mouse or keyboard while `record.ps1` runs (about 2 min).
-To abort, click any other window: every input first checks that greenterm
+To abort, click any other window: every input first checks that Heron
 is the foreground window and the script stops if it is not.
 
 Record only some scenes with `-Only split,settings`. Scenes that continue

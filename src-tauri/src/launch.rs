@@ -1,9 +1,9 @@
-//! Opening greenterm on a folder. The Explorer menu "Open in greenterm"
-//! runs `greenterm.exe "<folder>"`.
+//! Opening Heron on a folder. The Explorer menu "Open in Heron"
+//! runs `heron.exe "<folder>"`.
 //!
 //! - First launch: the folder is kept here and the frontend takes it for
 //!   its first pane (`take_launch_dir`).
-//! - Launch while greenterm is already running (release builds use the
+//! - Launch while Heron is already running (release builds use the
 //!   single-instance plugin): the new process exits and the running window
 //!   gets an `open-folder` event, so the folder opens as a new pane there.
 
@@ -39,7 +39,7 @@ pub fn folder_arg(args: impl IntoIterator<Item = String>) -> Option<String> {
     })
 }
 
-/// The folder greenterm was started on, once; later calls get `None`.
+/// The folder Heron was started on, once; later calls get `None`.
 #[tauri::command]
 pub fn take_launch_dir(state: State<'_, LaunchDir>) -> Option<String> {
     state.0.lock().unwrap().take()

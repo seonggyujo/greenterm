@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
-// "Open in greenterm": the folder greenterm was started on, and folders
+// "Open in Heron": the folder Heron was started on, and folders
 // sent by later launches while this window is running (see launch.rs).
 
 /** The start folder, or null. Returns it only on the first call. */

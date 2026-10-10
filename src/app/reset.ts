@@ -1,10 +1,10 @@
 import { resetPrefs } from "./prefs";
 
-// Settings > Reset settings: forgets every stored greenterm.* value, so
+// Settings > Reset settings: forgets every stored Heron.* value, so
 // theme, font size, default shell and the other preferences fall back to
 // their defaults. The caller applies them to what is on screen.
 
-const PREFIX = "greenterm.";
+const PREFIX = "heron.";
 
 export function forgetSettings(): void {
   try {

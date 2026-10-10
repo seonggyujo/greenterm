@@ -1,6 +1,6 @@
-// What greenterm knows about the coding agent (Claude Code) in one pane, and
+// What Heron knows about the coding agent (Claude Code) in one pane, and
 // how each signal changes it. Pure: no DOM, no IPC. Two sources:
-//   - agent files (exact, ipc/agent.ts): the state from greenterm's hooks or
+//   - agent files (exact, ipc/agent.ts): the state from Heron's hooks or
 //     the plugin's, the model check and limits from the plugin's status line
 //   - the terminal title (rough): "✳ <title>" idle, a turning half circle working
 // Once a hook has reported for a pane, hooks decide the state.

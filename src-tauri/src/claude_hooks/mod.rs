@@ -1,7 +1,7 @@
-//! greenterm's own Claude Code hooks, so agents in the panes report what
+//! Heron's own Claude Code hooks, so agents in the panes report what
 //! they do without the routing-detector plugin. With the user's consent
-//! (the sidebar or Settings), greenterm adds entries to Claude Code's
-//! settings.json that run `greenterm.exe --agent-hook` on a few events
+//! (the sidebar or Settings), Heron adds entries to Claude Code's
+//! settings.json that run `heron.exe --agent-hook` on a few events
 //! (entry.rs writes the pane's state file). The uninstaller and Settings run
 //! `remove`, which leaves the user's own hooks as they were.
 
@@ -17,9 +17,9 @@ use std::path::Path;
 pub use config::Presence;
 pub use entry::run as run_hook;
 
-/// Argument that makes greenterm.exe run as a hook.
+/// Argument that makes heron.exe run as a hook.
 pub const HOOK_FLAG: &str = "--agent-hook";
-/// Argument that makes greenterm.exe remove its hooks (used by the uninstaller).
+/// Argument that makes heron.exe remove its hooks (used by the uninstaller).
 pub const REMOVE_FLAG: &str = "--remove-agent-hooks";
 
 #[derive(Debug)]
@@ -50,7 +50,7 @@ pub fn presence() -> Result<Presence, HookError> {
     Ok(config::presence(&settings_file::read()?, &current_exe()?))
 }
 
-/// Adds the hooks for this greenterm.exe, replacing older ones.
+/// Adds the hooks for this heron.exe, replacing older ones.
 pub fn install() -> Result<(), HookError> {
     version::check()?;
     let mut settings = settings_file::read()?;

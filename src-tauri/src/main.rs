@@ -3,8 +3,8 @@
 
 fn main() {
     // Run as a Claude Code hook or by the uninstaller: no window at all.
-    if let Some(code) = greenterm_lib::run_cli() {
+    if let Some(code) = heron_lib::run_cli() {
         std::process::exit(code);
     }
-    greenterm_lib::run()
+    heron_lib::run()
 }

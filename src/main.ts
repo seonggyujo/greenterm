@@ -88,7 +88,7 @@ async function main(): Promise<void> {
   );
   await panes.init();
   await agents.start();
-  // "Open in greenterm" while this window runs: a new pane in that folder.
+  // "Open in Heron" while this window runs: a new pane in that folder.
   await onOpenFolder((dir) => open(defaultShell, dir));
   await installFileDrop((x, y) => panes.paneAt(x, y));
 

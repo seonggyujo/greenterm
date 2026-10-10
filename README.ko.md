@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="src-tauri/icons/128x128.png" width="96" alt="greenterm 아이콘">
+  <img src="src-tauri/icons/128x128.png" width="96" alt="Heron 아이콘">
 </p>
 
-<h1 align="center">greenterm</h1>
+<h1 align="center">Heron</h1>
 
 <p align="center">
   코딩 에이전트를 나란히 띄우는 가벼운 Windows 터미널. <b>+</b>만 누르면 알아서 화면을 나누고, 사이드바에 Claude Code마다 지금 무엇을 하는지 보여 줘요.
@@ -12,7 +12,7 @@
 
 ---
 
-greenterm은 한 창에 셸 여러 개를 나란히 띄우고 배치를 자동으로 맞춰 줘요. 외울 분할 단축키는
+Heron은 한 창에 셸 여러 개를 나란히 띄우고 배치를 자동으로 맞춰 줘요. 외울 분할 단축키는
 없고 모든 조작은 버튼과 끌기로 해요. 터미널 안쪽은 건드리지 않아요. 기본 색 그대로, 셸이 출력한
 그대로 보여 줘요. 대신 터미널을 감싼 창에 초록(또는 블랙) 테마를 입혀서 어떤 셸이 살아서
 일하고 있는지 한눈에 보이게 했어요.
@@ -59,16 +59,16 @@ pane을 남긴 채 붉은 exit 뱃지를 보여 줘요.
 pane에서 Claude Code를 켜면 왼쪽에 사이드바가 나타나요. 에이전트가 있는 pane마다 한 줄씩 생기고,
 pane 번호, 폴더, 에이전트가 하는 일(작업 중이면 경과 시간, 끝남)을 보여 줘요. 나를 기다리는
 에이전트가 맨 위에 와요. 줄을 누르면 그 pane으로 가고, 마우스를 올리면 어느 pane인지 테두리로
-알려 줘요. pane의 상태 점도 같은 색으로 바뀌어요. greenterm이 다른 창 뒤에 있을 때 에이전트가
+알려 줘요. pane의 상태 점도 같은 색으로 바뀌어요. Heron이 다른 창 뒤에 있을 때 에이전트가
 일을 마치거나 나를 기다리면 작업 표시줄 버튼이 깜빡여요. 사이드바는 점만 남는 얇은 줄로 접을 수 있고,
 에이전트가 없으면 숨어요. 따로 설치할 것은 없어요. Claude Code가 터미널에 붙이는 제목을 읽어서
 알아내요.
 
 에이전트가 권한을 기다리거나 질문하는 것까지 보려면 사이드바 아래의 **Turn on**(켜기)을 누르세요.
-설정의 **Claude Code 훅** 스위치로 켜도 돼요. greenterm이 Claude Code의 `~/.claude/settings.json`에
-greenterm.exe를 부르는 훅 몇 개를 넣어서, 따로 설치할 것은 없어요. Claude Code 2.1.139 이상이
-필요해요. 사용자가 넣은 훅은 그대로 두고, 바꾸기 전 파일은 `settings.json.greenterm-backup`으로
-남겨요. 스위치를 끄거나 greenterm을 삭제하면 훅도 빠져요. greenterm 밖에서는 아무 일도 하지 않아요.
+설정의 **Claude Code 훅** 스위치로 켜도 돼요. Heron이 Claude Code의 `~/.claude/settings.json`에
+heron.exe를 부르는 훅 몇 개를 넣어서, 따로 설치할 것은 없어요. Claude Code 2.1.139 이상이
+필요해요. 사용자가 넣은 훅은 그대로 두고, 바꾸기 전 파일은 `settings.json.heron-backup`으로
+남겨요. 스위치를 끄거나 Heron을 삭제하면 훅도 빠져요. Heron 밖에서는 아무 일도 하지 않아요.
 
 [routing-detector](https://github.com/seonggyujo/claude-code-routing-detector) 플러그인(0.3.1
 이상)을 설치하면 선택한 모델과 다른 모델이 답할 때 경고하고, 5시간·주간 사용 한도와 초기화까지
@@ -79,9 +79,9 @@ greenterm.exe를 부르는 훅 몇 개를 넣어서, 따로 설치할 것은 없
 /plugin install routing-detector@routing-detector
 ```
 
-greenterm은 셸마다 환경변수 두 개(`GREENTERM_PANE`, `GREENTERM_AGENT_DIR`)로 훅과 플러그인에 어느
-pane인지 알려 줘요. 훅과 플러그인은 `%LOCALAPPDATA%\com.greenterm.app\agents` 아래에 pane마다 작은
-파일 두 개를 남기는데, 이 PC 밖으로 나가지 않고 pane을 닫으면 지워져요. greenterm 밖에서는
+Heron은 셸마다 환경변수 두 개(`HERON_PANE`, `HERON_AGENT_DIR`)로 훅과 플러그인에 어느
+pane인지 알려 줘요. 훅과 플러그인은 `%LOCALAPPDATA%\io.github.seonggyujo.heron\agents` 아래에 pane마다 작은
+파일 두 개를 남기는데, 이 PC 밖으로 나가지 않고 pane을 닫으면 지워져요. Heron 밖에서는
 아무것도 쓰지 않아요.
 
 ### 설정
@@ -95,7 +95,7 @@ pane 닫기, Claude Code 훅을 바꿀 수 있어요. 바꾸면 바로 적용되
 
 ### 그 밖에
 
-- 탐색기에서 폴더나 드라이브를 우클릭하면 **Open in greenterm**이 있어요(Windows 11은 "추가 옵션 표시" 안). greenterm이 이미 켜져 있으면 그 창에 새 pane으로 열려요.
+- 탐색기에서 폴더나 드라이브를 우클릭하면 **Open in Heron**이 있어요(Windows 11은 "추가 옵션 표시" 안). Heron이 이미 켜져 있으면 그 창에 새 pane으로 열려요.
 - 출력에 나온 링크는 Ctrl+클릭하면 기본 브라우저로 열려요(http, https만).
 - 파일을 pane에 끌어다 놓으면 Windows Terminal처럼 경로가 입력돼요. CLI 도구에 이미지를 첨부할 때 편해요.
 - 우클릭: 선택한 글자가 있으면 복사, 없으면 붙여넣기(Windows 콘솔과 같음). Ctrl+C는 선택이
@@ -128,12 +128,12 @@ pane 6개에서 `Get-ChildItem -Recurse C:\Windows`를 동시에 돌려도 앱 �
 ```powershell
 npm install
 npm run tauri:dev                    # 개발 실행, 로그가 터미널에 나옴
-npm run tauri build -- --no-bundle   # release exe: src-tauri\target\release\greenterm.exe
+npm run tauri build -- --no-bundle   # release exe: src-tauri\target\release\heron.exe
 npm run tauri build                  # release exe와 설치 프로그램
 ```
 
 개발 실행 중에는 Rust와 프론트 로그가 `tauri:dev` 터미널에 함께 나와요. 로그 레벨은
-`GREENTERM_LOG` 환경변수(`error`, `warn`, `info`, `debug`(기본), `trace`)로 바꿔요.
+`HERON_LOG` 환경변수(`error`, `warn`, `info`, `debug`(기본), `trace`)로 바꿔요.
 
 ## 구조
 

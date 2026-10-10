@@ -3,7 +3,7 @@
 측정일 2026-09-24. Windows 11, 논리 코어 12개, release 빌드(`npm run tauri build -- --no-bundle`).
 셸은 Windows PowerShell 5.1.
 
-- 앱 = `greenterm.exe`와 WebView2 프로세스들(총 6개)
+- 앱 = `heron.exe`와 WebView2 프로세스들(총 6개)
 - 셸 = 그 아래 셸과 conhost
 - CPU는 작업 관리자 방식(전체 코어 대비 %)
 - 메모리는 private working set(작업 관리자 "메모리" 열)
@@ -46,6 +46,6 @@ pane 하나가 늘 때 앱 메모리는 약 3.6 MB 늘어난다. 셸 메모리�
 ## 다시 재는 법
 
 1. `npm run tauri build -- --no-bundle`
-2. `src-tauri\target\release\greenterm.exe` 실행
-3. 작업 관리자 "세부 정보" 탭에서 `greenterm.exe`와 그 아래 `msedgewebview2.exe`들의 CPU와 메모리 합계를 본다.
+2. `src-tauri\target\release\heron.exe` 실행
+3. 작업 관리자 "세부 정보" 탭에서 `heron.exe`와 그 아래 `msedgewebview2.exe`들의 CPU와 메모리 합계를 본다.
 4. long task는 `npm run tauri:dev` 로그에서 `[perf] long task` 줄을 본다.

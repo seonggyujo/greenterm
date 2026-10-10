@@ -2,10 +2,10 @@ import { agentHooksPresence, installAgentHooks, removeAgentHooks } from "../ipc/
 import { createLogger } from "./log";
 import { agentHooksWantedPref } from "./prefs";
 
-// Whether greenterm's Claude Code hooks are on, shared by the agent sidebar
+// Whether Heron's Claude Code hooks are on, shared by the agent sidebar
 // and Settings. The choice is remembered, so at start hooks that an update
 // took away (the uninstaller removes them) or that run a moved
-// greenterm.exe are put back.
+// heron.exe are put back.
 
 const log = createLogger("hooks");
 const listeners = new Set<() => void>();
@@ -28,7 +28,7 @@ export async function syncAgentHooks(): Promise<void> {
     const presence = await agentHooksPresence();
     log.debug(`claude hooks ${presence}`);
     set(presence !== "absent");
-    // Hooks of this greenterm.exe were turned on here, also when a reset
+    // Hooks of this heron.exe were turned on here, also when a reset
     // forgot that.
     if (presence === "current") agentHooksWantedPref.set(true);
     else if (agentHooksWantedPref.get()) await setAgentHooks(true);

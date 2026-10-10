@@ -1,4 +1,4 @@
-# greenterm 구조
+# Heron 구조
 
 한 파일은 한 가지 기능만 맡는다. 파일이 약 150줄을 넘으면 기능 단위로 쪼갠다.
 계산 로직(그리드 배치, 배치 flush 규칙 등)은 DOM, Tauri API와 분리해서 순수 함수로 둔다.
@@ -12,7 +12,7 @@
 | --- | --- |
 | `main.ts` | 부트스트랩만. 모듈을 만들고 서로 연결한다 |
 | `wire-agents.ts` | `main.ts`처럼 연결만: 에이전트 파일과 pane 신호를 에이전트 보드에 넣고, 보드가 바뀌면 사이드바와 pane 점(`pane-signals.ts`의 표시 함수)을 다시 그린다. 에이전트가 나를 기다리거나 끝나면 작업 표시줄 버튼을 깜빡인다(`ipc/attention.ts`). 사이드바 줄에 마우스를 올리면 그 pane 테두리를 밝힌다. 시작할 때 Claude Code 훅 상태를 맞춘다(`app/agent-hooks.ts`) |
-| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 에이전트 파일(정확. greenterm 훅이나 플러그인이 쓴 상태, 플러그인 상태줄의 모델 확인과 한도)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 아무것도 설치하지 않아도 동작). 훅이 한 번 보고하면 훅이 상태를 정한다. 단 Esc나 Ctrl+C는 작업을 멈춘 것으로 본다(Claude Code는 중단된 턴에 Stop 훅을 보내지 않는다). 작업 표시줄을 깜빡일 변화인지도 여기서 정한다 |
+| `agent/agent-model.ts` | 순수 함수: pane 하나의 에이전트 상태(쉬는 중, 작업 중, 권한 필요, 질문, 입력 대기, 끝남), 모델 확인, 한도, 작업 폴더, 급한 순서, 상태별 색. 신호 두 가지: 에이전트 파일(정확. Heron 훅이나 플러그인이 쓴 상태, 플러그인 상태줄의 모델 확인과 한도)과 터미널 제목(`✳`은 쉬는 중, `◐◑`는 작업 중. 아무것도 설치하지 않아도 동작). 훅이 한 번 보고하면 훅이 상태를 정한다. 단 Esc나 Ctrl+C는 작업을 멈춘 것으로 본다(Claude Code는 중단된 턴에 Stop 훅을 보내지 않는다). 작업 표시줄을 깜빡일 변화인지도 여기서 정한다 |
 | `agent/agent-board.ts` | pty별 에이전트와 가장 최근 한도를 보관. 모든 신호를 `agent-model.ts`로 계산하고, 바뀌면 구독자에게 어느 pane이 어떤 상태에서 어떤 상태로 바뀌었는지 알린다 |
 | `app/paths.ts` | 경로에서 마지막 폴더 이름 |
 | `app/perf-monitor.ts` | dev 전용 long task(50ms 초과) 로그 |
@@ -23,9 +23,9 @@
 | `app/font-size.ts` | 터미널 글씨 크기(10~24px) 저장 |
 | `app/uptime-clock.ts` | 앱 전체에 1초 `setInterval` 1개. 창이 숨거나 최소화되면 멈춘다 |
 | `app/prefs.ts` | 작은 설정값 저장: 설정 창(애니메이션, exit 0이면 닫기)과 화면이 스스로 기억하는 것(사이드바 접힘, 안내 숨김), Claude Code 훅을 켰는지(초기화해도 남는다). 실패하면 기본값 |
-| `app/agent-hooks.ts` | greenterm의 Claude Code 훅이 켜졌는지(사이드바와 설정이 함께 본다), 켜고 끄기. 켠 선택을 기억해서, 시작할 때 업데이트로 빠졌거나 다른 greenterm.exe를 가리키는 훅을 다시 넣는다 |
+| `app/agent-hooks.ts` | Heron의 Claude Code 훅이 켜졌는지(사이드바와 설정이 함께 본다), 켜고 끄기. 켠 선택을 기억해서, 시작할 때 업데이트로 빠졌거나 다른 heron.exe를 가리키는 훅을 다시 넣는다 |
 | `app/motion.ts` | 설정 > Animations. 끄면 `<html class="no-motion">`으로 CSS 전환·애니메이션을 멈추고, pane 등장·FLIP·출력 글로우도 끈다 |
-| `app/reset.ts` | 설정 > Reset: 저장된 `greenterm.*` 값을 모두 지워 기본값으로. 화면 적용은 `main.ts`가 한다 |
+| `app/reset.ts` | 설정 > Reset: 저장된 `heron.*` 값을 모두 지워 기본값으로. 화면 적용은 `main.ts`가 한다 |
 | `app/visibility.ts` | 창 숨김·최소화 감지(WebView2는 최소화해도 `document.hidden`이 false라 Tauri 창 상태도 본다), `app-hidden` class, 애니메이션 허용 여부 |
 | `ui/titlebar.ts` | macOS식 타이틀바. 왼쪽 로고, 오른쪽 action 슬롯과 신호등(Windows 순서). 비활성 표시는 Tauri 창 포커스 이벤트로 |
 | `ui/new-terminal-button.ts` | [+ 새 터미널 (선택된 셸)][▾] split 버튼. + 를 눌러야 생성 |
@@ -94,16 +94,16 @@
 | `lib.rs` | `run_cli()`(`--agent-hook`, `--remove-agent-hooks`), Builder 구성, 명령 등록, `AgentLink` 생성. 앱 페이지(main)가 다시 로드되거나 앱이 끝나면 모든 PTY kill과 에이전트 파일 정리 |
 | `window.rs` | 메인 창 생성. 설정 파일로 못 켜는 옵션(클립보드 읽기 자동 허용) 때문에 코드에서 만든다 |
 | `attention.rs` | 다른 앱이 앞에 있을 때 작업 표시줄 버튼 깜빡임(`flash_taskbar`). Tauri의 `requestUserAttention`은 창이 자기 스레드의 활성 창이기만 해도 건너뛰어서(tao#942와 같은 원인) 맨 앞 창을 확인한 뒤 user32 `FlashWindowEx`를 직접 부른다 |
-| `launch.rs` | 명령줄 폴더 인자("Open in greenterm"), 이미 켜져 있으면 그 창에 pane 추가(single-instance 플러그인, release 빌드만) |
+| `launch.rs` | 명령줄 폴더 인자("Open in Heron"), 이미 켜져 있으면 그 창에 pane 추가(single-instance 플러그인, release 빌드만) |
 | `logging.rs` | dev용 stderr 로거. release에서는 로그 호출이 컴파일에서 빠진다 |
 | `commands.rs` | Tauri 명령. 인자만 넘기고 `pty`, `agent`, `claude_hooks` 모듈에 위임. 셸 명령에 pane의 에이전트 변수를 넣는 곳이 여기라 `pty`는 에이전트를 모른다 |
-| `agent/mod.rs` | `AgentLink`: pane마다 셸에 `GREENTERM_PANE`(키 `<pid>-<pty id>`)와 `GREENTERM_AGENT_DIR`(`%LOCALAPPDATA%\com.greenterm.app\agents`)을 넣고, pane이 닫히면 그 pane 파일을 지운다. 파일은 greenterm 훅(`claude_hooks/`)이나 플러그인이 쓴다 |
+| `agent/mod.rs` | `AgentLink`: pane마다 셸에 `HERON_PANE`(키 `<pid>-<pty id>`)와 `HERON_AGENT_DIR`(`%LOCALAPPDATA%\io.github.seonggyujo.heron\agents`)을 넣고, pane이 닫히면 그 pane 파일을 지운다. 파일은 Heron 훅(`claude_hooks/`)이나 플러그인이 쓴다 |
 | `agent/files.rs` | pane 파일 이름(`<키>.status.json`은 상태줄, `<키>.state.json`은 훅)과 키 검사(`claude_hooks/entry.rs`가 환경변수의 키로 파일 이름을 만들 때), 하루 지난 파일 정리 |
 | `agent/poll.rs` | 살아 있는 pane의 파일 두 개를 0.7초마다 수정 시각으로 확인. 바뀌면 읽어서 `agent-update` 이벤트로 프론트에 보낸다. 쓰는 쪽은 쓰고 나서 이름을 바꾸므로 반쯤 쓴 파일을 읽지 않는다 |
-| `claude_hooks/mod.rs` | greenterm 자체 Claude Code 훅의 진입점: 상태 확인, 설치(먼저 버전 확인), 제거, 오류 코드. 플러그인 없이도 권한 요청, 질문, 끝남을 알게 한다 |
-| `claude_hooks/entry.rs` | `greenterm.exe --agent-hook`으로 실행됐을 때: 훅 입력(JSON)을 상태로 바꿔 pane의 상태 파일에 쓰고 끝난다. 아무것도 출력하지 않는다. greenterm pane 밖이면 입력을 읽기 전에 끝난다 |
-| `claude_hooks/config.rs` | settings.json `hooks` 안의 greenterm 항목 넣기, 빼기, 있는지 보기(순수 함수). greenterm.exe를 `--agent-hook`으로 부르는 항목만 우리 것으로 보고 사용자의 훅은 건드리지 않는다. 테스트는 `config_tests.rs` |
-| `claude_hooks/settings_file.rs` | `settings.json`(CLAUDE_CONFIG_DIR 또는 `%USERPROFILE%.claude`) 읽기와 쓰기. 쓰기 전에 옆에 `.greenterm-backup` 사본, 임시 파일에 쓰고 이름 바꾸기. 올바른 JSON이 아니면 쓰지 않는다 |
+| `claude_hooks/mod.rs` | Heron 자체 Claude Code 훅의 진입점: 상태 확인, 설치(먼저 버전 확인), 제거, 오류 코드. 플러그인 없이도 권한 요청, 질문, 끝남을 알게 한다 |
+| `claude_hooks/entry.rs` | `heron.exe --agent-hook`으로 실행됐을 때: 훅 입력(JSON)을 상태로 바꿔 pane의 상태 파일에 쓰고 끝난다. 아무것도 출력하지 않는다. Heron pane 밖이면 입력을 읽기 전에 끝난다 |
+| `claude_hooks/config.rs` | settings.json `hooks` 안의 Heron 항목 넣기, 빼기, 있는지 보기(순수 함수). heron.exe를 `--agent-hook`으로 부르는 항목만 우리 것으로 보고 사용자의 훅은 건드리지 않는다. 테스트는 `config_tests.rs` |
+| `claude_hooks/settings_file.rs` | `settings.json`(CLAUDE_CONFIG_DIR 또는 `%USERPROFILE%.claude`) 읽기와 쓰기. 쓰기 전에 옆에 `.heron-backup` 사본, 임시 파일에 쓰고 이름 바꾸기. 올바른 JSON이 아니면 쓰지 않는다 |
 | `claude_hooks/version.rs` | `claude --version` 확인. 2.1.139 미만은 훅 항목의 `args`를 무시해서 이벤트마다 앱을 띄울 수 있으므로 설치하지 않는다 |
 | `pty/mod.rs` | `pty` 모듈 공개 API |
 | `pty/registry.rs` | id → 세션 맵. 락은 조회·삽입·삭제 동안만. 새 id가 정해진 뒤 호출한 쪽에 셸 명령을 받아 실행한다 |
@@ -126,9 +126,9 @@
 ## 로그
 
 - `npm run tauri:dev` 터미널에 Rust 로그와 프론트 로그(`web` 대상)가 함께 나온다.
-- 레벨은 환경변수 `GREENTERM_LOG`(error, warn, info, debug, trace)로 바꾼다. 기본 debug.
+- 레벨은 환경변수 `HERON_LOG`(error, warn, info, debug, trace)로 바꾼다. 기본 debug.
   `trace`는 출력 flush마다 한 줄을 찍으니 필요할 때만 쓴다.
-  PowerShell: `$env:GREENTERM_LOG = "trace"; npm run tauri:dev`
+  PowerShell: `$env:HERON_LOG = "trace"; npm run tauri:dev`
 - 출력 청크마다 찍는 로그는 trace에만 둔다. 다른 레벨에서 hot path 로그 금지.
 - 기본(debug)에서 나오는 것: 셸 시작·종료·크기, 현재 폴더 변화(`[cwd]`), 배치 변화, 막힌 링크, 설정 변경(`[settings]`), 막힌 브라우저 단축키(`[keys]`), 다음 프레임으로 밀린 fit(`[fit]`), 에이전트 파일 변화(`agent:`), 작업 표시줄 깜빡임(`attention:`).
 - `trace`에서만 나오는 것: 출력 flush.
@@ -138,8 +138,8 @@
 - `src-tauri/tauri.conf.json`: 창은 `create: false`(`window.rs`에서 생성), `decorations: false`(자체 타이틀바), `shadow: true`(Windows 11 둥근 모서리와 그림자). CSP는 `'self'`와 IPC만 허용.
 - `src-tauri/capabilities/default.json`: 이벤트와 창 조작(닫기, 최소화, 최대화, 드래그)만 허용.
 - `tauri.conf.json` `bundle.windows`: 설치 파일 아이콘과 설치 창 이미지(`src-tauri/installer/*.bmp`).
-- `src-tauri/installer/hooks.nsh`, `context-menu.wxs`: 탐색기 우클릭 "Open in greenterm" 등록과 제거(NSIS, MSI). 서명 없는 클래식 메뉴라 Windows 11에서는 "추가 옵션 표시" 안에 나온다.
-- 삭제할 때 `greenterm.exe --remove-agent-hooks`로 Claude Code 훅을 뺀다(NSIS는 `hooks.nsh`, MSI는 `agent-hooks.wxs`). 업데이트할 때도 빠지지만 새 버전이 시작하면 다시 넣는다.
+- `src-tauri/installer/hooks.nsh`, `context-menu.wxs`: 탐색기 우클릭 "Open in Heron" 등록과 제거(NSIS, MSI). 서명 없는 클래식 메뉴라 Windows 11에서는 "추가 옵션 표시" 안에 나온다.
+- 삭제할 때 `heron.exe --remove-agent-hooks`로 Claude Code 훅을 뺀다(NSIS는 `hooks.nsh`, MSI는 `agent-hooks.wxs`). 업데이트할 때도 빠지지만 새 버전이 시작하면 다시 넣는다.
 - `Cargo.toml`: `serde_json`의 `preserve_order`를 켜서 사용자의 settings.json 키 순서를 그대로 둔다.
 - `build.rs`: `icons/`가 바뀌면 다시 실행되게 해서 exe에 새 아이콘이 들어가게 한다.
 - `Cargo.toml` release 프로필: `lto = true`, `codegen-units = 1`, `panic = "abort"`, `strip = true`, `opt-level = "s"`.

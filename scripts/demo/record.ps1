@@ -1,11 +1,11 @@
 param(
   [string[]]$Only = @("split", "arrange", "shells", "activity", "settings"),
   [int]$Panes = 1,  # panes open right now
-  # Which greenterm to drive: one built from this repo, never an installed
+  # Which Heron to drive: one built from this repo, never an installed
   # copy that may be running with real work in it.
-  [string]$Exe = "*\src-tauri\target\*\greenterm.exe"
+  [string]$Exe = "*\src-tauri\target\*\heron.exe"
 )
-# Drives a running greenterm and records each scene to rec\<scene>.mkv at
+# Drives a running Heron and records each scene to rec\<scene>.mkv at
 # 60 fps. Do not touch mouse or keyboard while it runs; to abort, click any
 # other window (the focus guard in ui.ps1 stops the script).
 # Settings > Reset runs before the first scene, so the settings stored by
@@ -32,7 +32,7 @@ function Start-Rec([string]$name, [int]$seconds) {
 $h = Get-GtWindow
 try {
   # Topmost so nothing covers the recorded area; the title bar click can
-  # then only hit greenterm and makes it the foreground window.
+  # then only hit Heron and makes it the foreground window.
   [Ui]::SetWindowPos($h, [IntPtr](-1), 300, 150, $WindowSize[0], $WindowSize[1], 0x40) | Out-Null
   [Ui]::SetForegroundWindow($h) | Out-Null; Wait-Ms 300
   $f = Get-GtFrame; [Ui]::Click($f.L + $Target.TitleBar[0], $f.T + $Target.TitleBar[1]); Wait-Ms 400

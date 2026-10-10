@@ -1,11 +1,11 @@
-//! Tests for config.rs: greenterm's entries come and go without touching
+//! Tests for config.rs: Heron's entries come and go without touching
 //! anything else in the user's settings.
 
 use serde_json::{json, Value};
 
 use super::config::{add, presence, remove, Presence};
 
-const EXE: &str = r"C:\Users\me\AppData\Local\greenterm\greenterm.exe";
+const EXE: &str = r"C:\Users\me\AppData\Local\Heron\heron.exe";
 
 fn user_settings() -> Value {
     json!({
@@ -45,7 +45,7 @@ fn an_empty_file_gets_and_loses_a_hooks_object() {
 #[test]
 fn entries_for_another_exe_are_stale_and_get_replaced() {
     let mut settings = user_settings();
-    add(&mut settings, r"D:\old\greenterm.exe").unwrap();
+    add(&mut settings, r"D:\old\heron.exe").unwrap();
     assert_eq!(presence(&settings, EXE), Presence::Stale);
     add(&mut settings, EXE).unwrap();
     assert_eq!(presence(&settings, EXE), Presence::Current);
@@ -56,7 +56,7 @@ fn entries_for_another_exe_are_stale_and_get_replaced() {
 fn hooks_of_other_programs_are_not_ours() {
     let mut settings = json!({"hooks": {"Stop": [{"hooks": [
         {"type": "command", "command": "node", "args": ["--agent-hook"]},
-        {"type": "command", "command": r"C:\greenterm.exe"}
+        {"type": "command", "command": r"C:\heron.exe"}
     ]}]}});
     let before = settings.clone();
     assert_eq!(presence(&settings, EXE), Presence::Absent);

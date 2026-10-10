@@ -81,7 +81,7 @@ pub fn kill_pty(registry: State<'_, PtyRegistry>, agent: State<'_, AgentLink>, i
     }
 }
 
-/// Whether greenterm's hooks are in Claude Code's settings (claude_hooks/).
+/// Whether Heron's hooks are in Claude Code's settings (claude_hooks/).
 #[tauri::command(async)]
 pub fn agent_hooks_presence() -> Result<Presence, String> {
     claude_hooks::presence().map_err(|e| e.code())

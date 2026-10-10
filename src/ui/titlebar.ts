@@ -57,7 +57,7 @@ export function createTitlebar(): Titlebar {
 
   const brand = document.createElement("div");
   brand.className = "brand";
-  brand.innerHTML = '<span class="brand-dot">●</span> GREENTERM';
+  brand.innerHTML = '<span class="brand-dot">●</span> HERON';
 
   const actions = document.createElement("div");
   actions.className = "titlebar-actions";

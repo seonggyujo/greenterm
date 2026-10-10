@@ -1,8 +1,8 @@
-//! Link to coding agents (Claude Code) running in the panes. greenterm puts
+//! Link to coding agents (Claude Code) running in the panes. Heron puts
 //! two invisible variables in every shell:
-//!   GREENTERM_PANE       the pane's key, `<greenterm pid>-<pty id>`
-//!   GREENTERM_AGENT_DIR  the folder to write into
-//! An agent integration that sees them (greenterm's own hooks, see
+//!   HERON_PANE       the pane's key, `<Heron pid>-<pty id>`
+//!   HERON_AGENT_DIR  the folder to write into
+//! An agent integration that sees them (Heron's own hooks, see
 //! claude_hooks/, or the routing-detector status line and hooks) writes
 //! `<key>.status.json` and `<key>.state.json` there. This module watches
 //! those files for live panes and forwards each change to the frontend as an
@@ -39,8 +39,8 @@ impl AgentLink {
     /// Variables for the shell of pane `pty`.
     pub fn pane_env(&self, pty: u32) -> [(&'static str, String); 2] {
         [
-            ("GREENTERM_PANE", files::key(pty)),
-            ("GREENTERM_AGENT_DIR", self.dir.to_string_lossy().into_owned()),
+            ("HERON_PANE", files::key(pty)),
+            ("HERON_AGENT_DIR", self.dir.to_string_lossy().into_owned()),
         ]
     }
 

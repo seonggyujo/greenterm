@@ -4,7 +4,7 @@
 export const FONT_MIN = 10;
 export const FONT_MAX = 24;
 const FONT_DEFAULT = 14;
-const KEY = "greenterm.fontSize";
+const KEY = "heron.fontSize";
 
 export function loadFontSize(): number {
   try {

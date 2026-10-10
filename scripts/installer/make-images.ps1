@@ -36,9 +36,9 @@ function Draw-Panel($g, [int]$x, [int]$w, [int]$h, [int]$iconSize) {
   $iy = [int]($h * 0.2)
   $g.DrawImage($icon, $x + ($w - $iconSize) / 2, $iy, $iconSize, $iconSize)
   $center = New-Object Drawing.StringFormat; $center.Alignment = "Center"
-  $g.DrawString("greenterm", (New-Object Drawing.Font $mono, 15, ([Drawing.FontStyle]::Bold), ([Drawing.GraphicsUnit]::Pixel)),
+  $g.DrawString("Heron", (New-Object Drawing.Font $mono, 15, ([Drawing.FontStyle]::Bold), ([Drawing.GraphicsUnit]::Pixel)),
     (New-Object Drawing.SolidBrush $green), (New-Object Drawing.RectangleF $x, ($iy + $iconSize + 14), $w, 24), $center)
-  $g.DrawString("terminals that`nsplit themselves", (New-Object Drawing.Font $mono, 10, ([Drawing.FontStyle]::Regular), ([Drawing.GraphicsUnit]::Pixel)),
+  $g.DrawString("watches over`nyour coding agents", (New-Object Drawing.Font $mono, 10, ([Drawing.FontStyle]::Regular), ([Drawing.GraphicsUnit]::Pixel)),
     (New-Object Drawing.SolidBrush $dim), (New-Object Drawing.RectangleF $x, ($iy + $iconSize + 42), $w, 40), $center)
 }
 
@@ -55,7 +55,7 @@ $c = New-Canvas 150 57
 $c.G.Clear([Drawing.Color]::White)
 $c.G.DrawImage($icon, 104, 8, 40, 40)
 $right = New-Object Drawing.StringFormat; $right.Alignment = "Far"; $right.LineAlignment = "Center"
-$c.G.DrawString("greenterm", (New-Object Drawing.Font $mono, 13, ([Drawing.FontStyle]::Bold), ([Drawing.GraphicsUnit]::Pixel)),
+$c.G.DrawString("Heron", (New-Object Drawing.Font $mono, 13, ([Drawing.FontStyle]::Bold), ([Drawing.GraphicsUnit]::Pixel)),
   (New-Object Drawing.SolidBrush $onWhite), (New-Object Drawing.RectangleF 0, 0, 98, 57), $right)
 Save $c "nsis-header.bmp"
 

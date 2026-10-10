@@ -1,7 +1,7 @@
 //! Tiny stderr logger for `tauri dev`. Release builds compile every log call
 //! out (`log` feature `release_max_level_off`), so this costs nothing there.
 //!
-//! Level: env `GREENTERM_LOG` = error | warn | info | debug | trace
+//! Level: env `HERON_LOG` = error | warn | info | debug | trace
 //! (default debug). `trace` adds one line per output flush.
 
 use std::sync::OnceLock;
@@ -9,7 +9,7 @@ use std::time::Instant;
 
 use log::{Level, LevelFilter, Log, Metadata, Record};
 
-const CRATE: &str = "greenterm_lib";
+const CRATE: &str = "heron_lib";
 
 struct DevLogger {
     start: Instant,
@@ -32,7 +32,7 @@ impl Log for DevLogger {
             Level::Debug => "36",
             Level::Trace => "90",
         };
-        // "greenterm_lib::pty::session" -> "pty::session", crate root -> "app".
+        // "heron_lib::pty::session" -> "pty::session", crate root -> "app".
         let target = match record.target().strip_prefix(CRATE) {
             Some("") => "app",
             Some(rest) => rest.trim_start_matches("::"),
@@ -53,7 +53,7 @@ pub fn init() {
     static LOGGER: OnceLock<DevLogger> = OnceLock::new();
     let logger = LOGGER.get_or_init(|| DevLogger { start: Instant::now() });
 
-    let level = std::env::var("GREENTERM_LOG")
+    let level = std::env::var("HERON_LOG")
         .ok()
         .and_then(|v| v.parse::<LevelFilter>().ok())
         .unwrap_or(LevelFilter::Debug);

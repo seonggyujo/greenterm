@@ -23,7 +23,7 @@ export interface AgentWiring {
   onSignal(pty: number, signal: PaneSignal): void;
   /** Panes were added, closed or renamed: redraw. */
   refresh(): void;
-  /** Starts listening to the agent files and checks greenterm's Claude Code hooks. */
+  /** Starts listening to the agent files and checks Heron's Claude Code hooks. */
   start(): Promise<void>;
 }
 

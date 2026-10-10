@@ -1,4 +1,4 @@
-//! The version of the Claude Code on PATH (`claude --version`). greenterm's
+//! The version of the Claude Code on PATH (`claude --version`). Heron's
 //! hooks use the `args` form of a command hook. Versions before it treat
 //! the entry as a shell command without the flag, which would start the app
 //! on every hook event, so hooks are only installed for newer versions.

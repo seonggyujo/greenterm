@@ -90,7 +90,7 @@ export class Pane implements PaneItem {
     return this.link.id !== null && !this.exited;
   }
 
-  /** Last folder name, e.g. "greenterm"; the shell name until one is known. */
+  /** Last folder name, e.g. "heron"; the shell name until one is known. */
   get folder(): string {
     return folderName(this.where() ?? this.cwd ?? "") ?? SHELL_LABELS[this.shell];
   }

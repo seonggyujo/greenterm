@@ -34,6 +34,9 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "publisher": "seonggyujo",
+    "copyright": "Copyright (c) 2026 seonggyujo",
+    "homepage": "https://github.com/seonggyujo/heron",
     "windows": {
       "nsis": {
         "installerIcon": "icons/icon.ico",

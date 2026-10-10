@@ -142,6 +142,7 @@
 - 삭제할 때 `heron.exe --remove-agent-hooks`로 Claude Code 훅을 뺀다(NSIS는 `hooks.nsh`, MSI는 `agent-hooks.wxs`). 업데이트할 때도 빠지지만 새 버전이 시작하면 다시 넣는다.
 - `Cargo.toml`: `serde_json`의 `preserve_order`를 켜서 사용자의 settings.json 키 순서를 그대로 둔다.
 - `build.rs`: `icons/`가 바뀌면 다시 실행되게 해서 exe에 새 아이콘이 들어가게 한다.
+- `src-tauri/icons/icon-source.png`: 앱 아이콘 원본(1024px). `npm run tauri icon src-tauri/icons/icon-source.png`로 모든 크기를 만든 뒤 저장소에 두는 6개(`32x32.png`, `128x128.png`, `128x128@2x.png`, `icon.png`, `icon.ico`, 원본)만 남긴다. 설치 이미지는 `scripts/installer/make-images.ps1`로 다시 그린다.
 - `Cargo.toml` release 프로필: `lto = true`, `codegen-units = 1`, `panic = "abort"`, `strip = true`, `opt-level = "s"`.
 
 ## 성능 원칙 (측정으로 확인한 것)

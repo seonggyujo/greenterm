@@ -1,28 +1,31 @@
-# Where things are on screen, for a window of 1216x796 (outer size).
-# Coordinates are relative to the visible frame (see ui.ps1). Re-measure
-# them if the title bar changes: the controls are right-aligned, so any
-# width change to their right shifts everything to their left.
+# Where things are on screen, for a window of 1216x796 (outer size), with
+# the UI in English. Coordinates are relative to the visible frame (see
+# ui.ps1), which is the page's client area moved by (1, 1). Re-measure them
+# if the title bar or Settings change: log getBoundingClientRect() of the
+# controls from a dev build at this window size and add 1 to each. The
+# title bar controls are right-aligned, so any width change to their right
+# shifts everything to their left.
 
 $WindowSize = @(1216, 796)
 
 $Target = @{
-  New     = @(933, 22)    # "+ New terminal"
+  New     = @(974, 22)    # "+ New terminal"
   Menu    = @(1086, 22)   # the ▾ next to it
   Gear    = @(852, 22)    # settings
   TitleBar = @(400, 22)   # empty title bar, safe to click
   Park    = @(600, 420)   # where the pointer rests between actions
 }
 
-$MenuItem = @{ powershell = @(1000, 62); cmd = @(975, 92); gitbash = @(1000, 122) }
+$MenuItem = @{ powershell = @(1014, 62); cmd = @(1014, 92); gitbash = @(1014, 122) }
 
-# Inside the settings panel, which opens right-aligned under the gear.
+# Inside the settings panel, which opens right-aligned under the gear and
+# stays where it opened when the language changes.
 $Settings = @{
   Green = @(818, 93); Black = @(840, 93)
-  AMinus = @(777, 129); APlus = @(837, 129)
-  Animations = @(835, 165)
-  # Computed from the old layout (36px rows, 52px across the separator);
-  # check with a capture before the next recording.
-  Reset = @(804, 253)
+  English = @(772, 129); Korean = @(826, 129)
+  AMinus = @(777, 165); APlus = @(837, 165)
+  Animations = @(835, 201)
+  Reset = @(804, 324)
 }
 
 # Workspace content box (inside its padding) and the grid gap.

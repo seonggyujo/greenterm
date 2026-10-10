@@ -45,9 +45,10 @@ $Scenes = [ordered]@{
     Tap $p[2].Body; Wait-Ms 300; Type-Gt "exit" 70; Enter-Gt; Wait-Ms 1000
   })
 
-  settings = @(13, {
+  settings = @(16, {
     Tap $Target.Gear; Wait-Ms 900
     Tap $Settings.Black; Wait-Ms 1500; Tap $Settings.Green; Wait-Ms 1200
+    Tap $Settings.Korean; Wait-Ms 1500; Tap $Settings.English; Wait-Ms 1000
     for ($i = 0; $i -lt 3; $i++) { Tap $Settings.APlus; Wait-Ms 550 }
     Wait-Ms 400
     for ($i = 0; $i -lt 3; $i++) { Tap $Settings.AMinus; Wait-Ms 550 }
@@ -56,11 +57,14 @@ $Scenes = [ordered]@{
 }
 
 # Back to one PowerShell pane with every setting at its default (Settings >
-# Reset): green theme, font 14, animations on, PowerShell for +.
+# Reset): green theme, font 14, animations on, PowerShell for +. Reset also
+# drops the language, which then follows Windows, so English is picked
+# again: the coordinates are for the English UI.
 function Reset-Scene([int]$panes) {
   for ($n = $panes; $n -ge 1; $n--) { Tap (Get-Panes $n)[$n - 1].Close; Wait-Ms 450 }
   Tap $Target.Gear; Wait-Ms 400
   Tap $Settings.Reset; Wait-Ms 250; Tap $Settings.Reset; Wait-Ms 1600
+  Tap $Settings.English; Wait-Ms 500
   Tap $Target.Gear; Wait-Ms 300
   Tap $Target.New; Wait-Ms 1200
   Park; Wait-Ms 800

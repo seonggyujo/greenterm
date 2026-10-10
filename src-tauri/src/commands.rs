@@ -1,4 +1,5 @@
-//! Tauri commands. Thin layer: argument plumbing only, logic lives in `pty`.
+//! Tauri commands. Thin layer: argument plumbing only, logic lives in `pty`
+//! and `agent`.
 
 use std::path::Path;
 use std::thread;
@@ -6,6 +7,7 @@ use std::thread;
 use tauri::ipc::{Channel, InvokeResponseBody};
 use tauri::{AppHandle, State};
 
+use crate::agent::AgentLink;
 use crate::pty::{PtyRegistry, ShellKind};
 
 /// Shells installed on this machine, for the shell menu.
@@ -14,18 +16,29 @@ pub fn list_shells() -> Vec<ShellKind> {
     ShellKind::available()
 }
 
-/// Runs off the main thread: starting a process can take a few ms.
+/// Runs off the main thread: starting a process can take a few ms. The
+/// shell gets the pane's agent variables (see agent/mod.rs).
+#[allow(clippy::too_many_arguments)] // Tauri passes command arguments one by one
 #[tauri::command(async)]
 pub fn spawn_pty(
     app: AppHandle,
     registry: State<'_, PtyRegistry>,
+    agent: State<'_, AgentLink>,
     shell: ShellKind,
     cols: u16,
     rows: u16,
     cwd: Option<String>,
     on_output: Channel<InvokeResponseBody>,
 ) -> Result<u32, String> {
-    registry.spawn(app, shell, cols, rows, cwd.as_deref().map(Path::new), on_output)
+    let id = registry.spawn(app, shell, cols, rows, on_output, |id| {
+        let mut cmd = shell.command(cwd.as_deref().map(Path::new))?;
+        for (key, value) in agent.pane_env(id) {
+            cmd.env(key, value);
+        }
+        Ok(cmd)
+    })?;
+    agent.track(id);
+    Ok(id)
 }
 
 /// Sync command on the main thread so keystrokes keep their order. It only
@@ -60,7 +73,8 @@ pub fn resume_pty(registry: State<'_, PtyRegistry>, id: u32) -> Result<(), Strin
 /// Closing the pseudo console may wait on conhost, so it runs on its own
 /// thread and the UI never stalls.
 #[tauri::command]
-pub fn kill_pty(registry: State<'_, PtyRegistry>, id: u32) {
+pub fn kill_pty(registry: State<'_, PtyRegistry>, agent: State<'_, AgentLink>, id: u32) {
+    agent.forget(id);
     if let Some(session) = registry.remove(id) {
         thread::spawn(move || session.kill());
     }

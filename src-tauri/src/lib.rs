@@ -1,3 +1,4 @@
+mod agent;
 mod commands;
 mod launch;
 mod logging;
@@ -26,12 +27,19 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(pty::PtyRegistry::default())
         .manage(launch::LaunchDir::from_args())
-        .setup(|app| Ok(window::create_main(app)?))
+        .setup(|app| {
+            // Agents in the panes report to %LOCALAPPDATA%\com.greenterm.app\agents.
+            let link = agent::AgentLink::new(app.path().app_local_data_dir()?.join("agents"));
+            link.start(app.handle().clone());
+            app.manage(link);
+            Ok(window::create_main(app)?)
+        })
         // A reload (dev hot reload, crash recovery) starts a fresh frontend
         // that knows nothing about the old shells, so drop them all.
         .on_page_load(|webview, payload| {
             if webview.label() == "main" && payload.event() == PageLoadEvent::Started {
                 webview.state::<pty::PtyRegistry>().kill_all();
+                webview.state::<agent::AgentLink>().forget_all();
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -53,6 +61,7 @@ pub fn run() {
         // No shell may outlive the app.
         if let RunEvent::Exit = event {
             app.state::<pty::PtyRegistry>().kill_all();
+            app.state::<agent::AgentLink>().forget_all();
             log::info!("app: exit");
         }
     });

@@ -1,10 +1,9 @@
 use std::fmt::Display;
-use std::path::Path;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 
 use log::{debug, info};
-use portable_pty::{native_pty_system, ChildKiller, MasterPty, PtySize};
+use portable_pty::{native_pty_system, ChildKiller, CommandBuilder, MasterPty, PtySize};
 use tauri::ipc::{Channel, InvokeResponseBody};
 use tauri::AppHandle;
 
@@ -28,13 +27,14 @@ fn err(e: impl Display) -> String {
 }
 
 impl PtySession {
+    /// `shell` only names the session in logs; `command` is what runs.
     pub fn spawn(
         app: AppHandle,
         id: u32,
         shell: ShellKind,
+        command: CommandBuilder,
         cols: u16,
         rows: u16,
-        cwd: Option<&Path>,
         out: Channel<InvokeResponseBody>,
     ) -> Result<Arc<Self>, String> {
         let size = PtySize { rows, cols, pixel_width: 0, pixel_height: 0 };
@@ -42,7 +42,7 @@ impl PtySession {
         let reader = pair.master.try_clone_reader().map_err(err)?;
         let input = writer::spawn(id, pair.master.take_writer().map_err(err)?);
 
-        let child = pair.slave.spawn_command(shell.command(cwd)?).map_err(err)?;
+        let child = pair.slave.spawn_command(command).map_err(err)?;
         // The slave shares the pseudo console with the master. If it stays
         // alive the console never closes and the reader never sees EOF.
         drop(pair.slave);

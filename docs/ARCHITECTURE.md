@@ -75,13 +75,16 @@
 | 경로 | 역할 |
 | --- | --- |
 | `main.rs` | `greenterm_lib::run()` 호출만 |
-| `lib.rs` | Builder 구성, 명령 등록. 앱 페이지(main)가 다시 로드되면 모든 PTY kill, 앱 종료 시 PTY kill |
+| `lib.rs` | Builder 구성, 명령 등록, `AgentLink` 생성. 앱 페이지(main)가 다시 로드되거나 앱이 끝나면 모든 PTY kill과 에이전트 파일 정리 |
 | `window.rs` | 메인 창 생성. 설정 파일로 못 켜는 옵션(클립보드 읽기 자동 허용) 때문에 코드에서 만든다 |
 | `launch.rs` | 명령줄 폴더 인자("Open in greenterm"), 이미 켜져 있으면 그 창에 pane 추가(single-instance 플러그인, release 빌드만) |
 | `logging.rs` | dev용 stderr 로거. release에서는 로그 호출이 컴파일에서 빠진다 |
-| `commands.rs` | Tauri 명령. 인자만 넘기고 `pty` 모듈에 위임 |
+| `commands.rs` | Tauri 명령. 인자만 넘기고 `pty`, `agent` 모듈에 위임. 셸 명령에 pane의 에이전트 변수를 넣는 곳이 여기라 `pty`는 에이전트를 모른다 |
+| `agent/mod.rs` | `AgentLink`: pane마다 셸에 `GREENTERM_PANE`(키 `<pid>-<pty id>`)와 `GREENTERM_AGENT_DIR`(`%LOCALAPPDATA%\com.greenterm.app\agents`)을 넣고, pane이 닫히면 그 pane 파일을 지운다 |
+| `agent/files.rs` | pane 파일 이름(`<키>.status.json`은 상태줄, `<키>.state.json`은 훅), 하루 지난 파일 정리 |
+| `agent/poll.rs` | 살아 있는 pane의 파일 두 개를 0.7초마다 수정 시각으로 확인. 바뀌면 읽어서 `agent-update` 이벤트로 프론트에 보낸다. 쓰는 쪽은 쓰고 나서 이름을 바꾸므로 반쯤 쓴 파일을 읽지 않는다 |
 | `pty/mod.rs` | `pty` 모듈 공개 API |
-| `pty/registry.rs` | id → 세션 맵. 락은 조회·삽입·삭제 동안만 |
+| `pty/registry.rs` | id → 세션 맵. 락은 조회·삽입·삭제 동안만. 새 id가 정해진 뒤 호출한 쪽에 셸 명령을 받아 실행한다 |
 | `pty/session.rs` | 세션 하나: 생성, 입력 큐, 크기 조정, pause, kill, close |
 | `pty/shell.rs` | 셸 종류(pwsh 7, Windows PowerShell, cmd, Git Bash), 설치 여부, 실행 명령 |
 | `pty/cwd_report.rs` | 셸 세션에만 현재 폴더 신호(OSC 9;9) 훅을 건다. 화면과 프로필 파일은 그대로 |
@@ -105,7 +108,7 @@
   `trace`는 출력 flush마다 한 줄을 찍으니 필요할 때만 쓴다.
   PowerShell: `$env:GREENTERM_LOG = "trace"; npm run tauri:dev`
 - 출력 청크마다 찍는 로그는 trace에만 둔다. 다른 레벨에서 hot path 로그 금지.
-- 기본(debug)에서 나오는 것: 셸 시작·종료·크기, 현재 폴더 변화(`[cwd]`), 배치 변화, 막힌 링크, 설정 변경(`[settings]`), 막힌 브라우저 단축키(`[keys]`), 다음 프레임으로 밀린 fit(`[fit]`).
+- 기본(debug)에서 나오는 것: 셸 시작·종료·크기, 현재 폴더 변화(`[cwd]`), 배치 변화, 막힌 링크, 설정 변경(`[settings]`), 막힌 브라우저 단축키(`[keys]`), 다음 프레임으로 밀린 fit(`[fit]`), 에이전트 파일 변화(`agent:`).
 - `trace`에서만 나오는 것: 출력 flush.
 
 ## 설정

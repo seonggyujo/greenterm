@@ -24,6 +24,3 @@ dist-ssr
 
 # Raw demo recordings (scripts/demo)
 scripts/demo/rec/
-
-# Local code-navigation tool config
-.serena/

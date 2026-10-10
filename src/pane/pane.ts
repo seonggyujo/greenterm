@@ -5,16 +5,17 @@ import type { UptimeClock } from "../app/uptime-clock";
 import type { ShellKind } from "../ipc/pty";
 import { TerminalView } from "../terminal/terminal-view";
 import { OutputGlow } from "./output-glow";
-import { createPaneHeader, type PaneHeader } from "./pane-header";
+import { createPaneFrame } from "./pane-frame";
+import type { PaneHeader } from "./pane-header";
 import type { PaneItem } from "./pane-item";
 import { animateEnter, animateLeave } from "./pane-motion";
 import { watchPaneTerminal, type PaneSignal } from "./pane-signals";
 import { PtyLink } from "./pty-link";
 import { typeAtFirstPrompt } from "./start-command";
 
-// One pane = header + xterm view + PTY link. The constructor only builds
-// DOM; start() spawns the shell once the pane is laid out in the grid, so
-// the first PTY size is already right.
+// One pane = frame (header and terminal box, pane-frame.ts) + xterm view +
+// PTY link. The constructor only builds DOM; start() spawns the shell once
+// the pane is laid out in the grid, so the first PTY size is already right.
 
 const log = createLogger("pane");
 
@@ -40,25 +41,17 @@ export class Pane implements PaneItem {
   private readonly view: TerminalView;
   private readonly link: PtyLink;
   private readonly glow: OutputGlow;
-  private exited = false;
   /** Folder the shell last reported. */
   private readonly where: () => string | null;
 
   constructor(parent: HTMLElement, opts: PaneOptions) {
     this.shell = opts.shell;
     this.cwd = opts.cwd;
-    this.el = document.createElement("section");
-    this.el.className = "pane";
-    this.header = createPaneHeader(SHELL_LABELS[opts.shell], opts.clock, () => opts.onClose(this));
-    const body = document.createElement("div");
-    body.className = "pane-body";
-    const host = document.createElement("div");
-    host.className = "pane-term";
-    body.append(host);
-    this.el.append(this.header.el, body);
-    parent.append(this.el);
+    const frame = createPaneFrame(parent, SHELL_LABELS[opts.shell], opts.clock, () => opts.onClose(this), () => this.focus());
+    this.el = frame.el;
+    this.header = frame.header;
 
-    this.view = new TerminalView(host, opts.fontSize);
+    this.view = new TerminalView(frame.host, opts.fontSize);
     this.glow = new OutputGlow(this.el);
     this.link = new PtyLink(this.view, () => this.glow.ping());
 
@@ -66,10 +59,6 @@ export class Pane implements PaneItem {
     const emit = typeAtFirstPrompt(opts.run, type, (s) => opts.onSignal(this, s));
     this.where = watchPaneTerminal(this.view.term, () => this.name, this.header, emit);
     this.el.addEventListener("focusin", () => opts.onFocus(this));
-    this.header.el.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      this.focus();
-    });
   }
 
   async start(): Promise<void> {
@@ -92,7 +81,7 @@ export class Pane implements PaneItem {
   }
 
   get running(): boolean {
-    return this.link.id !== null && !this.exited;
+    return this.link.running;
   }
 
   /** The folder the shell is in, as far as known; null = home. */
@@ -112,9 +101,7 @@ export class Pane implements PaneItem {
 
   fit(): void {
     const size = this.view.fit();
-    if (!size || this.exited) return;
-    log.debug(`pty ${this.id} fit to ${size.cols}x${size.rows}`);
-    this.link.resize(size.cols, size.rows);
+    if (size) this.link.resize(size.cols, size.rows);
   }
 
   setFontSize(px: number): void {
@@ -141,7 +128,6 @@ export class Pane implements PaneItem {
   }
 
   private setExited(code: number | null): void {
-    this.exited = true;
     this.link.markClosed();
     this.el.classList.add("exited");
     this.header.showExit(code);

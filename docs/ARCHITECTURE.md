@@ -69,12 +69,13 @@
 | `terminal/links.ts` | 출력 속 URL과 OSC 8 링크를 Ctrl+클릭으로 브라우저에서 열기(opener 플러그인, http/https만. 앱이 마우스 추적 중이어도 링크 위 Ctrl+클릭은 앱에 넘기지 않음) |
 | `terminal/cwd.ts` | 셸이 보내는 현재 폴더 신호(OSC 9;9, OSC 7) 해석. 신호는 프롬프트마다 오므로 "프롬프트로 돌아옴"도 알린다. 새 폴더를 먼저 알리고 프롬프트를 알려서, 프롬프트를 듣는 쪽이 새 폴더를 읽는다 |
 | `pane/pane-item.ts` | pane 매니저, 배치, 끌기가 pane(`pane.ts`)에 요구하는 것. 이 모듈들이 터미널에 직접 기대지 않게 한다 |
-| `pane/pane.ts` | 터미널 pane 하나: 헤더, TerminalView, PtyLink, 글로우를 묶는다. 에이전트 상태 색, 셸의 현재 폴더 경로와 이름, 첫 프롬프트에 칠 명령(`start-command.ts`) |
+| `pane/pane.ts` | 터미널 pane 하나: 틀(`pane-frame.ts`), TerminalView, PtyLink, 글로우를 묶는다. 에이전트 상태 색, 셸의 현재 폴더 경로와 이름, 첫 프롬프트에 칠 명령(`start-command.ts`) |
+| `pane/pane-frame.ts` | pane의 DOM: 헤더와 터미널이 그려질 상자를 담은 section. 헤더를 누르면 글자 선택 없이 그 pane에 포커스 |
 | `pane/start-command.ts` | 새 pane의 셸이 처음 프롬프트를 띄우면 명령을 사용자가 친 것처럼 입력한다(`claude`, `claude --resume <id>`). Heron이 띄우는 셸은 모두 프롬프트를 알려서(`pty/cwd_report.rs`) 셸 시작과 엇갈리지 않는다 |
 | `pane/pane-signals.ts` | 터미널 제목과 폴더를 헤더에, 신호(제목, 프롬프트, 키 입력과 그 키가 단독 Esc나 Ctrl+C인지, 포커스, 닫힘)를 에이전트 보드로. 에이전트 상태에 따른 점 색과 사이드바에서 가리킬 때의 테두리 class |
 | `pane/shell-exits.ts` | 셸 종료 처리: exit 0이면 pane 닫기(설정으로 끌 수 있음), 실패면 남기고 뱃지 |
 | `pane/pane-counts.ts` | 타이틀바 개수와 빈 화면용 숫자(터미널, 실행 중) |
-| `pane/pty-link.ts` | TerminalView와 백엔드 PTY 연결: 출력, 입력, 크기, kill |
+| `pane/pty-link.ts` | TerminalView와 백엔드 PTY 연결: 출력, 입력, 크기, kill. 셸이 아직 도는지(시작했고 끝나지 않음)도 안다 |
 | `pane/pane-header.ts` | 헤더 DOM: 상태 점, 셸 이름, exit 뱃지, 폴더, 터미널 제목, 실행 시간(시계 구독, 셸이 끝나면 멈춤), 닫기 |
 | `pane/pane-motion.ts` | pane 등장·퇴장 애니메이션 |
 | `pane/output-glow.ts` | 출력 시 테두리 글로우(0.3초)와 상태 점 pulse(3초). 조용한 셸에는 도는 애니메이션이 없다. pane당 최대 150ms에 한 번 class 토글 |

@@ -12,7 +12,7 @@ import { FlowControl } from "../terminal/flow-control";
 import type { TerminalView } from "../terminal/terminal-view";
 
 // Connects one TerminalView to one backend PTY: output in (with flow
-// control), keystrokes out, resize, kill.
+// control), keystrokes out, resize, kill. Knows whether the shell still runs.
 
 const log = createLogger("pty-link");
 
@@ -40,6 +40,11 @@ export class PtyLink {
     return this.ptyId;
   }
 
+  /** Started and not ended (or failed to start). */
+  get running(): boolean {
+    return this.ptyId !== null && !this.closed;
+  }
+
   /** Throws when the shell cannot be started. `cwd` null = home folder. */
   async spawn(shell: ShellKind, cols: number, rows: number, cwd: string | null): Promise<void> {
     this.ptyId = await spawnPty(shell, cols, rows, cwd, (data) => {
@@ -53,6 +58,7 @@ export class PtyLink {
 
   resize(cols: number, rows: number): void {
     if (this.closed) return;
+    log.debug(`pty ${this.ptyId} fit to ${cols}x${rows}`);
     this.call((id) => resizePty(id, cols, rows));
   }
 

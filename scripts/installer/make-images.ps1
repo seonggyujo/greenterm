@@ -10,10 +10,14 @@ $out = Join-Path $root "src-tauri\installer"
 New-Item -ItemType Directory -Force $out | Out-Null
 $icon = [Drawing.Image]::FromFile((Join-Path $root "src-tauri\icons\icon.png"))
 
-$green = [Drawing.Color]::FromArgb(0x39, 0xff, 0x88)
-$dim = [Drawing.Color]::FromArgb(0x5f, 0xae, 0x7f)
-$top = [Drawing.Color]::FromArgb(0x0d, 0x24, 0x17)
-$bottom = [Drawing.Color]::FromArgb(0x05, 0x0c, 0x08)
+# The green theme's colors (src/styles/themes.css).
+$green = [Drawing.Color]::FromArgb(0x8f, 0xd8, 0xa8)
+$dim = [Drawing.Color]::FromArgb(0x86, 0xa6, 0x93)
+$top = [Drawing.Color]::FromArgb(0x1a, 0x20, 0x1c)
+$bottom = [Drawing.Color]::FromArgb(0x10, 0x14, 0x12)
+$border = [Drawing.Color]::FromArgb(0x2c, 0x3a, 0x32)
+# The name on the white header strip: a darker sage that reads on white.
+$onWhite = [Drawing.Color]::FromArgb(0x3a, 0x73, 0x53)
 $mono = "Cascadia Mono"
 if (-not ([Drawing.Text.InstalledFontCollection]::new().Families.Name -contains $mono)) { $mono = "Consolas" }
 
@@ -24,11 +28,11 @@ function New-Canvas([int]$w, [int]$h) {
   @{ Bmp = $bmp; G = $g }
 }
 
-# Dark green panel with the icon, the name and a tagline, centered in a box.
+# Dark panel with the icon, the name and a tagline, centered in a box.
 function Draw-Panel($g, [int]$x, [int]$w, [int]$h, [int]$iconSize) {
   $rect = New-Object Drawing.Rectangle $x, 0, $w, $h
   $g.FillRectangle((New-Object Drawing.Drawing2D.LinearGradientBrush $rect, $top, $bottom, 90), $rect)
-  $g.FillRectangle((New-Object Drawing.SolidBrush ([Drawing.Color]::FromArgb(0x1f, 0x4d, 0x33))), $x + $w - 1, 0, 1, $h)
+  $g.FillRectangle((New-Object Drawing.SolidBrush $border), $x + $w - 1, 0, 1, $h)
   $iy = [int]($h * 0.2)
   $g.DrawImage($icon, $x + ($w - $iconSize) / 2, $iy, $iconSize, $iconSize)
   $center = New-Object Drawing.StringFormat; $center.Alignment = "Center"
@@ -52,7 +56,7 @@ $c.G.Clear([Drawing.Color]::White)
 $c.G.DrawImage($icon, 104, 8, 40, 40)
 $right = New-Object Drawing.StringFormat; $right.Alignment = "Far"; $right.LineAlignment = "Center"
 $c.G.DrawString("greenterm", (New-Object Drawing.Font $mono, 13, ([Drawing.FontStyle]::Bold), ([Drawing.GraphicsUnit]::Pixel)),
-  (New-Object Drawing.SolidBrush ([Drawing.Color]::FromArgb(0x10, 0x60, 0x38))), (New-Object Drawing.RectangleF 0, 0, 98, 57), $right)
+  (New-Object Drawing.SolidBrush $onWhite), (New-Object Drawing.RectangleF 0, 0, 98, 57), $right)
 Save $c "nsis-header.bmp"
 
 # WiX Welcome/Finish background, 493x312: WiX writes black text on the

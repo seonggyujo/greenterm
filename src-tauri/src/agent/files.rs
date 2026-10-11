@@ -60,6 +60,40 @@ pub fn remove_pane(dir: &Path, pty: u32) {
             debug!("agent: removed {}", file.display());
         }
     }
+    remove_subagents(dir, &key(pty));
+}
+
+/// A subagent id as Claude Code gives it (letters, digits, `-`, `_`), so a
+/// file name built from it stays in `dir`.
+pub fn is_subagent_id(text: &str) -> bool {
+    !text.is_empty() && text.len() <= 64 && text.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+}
+
+/// Written by hooks while a subagent of pane `key` runs: `<key>.sub.<id>.json`.
+pub fn subagent_path(dir: &Path, key: &str, id: &str) -> PathBuf {
+    dir.join(format!("{key}.sub.{id}.json"))
+}
+
+/// The subagent files of pane `key`, with the id of each.
+pub fn subagent_files(dir: &Path, key: &str) -> Vec<(String, PathBuf)> {
+    let prefix = format!("{key}.sub.");
+    let Ok(entries) = fs::read_dir(dir) else { return Vec::new() };
+    entries
+        .flatten()
+        .filter_map(|entry| {
+            let name = entry.file_name().into_string().ok()?;
+            let id = name.strip_prefix(&prefix)?.strip_suffix(".json")?;
+            is_subagent_id(id).then(|| (id.to_owned(), entry.path()))
+        })
+        .collect()
+}
+
+pub fn remove_subagents(dir: &Path, key: &str) {
+    for (_, file) in subagent_files(dir, key) {
+        if fs::remove_file(&file).is_ok() {
+            debug!("agent: removed {}", file.display());
+        }
+    }
 }
 
 pub fn remove_stale(dir: &Path) {
@@ -72,6 +106,20 @@ pub fn remove_stale(dir: &Path) {
             .is_ok_and(|t| now.duration_since(t).unwrap_or_default() > STALE_AFTER);
         if old && fs::remove_file(entry.path()).is_ok() {
             debug!("agent: removed stale {}", entry.path().display());
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_subagent_id_cannot_leave_the_folder() {
+        assert!(is_subagent_id("a65cc6212ebfce9ef"));
+        assert!(is_subagent_id("agent_1-x"));
+        for bad in ["", "..", "a/b", r"a\b", "a.b", "a:b"] {
+            assert!(!is_subagent_id(bad), "{bad}");
         }
     }
 }

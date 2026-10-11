@@ -4,6 +4,7 @@ mod claude_dir;
 mod claude_hooks;
 mod claude_version;
 mod commands;
+mod git;
 mod launch;
 mod logging;
 mod pty;
@@ -42,6 +43,8 @@ pub fn run() {
     let app = builder
         // Opens http(s) links from terminal output in the default browser.
         .plugin(tauri_plugin_opener::init())
+        // The folder picker of "New agent" (commands/folders.rs).
+        .plugin(tauri_plugin_dialog::init())
         .manage(pty::PtyRegistry::default())
         .manage(launch::LaunchDir::from_args())
         .setup(|app| {
@@ -60,21 +63,25 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
-            commands::list_shells,
+            commands::pty::list_shells,
             attention::flash_taskbar,
             launch::take_launch_dir,
-            commands::spawn_pty,
-            commands::write_pty,
-            commands::resize_pty,
-            commands::pause_pty,
-            commands::resume_pty,
-            commands::kill_pty,
+            commands::pty::spawn_pty,
+            commands::pty::write_pty,
+            commands::pty::resize_pty,
+            commands::pty::pause_pty,
+            commands::pty::resume_pty,
+            commands::pty::kill_pty,
             commands::frontend_log,
-            commands::agent_hooks_presence,
-            commands::install_agent_hooks,
-            commands::remove_agent_hooks,
-            commands::recent_sessions,
-            commands::delete_session,
+            commands::claude::agent_hooks_presence,
+            commands::claude::install_agent_hooks,
+            commands::claude::remove_agent_hooks,
+            commands::claude::recent_sessions,
+            commands::claude::delete_session,
+            commands::claude::resumable_sessions,
+            commands::folders::git_changes,
+            commands::folders::git_repos,
+            commands::folders::pick_folder,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

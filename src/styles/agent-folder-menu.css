@@ -1,0 +1,110 @@
+/* The folder menu of "New agent" (ui/agent-folder-menu.ts), opened by its
+   ▾ under the button: a heading, one row per folder (name over path, and
+   "worktree" for a folder in a git repository), then "Choose a folder…".
+   Opens and closes like the shell menu (popover.ts). */
+
+.agent-folder-menu {
+  position: fixed;
+  z-index: 20;
+  width: 300px;
+  max-width: calc(100vw - 16px);
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-raised);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+  transform-origin: top left;
+  visibility: hidden;
+  transition: opacity 120ms ease-out, transform 120ms ease-out, visibility 0s linear 120ms;
+}
+
+.agent-folder-menu.open {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  transition: opacity 120ms ease-out, transform 120ms ease-out, visibility 0s;
+}
+
+.folder-menu-head {
+  padding: 6px 10px 4px;
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.folder-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.folder-start,
+.folder-pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-soft);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.folder-start:hover,
+.folder-pick:hover,
+.folder-worktree:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.folder-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.folder-name,
+.folder-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-path {
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.folder-worktree {
+  flex: none;
+  padding: 3px 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  background: var(--bg-inset);
+  color: var(--fg-dim);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.folder-worktree[hidden] {
+  display: none;
+}
+
+.folder-pick {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border-soft);
+  border-radius: 0 0 6px 6px;
+  color: var(--fg-dim);
+  font-size: 13px;
+}

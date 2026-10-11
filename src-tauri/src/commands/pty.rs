@@ -1,5 +1,5 @@
-//! Tauri commands. Thin layer: argument plumbing only, logic lives in `pty`,
-//! `agent`, `claude_hooks` and `sessions`.
+//! Commands for shells and their terminals (`pty`). The shell gets the
+//! pane's agent variables here, so `pty` knows nothing about agents.
 
 use std::path::Path;
 use std::thread;
@@ -8,12 +8,7 @@ use tauri::ipc::{Channel, InvokeResponseBody};
 use tauri::{AppHandle, State};
 
 use crate::agent::AgentLink;
-use crate::claude_hooks::{self, Presence};
 use crate::pty::{PtyRegistry, ShellKind};
-use crate::sessions;
-
-/// Sessions the sidebar lists.
-const RECENT_SESSIONS: usize = 20;
 
 /// Shells installed on this machine, for the shell menu.
 #[tauri::command(async)]
@@ -83,47 +78,4 @@ pub fn kill_pty(registry: State<'_, PtyRegistry>, agent: State<'_, AgentLink>, i
     if let Some(session) = registry.remove(id) {
         thread::spawn(move || session.kill());
     }
-}
-
-/// Whether Heron's hooks are in Claude Code's settings (claude_hooks/).
-#[tauri::command(async)]
-pub fn agent_hooks_presence() -> Result<Presence, String> {
-    claude_hooks::presence().map_err(|e| e.code())
-}
-
-/// Async: it runs `claude --version` first.
-#[tauri::command(async)]
-pub fn install_agent_hooks() -> Result<(), String> {
-    claude_hooks::install().map_err(|e| e.code())
-}
-
-#[tauri::command(async)]
-pub fn remove_agent_hooks() -> Result<(), String> {
-    claude_hooks::remove().map_err(|e| e.code())
-}
-
-/// Claude Code's recent sessions, newest first, for the sidebar (sessions/).
-/// Async: it reads the end of each session file.
-#[tauri::command(async)]
-pub fn recent_sessions() -> Vec<sessions::RecentSession> {
-    sessions::recent(RECENT_SESSIONS)
-}
-
-/// Moves a session to the Recycle Bin. Rejects with "not-found", "running" or "io".
-#[tauri::command(async)]
-pub fn delete_session(id: String) -> Result<(), String> {
-    sessions::delete(&id).map_err(str::to_owned)
-}
-
-/// Frontend log lines, printed in the `tauri dev` terminal.
-#[tauri::command]
-pub fn frontend_log(level: String, scope: String, message: String) {
-    let level = match level.as_str() {
-        "error" => log::Level::Error,
-        "warn" => log::Level::Warn,
-        "info" => log::Level::Info,
-        "trace" => log::Level::Trace,
-        _ => log::Level::Debug,
-    };
-    log::log!(target: "web", level, "[{scope}] {message}");
 }

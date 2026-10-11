@@ -1,11 +1,13 @@
 // What Heron knows about the coding agent (Claude Code) in one pane, and
 // how each signal changes it. Pure: no DOM, no IPC. Sources:
-//   - agent updates (exact, ipc/agent.ts): the state from Heron's hooks, the
-//     model check Heron's backend makes, and context use from the
-//     heron-limits plugin's status line (its limits: usage.ts)
+//   - agent updates (exact, ipc/agent.ts): the state and the running
+//     subagents from Heron's hooks, the model check Heron's backend makes,
+//     and context use from the heron-limits plugin's status line (its
+//     limits: usage.ts)
 //   - the terminal title (rough): "✳ <title>" idle, a turning half circle working
 // Once a hook has reported for a pane, hooks decide the state.
 
+import { subagentsOf, type Subagent } from "./subagents";
 import { contextOf } from "./usage";
 
 export type AgentState = "idle" | "working" | "permission" | "question" | "waiting" | "done";
@@ -32,8 +34,10 @@ export interface Agent {
   context: number | null;
   /** The agent's working folder (from the hooks). */
   cwd: string | null;
-  /** Claude Code's session id (from the hooks), to leave it out of the recent sessions. */
+  /** Claude Code's session id (from the hooks): left out of the recent sessions, resumed after a restart. */
   sessionId: string | null;
+  /** Subagents running now (from the hooks), oldest first. */
+  subagents: Subagent[];
 }
 
 const STATES: readonly AgentState[] = ["idle", "working", "permission", "question", "waiting", "done"];
@@ -53,6 +57,7 @@ const fresh = (now: number): Agent => ({
   context: null,
   cwd: null,
   sessionId: null,
+  subagents: [],
 });
 
 function withState(a: Agent, state: AgentState, now: number): Agent {
@@ -72,6 +77,11 @@ export function applyState(prev: Agent | undefined, data: unknown, now: number):
 /** The plugin's status line file: context use. Its limits: usage.ts. */
 export function applyStatus(prev: Agent | undefined, data: unknown, now: number): Agent {
   return { ...(prev ?? fresh(now)), context: contextOf(data) };
+}
+
+/** The subagents running now. Only for a pane that has an agent. */
+export function applySubagents(prev: Agent | undefined, data: unknown, now: number): Agent | undefined {
+  return prev && { ...prev, subagents: subagentsOf(data, now) };
 }
 
 /** The model check of the backend (src-tauri/src/agent). Only for a pane that has an agent. */

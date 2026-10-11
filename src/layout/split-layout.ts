@@ -4,12 +4,14 @@ import { Dividers } from "./dividers";
 import type { Zone } from "./drop-zone";
 import { computeRects, type Box } from "./split-rects";
 import { autoTree, describe, insertAt, leaves, moveItem, removeItem, swapItems, type Node } from "./split-tree";
+import { shapeOf, treeFrom } from "./tree-shape";
 
 // Places items (panes) in the workspace from a split tree.
 // Automatic mode rebuilds the tree from the grid rules on every add and
 // close. The first drag or divider move switches to manual mode: adding
 // then splits the focused pane along its longer side, and closing lets the
 // neighbours take the space. One item left, or tidy(), goes back to auto.
+// A manual arrangement can be saved as a shape and put back (tree-shape.ts).
 // Items stay direct children of the workspace and only get absolute boxes,
 // so a terminal is never re-parented.
 
@@ -81,6 +83,21 @@ export class SplitLayout<T extends Placeable> {
     this.setManual(false);
     this.root = autoTree(this.items());
     this.changed("tidy");
+  }
+
+  /** The user's own arrangement with item positions (tree-shape.ts); null in auto mode. */
+  shape(): Node<number> | null {
+    return this.manual && this.root ? shapeOf(this.root, this.items()) : null;
+  }
+
+  /** Puts back an arrangement from shape(); false when it does not fit the items. */
+  restore(saved: unknown): boolean {
+    const tree = treeFrom(saved, this.items());
+    if (!tree) return false;
+    this.root = tree;
+    this.setManual(true);
+    this.changed("restore");
+    return true;
   }
 
   private setManual(manual: boolean): void {

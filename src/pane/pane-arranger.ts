@@ -8,7 +8,8 @@ import type { PaneItem } from "./pane-item";
 // Where the panes sit and how they get there. SplitLayout places them (auto
 // grid, or the user's own splits), a drag on a header moves one, flip()
 // glides the others into their new boxes, and the ResizeObserver in
-// FitScheduler refits exactly the panes whose size changed.
+// FitScheduler refits exactly the panes whose size changed. The user's own
+// arrangement can be saved and put back (wire-workspace.ts).
 
 export class PaneArranger {
   private readonly fits = new FitScheduler();
@@ -64,6 +65,16 @@ export class PaneArranger {
   /** Puts the panes back into the automatic grid. */
   tidy(): void {
     flip(this.elements(), () => this.layout.tidy());
+  }
+
+  /** The user's own arrangement, to save; null in the automatic grid. */
+  shape(): unknown {
+    return this.layout.shape();
+  }
+
+  /** Puts back a saved arrangement; false when it does not fit the panes. */
+  restore(saved: unknown): boolean {
+    return this.layout.restore(saved);
   }
 
   /**

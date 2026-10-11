@@ -2,13 +2,15 @@
 //! files under `<config folder>/projects/<project>/`, each read from its end
 //! (summary.rs), and deleting one. Claude Code writes the title records again
 //! on every prompt, so the end holds the latest. Sessions some Claude Code
-//! runs now (live.rs) and sessions whose folder is gone are left out.
+//! runs now (live.rs) and sessions whose folder is gone are left out. Also
+//! which saved sessions can be resumed after a restart.
 
 mod live;
 mod recycle;
 mod summary;
 
 use std::cmp::Reverse;
+use std::collections::HashSet;
 use std::fs::{self, File};
 use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
@@ -47,6 +49,17 @@ pub fn recent(limit: usize) -> Vec<RecentSession> {
         .filter(|session| !running.contains(&session.id))
         .take(limit)
         .collect()
+}
+
+/// Of `ids`, the sessions `claude --resume` can open: Claude Code saved
+/// them (it writes a session's file at its first message) and no Claude
+/// Code runs them now.
+pub fn resumable(ids: &[String]) -> Vec<String> {
+    let Some(config) = config_dir() else { return Vec::new() };
+    let running = live::running_ids(&config);
+    let saved: HashSet<String> =
+        session_files(&config).filter_map(|path| Some(path.file_stem()?.to_str()?.to_owned())).collect();
+    ids.iter().filter(|id| saved.contains(*id) && !running.contains(*id)).cloned().collect()
 }
 
 /// Moves a session to the Recycle Bin: its file and the folder beside it

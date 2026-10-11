@@ -1,31 +1,26 @@
+import { resumeCommand } from "./app/claude-commands";
 import { createLogger } from "./app/log";
-import { folderName } from "./app/paths";
 import type { ShellKind } from "./ipc/pty";
 import { deleteSession, recentSessions, type RecentSession } from "./ipc/sessions";
 import type { PaneManager } from "./pane/pane-manager";
-import { createNewAgentButton } from "./ui/new-agent-button";
 import { createRecentSessions } from "./ui/recent-sessions";
 
-// Wiring only, like main.ts: the agent sidebar's "New agent" button and its
-// recent Claude Code sessions. Both open a pane with the default shell and
-// type the command at its first prompt: `claude` in the selected pane's
-// folder, `claude --resume <id>` in the folder the session last ran in. A
-// session can also be moved to the Recycle Bin. The list is read again when
-// the window gets focus and when an agent's session leaves its pane;
+// Wiring only, like main.ts: the recent Claude Code sessions in the agent
+// sidebar. A click opens a pane with the default shell in the folder the
+// session last ran in and types `claude --resume <id>` at its first prompt;
+// a session can also be moved to the Recycle Bin. The list is read again
+// when the window gets focus and when an agent's session leaves its pane;
 // sessions running in a pane are left out.
 
 const log = createLogger("sessions");
 
-/** Checked again here: the id is typed into a shell. */
-const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export interface SessionWiring {
-  /** The "New agent" button and the recent sessions, for the sidebar. */
-  parts: { start: HTMLElement; sessions: HTMLElement };
+  /** The recent sessions, for the sidebar. */
+  el: HTMLElement;
+  /** The sessions read last, newest first. */
+  list(): readonly RecentSession[];
   /** Ids of the sessions running in panes now. */
   setRunning(ids: string[]): void;
-  /** The selected pane or its folder may have changed. */
-  refreshFolder(): void;
   /** Reads the recent sessions now and whenever the window gets focus. */
   start(): void;
 }
@@ -34,14 +29,12 @@ export function wireSessions(panes: () => PaneManager, shell: () => ShellKind): 
   let sessions: RecentSession[] = [];
   let running = new Set<string>();
 
-  const open = (cwd: string | null, command: string) => {
-    log.info(`open "${command}" in ${cwd ?? "home"}`);
-    panes().add(shell(), cwd, command).catch((err) => log.error("open failed", err));
-  };
-  const button = createNewAgentButton(() => open(panes().selected()?.path ?? null, "claude"));
   const recent = createRecentSessions({
     open(session) {
-      if (SESSION_ID.test(session.id)) open(session.cwd, `claude --resume ${session.id}`);
+      const command = resumeCommand(session.id);
+      if (!command) return;
+      log.info(`open "${command}" in ${session.cwd}`);
+      panes().add(shell(), session.cwd, command).catch((err) => log.error("open failed", err));
     },
     remove(session) {
       return deleteSession(session.id).then(
@@ -69,7 +62,8 @@ export function wireSessions(panes: () => PaneManager, shell: () => ShellKind): 
   };
 
   return {
-    parts: { start: button.el, sessions: recent.el },
+    el: recent.el,
+    list: () => sessions,
     setRunning(ids) {
       const next = new Set(ids);
       const left = [...running].some((id) => !next.has(id));
@@ -78,9 +72,6 @@ export function wireSessions(panes: () => PaneManager, shell: () => ShellKind): 
       // A session that left its pane was just written: read the list again.
       if (left) load();
       else if (changed) draw();
-    },
-    refreshFolder() {
-      button.setFolder(folderName(panes().selected()?.path ?? "") ?? null);
     },
     start() {
       load();

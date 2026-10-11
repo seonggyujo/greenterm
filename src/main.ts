@@ -22,7 +22,9 @@ import { createTerminalCount } from "./ui/terminal-count";
 import { createTidyButton } from "./ui/tidy-button";
 import { createTitlebar } from "./ui/titlebar";
 import { wireAgents } from "./wire-agents";
+import { wireNewAgent } from "./wire-new-agent";
 import { wireSessions } from "./wire-sessions";
+import { wireWorkspace } from "./wire-workspace";
 
 const log = createLogger("app");
 
@@ -45,7 +47,8 @@ async function main(): Promise<void> {
   // reopens recent sessions, with the default shell.
   const clock = new UptimeClock();
   const sessions = wireSessions(() => panes, () => defaultShell);
-  const agents = wireAgents(clock, () => panes, sessions);
+  const newAgent = wireNewAgent(() => panes, () => defaultShell, sessions.list);
+  const agents = wireAgents(clock, () => panes, { start: newAgent.el, sessions: sessions.el }, sessions.setRunning);
   const middle = document.createElement("div");
   middle.className = "app-middle";
   middle.append(agents.sidebar, workspace);
@@ -77,7 +80,7 @@ async function main(): Promise<void> {
     (manual) => tidy.setVisible(manual),
     (pty, signal) => {
       agents.onSignal(pty, signal);
-      if (signal.kind === "focus" || signal.kind === "prompt") sessions.refreshFolder();
+      if (signal.kind === "focus" || signal.kind === "prompt") newAgent.refreshFolder();
     },
   );
   await panes.init();
@@ -126,7 +129,8 @@ async function main(): Promise<void> {
   document.body.append(settings.panel);
   titlebar.actions.append(tidy.el, count.el, settings.button, newButton.el);
 
-  await panes.add(defaultShell, await takeLaunchDir());
+  // The last run's panes (Settings > Reopen last work), then "Open in Heron".
+  await wireWorkspace(panes, clock, shells, agents.sessionOf).open(defaultShell, await takeLaunchDir());
   log.info("ready");
 }
 

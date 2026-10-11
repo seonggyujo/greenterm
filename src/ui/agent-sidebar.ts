@@ -9,9 +9,10 @@ import { createAgentItem, type AgentItem, type AgentRow } from "./agent-item";
 // Left sidebar for coding agents, always shown: the "New agent" button, the
 // panes that run an agent, most urgent first (needs you, finished, working,
 // idle), the recent sessions, and the notes of agent-hints.ts at the bottom.
-// The button and the sessions come from wire-sessions.ts. It collapses to a
-// narrow rail of numbered badges; the choice is remembered. Rows are rebuilt
-// when an agent changes; the 1-second tick only updates working times.
+// The button comes from wire-new-agent.ts, the sessions from
+// wire-sessions.ts. It collapses to a narrow rail of numbered badges; the
+// choice is remembered. Rows are rebuilt when an agent changes; the
+// 1-second tick only updates working and subagent times.
 
 export interface AgentSidebar {
   el: HTMLElement;

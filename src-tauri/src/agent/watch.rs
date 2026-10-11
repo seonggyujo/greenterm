@@ -1,7 +1,8 @@
 //! Everything Heron watches for one pane, one round at a time: the agent
-//! files (sent on to the frontend as they are), and the model check, from
-//! the transcript the hooks name and the model they report (or, while they
-//! do not know it, the model the heron-limits status line shows).
+//! files (sent on to the frontend as they are), the subagents running, and
+//! the model check, from the transcript the hooks name and the model they
+//! report (or, while they do not know it, the model the heron-limits status
+//! line shows).
 
 use std::collections::HashMap;
 use std::path::Path;
@@ -12,10 +13,11 @@ use serde_json::Value;
 
 use super::files::{self, Kind};
 use super::model_check::{ModelCheck, Verdict};
+use super::subagents;
 use super::transcript::Transcript;
 
-/// One `agent-update` for the frontend: `kind` is "state", "status" or
-/// "check".
+/// One `agent-update` for the frontend: `kind` is "state", "status",
+/// "check" or "subagents".
 pub struct Update {
     pub kind: &'static str,
     pub data: Value,
@@ -26,13 +28,14 @@ pub struct PaneWatch {
     transcript: Option<Transcript>,
     check: ModelCheck,
     sent: Verdict,
+    subagents: Value,
 }
 
 impl PaneWatch {
     pub fn new() -> Self {
         let check = ModelCheck::default();
         let sent = check.verdict();
-        Self { modified: HashMap::new(), transcript: None, check, sent }
+        Self { modified: HashMap::new(), transcript: None, check, sent, subagents: Value::Array(Vec::new()) }
     }
 
     /// The updates of this round, in order. New answers are judged before a
@@ -63,6 +66,11 @@ impl PaneWatch {
         if verdict != self.sent {
             updates.push(Update { kind: "check", data: serde_json::to_value(&verdict).unwrap_or_default() });
             self.sent = verdict;
+        }
+        let subagents = subagents::read(dir, &files::key(pty));
+        if subagents != self.subagents {
+            updates.push(Update { kind: "subagents", data: subagents.clone() });
+            self.subagents = subagents;
         }
         updates
     }

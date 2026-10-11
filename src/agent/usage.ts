@@ -18,6 +18,11 @@ export interface Limits {
 const record = (v: unknown): Record<string, unknown> => (v && typeof v === "object" ? (v as Record<string, unknown>) : {});
 const number = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
 
+/**
+ * The limits in a status file, or null when it has none: a new session's
+ * status line has no limits before its first answer, and the last known
+ * ones must stay on screen meanwhile.
+ */
 export function limitsOf(data: unknown): Limits | null {
   const d = record(data);
   const at = number(d.at);
@@ -27,7 +32,9 @@ export function limitsOf(data: unknown): Limits | null {
     return used === null ? null : { used, resetsAt: number(record(v).resets_at) };
   };
   const l = record(d.limits);
-  return { fiveHour: limit(l.five_hour), sevenDay: limit(l.seven_day), at };
+  const fiveHour = limit(l.five_hour);
+  const sevenDay = limit(l.seven_day);
+  return fiveHour || sevenDay ? { fiveHour, sevenDay, at } : null;
 }
 
 /** Percent of the context window in use, or null before the first answer. */

@@ -71,6 +71,16 @@ export class PaneManager {
     this.arranger.tidy();
   }
 
+  /** The user's own arrangement in pane positions, to save; null in the automatic grid. */
+  layoutShape(): unknown {
+    return this.arranger.shape();
+  }
+
+  /** Puts back a saved arrangement of the panes; false when it does not fit them. */
+  restoreLayout(saved: unknown): boolean {
+    return this.arranger.restore(saved);
+  }
+
   setFontSize(px: number): void {
     this.fontSize = px;
     this.panes.forEach((p) => p.setFontSize(px));

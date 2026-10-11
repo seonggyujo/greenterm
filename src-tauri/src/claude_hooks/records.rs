@@ -1,7 +1,33 @@
 //! What one hook event writes for the pane (pure): the agent state for the
-//! state file, and the session's model for the model file.
+//! state file, the session's model for the model file, and the subagent
+//! files.
 
 use serde_json::{json, Value};
+
+/// What a hook event does to the pane's subagent files.
+#[derive(Debug, PartialEq)]
+pub enum SubagentChange {
+    /// A subagent started: its file, with its type and start time.
+    Start { id: String, record: Value },
+    /// A subagent finished: its file goes.
+    Stop { id: String },
+    /// A session started or ended: no subagent of an earlier one is left.
+    Clear,
+}
+
+/// `now` is ms since 1970, the subagent's start.
+pub fn subagent_change(input: &Value, now: u64) -> Option<SubagentChange> {
+    let id = || input.get("agent_id")?.as_str().filter(|id| !id.is_empty()).map(str::to_owned);
+    Some(match input.get("hook_event_name")?.as_str()? {
+        "SubagentStart" => SubagentChange::Start {
+            id: id()?,
+            record: json!({ "type": input.get("agent_type"), "started": now }),
+        },
+        "SubagentStop" => SubagentChange::Stop { id: id()? },
+        "SessionStart" | "SessionEnd" => SubagentChange::Clear,
+        _ => return None,
+    })
+}
 
 /// Longest command or path kept in a permission message.
 const DETAIL_CHARS: usize = 80;

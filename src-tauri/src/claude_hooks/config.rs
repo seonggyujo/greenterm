@@ -12,7 +12,7 @@ use super::HOOK_FLAG;
 /// of the entries needs Claude Code 2.1.139, which version.rs checks. All
 /// exist since then but PostModelSwitch (2.1.251), and an older Claude Code
 /// skips an event name it does not know (since 2.1.101).
-const EVENTS: [(&str, Option<&str>); 8] = [
+const EVENTS: [(&str, Option<&str>); 10] = [
     // Not "compact": a compaction can happen in the middle of a turn.
     ("SessionStart", Some("startup|resume|clear")),
     ("UserPromptSubmit", None),
@@ -22,6 +22,8 @@ const EVENTS: [(&str, Option<&str>); 8] = [
     ("StopFailure", None),
     ("SessionEnd", None),
     ("PostModelSwitch", None),
+    ("SubagentStart", None),
+    ("SubagentStop", None),
 ];
 
 /// The hook exits at once; this only bounds a stuck one.

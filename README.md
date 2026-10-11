@@ -26,14 +26,18 @@ Built with Tauri v2, vanilla TypeScript, xterm.js (WebGL) and ConPTY.
 ### Coding agents
 
 The sidebar on the left has a row for each pane that runs a coding agent: the pane number in a badge of the agent's color, its folder and what the agent is doing
-(working, with a timer, or done).
-Agents that need you come first. Click a row to jump to that pane, or point at it to see which pane
+(working, with a timer, or done). When the folder is a git repository, the row also counts the
+lines not committed yet (`+12 −3`). Agents that need you come first. Click a row to jump to that pane, or point at it to see which pane
 it is; the pane's status dot takes the same color. While Heron is behind another window, its
 taskbar button flashes when an agent finishes or needs you. The sidebar folds into a narrow rail of
-badges. This needs nothing else: Heron reads the title Claude Code gives the terminal.
+badges. This needs nothing else: Heron reads the title Claude Code gives the terminal, and asks git.
 
 **New agent** at the top of the sidebar opens a pane in the selected pane's folder and starts Claude
-Code there. Below the agents, **Recent sessions** lists the Claude Code sessions of this PC by folder, newest
+Code there. Its **▾** lists the folders of your recent sessions and **Choose a folder…**. Next to a git
+repository, **worktree** starts the agent in a new git worktree (`claude --worktree`): a folder and a
+branch of its own, so two agents in one repository do not edit each other's files. Claude Code
+makes worktrees only in a folder you have trusted, which it asks the first time you run it there.
+Below the agents, **Recent sessions** lists the Claude Code sessions of this PC by folder, newest
 at the bottom; click a folder to fold it. Click a session to pick it up again (`claude --resume`)
 in a new pane, in the folder it last ran in, or right-click it to move it to the Recycle Bin.
 Sessions that run right now, in Heron or in another terminal, are left out.
@@ -43,7 +47,9 @@ at the bottom of the sidebar (or switch on **Claude Code hooks** in the settings
 to Claude Code's `~/.claude/settings.json` that run heron.exe itself, so there is nothing else to
 install. This needs Claude Code 2.1.139 or later. Your own hooks stay as they are, and the previous
 file is kept as `settings.json.heron-backup`. Switching it off, or uninstalling Heron, takes
-the hooks out again; outside Heron they do nothing.
+the hooks out again; outside Heron they do nothing. With the hooks on, each row also shows the
+model the session runs (it follows `/model` within a second) and, under it, the subagents running
+now with how long each has run.
 
 With the hooks on, Heron also checks every answer of the conversation: when the model that wrote
 it is not the one you selected (`/model`), the agent's row warns with the model's name. Each
@@ -68,6 +74,14 @@ Two environment variables in each shell (`HERON_PANE`, `HERON_AGENT_DIR`) tell t
 and the plugin which pane they run in. They write a few small files per pane under
 `%LOCALAPPDATA%\io.github.seonggyujo.heron\agents`; the files stay on your machine and are deleted when the
 pane closes. Outside Heron nothing is written.
+
+### Reopen last work
+
+When Heron starts, it opens the panes of the last run again: the same shells in the same folders,
+in your own arrangement if you made one. A pane that ran Claude Code resumes its session
+(`claude --resume`); a session that never got a message, or runs in another terminal by then,
+starts afresh instead. Resuming needs the hooks above, which tell Heron each pane's session.
+Turn it off in the settings (**Reopen last work**).
 
 ### Automatic grid
 

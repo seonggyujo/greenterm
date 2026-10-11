@@ -1,20 +1,25 @@
-/* "New agent" at the top of the agent sidebar (ui/new-agent-button.ts):
-   plus, label and the folder a new agent starts in. Collapsed, only the
-   "+" shows. */
+/* "New agent" at the top of the agent sidebar (ui/new-agent-button.ts): a
+   split button of plus, label and the folder a new agent starts in, and the
+   ▾ of the folder menu. Collapsed, only the "+" shows. */
 
 .sidebar-start {
   padding: 0 10px 8px;
 }
 
+.new-agent-group {
+  display: flex;
+}
+
 .new-agent {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 36px;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 0 12px;
   border: 1px solid var(--border-strong);
-  border-radius: 9px;
+  border-radius: 9px 0 0 9px;
   background: var(--bg-control);
   color: var(--fg-soft);
   font: inherit;
@@ -24,9 +29,25 @@
   cursor: pointer;
 }
 
-.new-agent:hover {
+.new-agent:hover,
+.new-agent-arrow:hover {
   background: var(--bg-hover);
   color: var(--fg);
+}
+
+.new-agent-arrow {
+  flex: none;
+  width: 28px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-left-color: var(--border-soft);
+  border-radius: 0 9px 9px 0;
+  margin-left: -1px;
+  background: var(--bg-control);
+  color: var(--fg-muted);
+  font-size: 11px;
+  cursor: pointer;
 }
 
 .new-agent-plus {
@@ -60,6 +81,11 @@
 .agent-sidebar.collapsed .new-agent {
   justify-content: center;
   padding: 0;
+  border-radius: 9px;
+}
+
+.agent-sidebar.collapsed .new-agent-arrow {
+  display: none;
 }
 
 .agent-sidebar.collapsed .new-agent-label,

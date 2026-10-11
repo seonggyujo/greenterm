@@ -1,7 +1,7 @@
-// Open/close for a panel under a title bar button: opens below the anchor,
-// right edges aligned; closes on outside click, Escape, window blur, or
-// another click on the button that opened it ([aria-haspopup] inside the
-// anchor).
+// Open/close for a panel under a button: opens below the anchor, right
+// edges aligned (title bar) or left edges (agent sidebar); closes on outside
+// click, Escape, window blur, or another click on the button that opened it
+// ([aria-haspopup] inside the anchor).
 
 export interface Popover {
   toggle(anchor: HTMLElement): void;
@@ -9,7 +9,7 @@ export interface Popover {
 }
 
 /** `onOpen` runs right before the panel shows, e.g. to refresh it. */
-export function createPopover(el: HTMLElement, onOpen?: () => void): Popover {
+export function createPopover(el: HTMLElement, onOpen?: () => void, align: "left" | "right" = "right"): Popover {
   let anchorEl: HTMLElement | null = null;
   const onOutside = (e: MouseEvent) => {
     const target = e.target as Element;
@@ -30,7 +30,8 @@ export function createPopover(el: HTMLElement, onOpen?: () => void): Popover {
     onOpen?.();
     const r = anchor.getBoundingClientRect();
     el.style.top = `${r.bottom + 6}px`;
-    el.style.right = `${window.innerWidth - r.right}px`;
+    if (align === "left") el.style.left = `${r.left}px`;
+    else el.style.right = `${window.innerWidth - r.right}px`;
     el.classList.add("open");
     // Next tick, so the click that opened the panel does not close it.
     setTimeout(() => document.addEventListener("mousedown", onOutside));

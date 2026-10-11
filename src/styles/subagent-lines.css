@@ -1,0 +1,34 @@
+/* The subagents under an agent's row in the sidebar (ui/subagent-lines.ts):
+   type and how long it has run, one line each, a little indented. Collapsed,
+   they hide with the rest of the row's text (agent-item.css). */
+
+.agent-subs {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 2px;
+}
+
+.agent-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  padding-left: 2px;
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.agent-sub-type {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-sub-time {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}

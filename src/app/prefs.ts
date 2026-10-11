@@ -56,6 +56,9 @@ export const motionPref = pref("heron.motion", true, bool);
 /** Close a terminal pane when its shell exits with code 0. */
 export const closeOnExitPref = pref("heron.closeOnExit", true, bool);
 
+/** On start, reopen the panes of the last run (wire-workspace.ts). */
+export const restoreWorkspacePref = pref("heron.restoreWorkspace", true, bool);
+
 /** The agent sidebar is folded to a rail of dots. */
 export const sidebarCollapsedPref = pref("heron.sidebarCollapsed", false, bool);
 
@@ -73,6 +76,6 @@ export const agentHooksWantedPref = pref("heron.agentHooks", false, bool);
 
 export function resetPrefs(): void {
   // agentHooksWantedPref stays: the hooks stay in Claude Code's settings.
-  const prefs = [motionPref, closeOnExitPref, sidebarCollapsedPref, pluginHintHiddenPref, hooksOfferHiddenPref];
+  const prefs = [motionPref, closeOnExitPref, restoreWorkspacePref, sidebarCollapsedPref, pluginHintHiddenPref, hooksOfferHiddenPref];
   [...prefs, foldedSessionGroupsPref].forEach((p) => p.reset());
 }

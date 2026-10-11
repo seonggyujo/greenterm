@@ -3,20 +3,24 @@
 //!   HERON_PANE       the pane's key, `<Heron pid>-<pty id>`
 //!   HERON_AGENT_DIR  the folder to write into
 //! What sees them writes small files there: Heron's own hooks (see
-//! claude_hooks/) `<key>.state.json` and `<key>.model.json`, the
-//! heron-limits plugin's status line `<key>.status.json`. This module
-//! watches those files for live panes, checks the model of each new answer
-//! in the transcript the hooks name, and sends every change to the frontend
-//! as an `agent-update` event. It never talks to the agent itself.
+//! claude_hooks/) `<key>.state.json`, `<key>.model.json` and one
+//! `<key>.sub.<id>.json` per running subagent, the heron-limits plugin's
+//! status line `<key>.status.json`. This module watches those files for
+//! live panes, checks the model of each new answer in the transcript the
+//! hooks name, and sends every change to the frontend as an `agent-update`
+//! event. It never talks to the agent itself.
 
 mod answers;
 mod files;
 mod model_check;
 mod poll;
+mod subagents;
 mod transcript;
 mod watch;
 
-pub use files::{is_key as is_pane_key, path_for as pane_file, Kind as FileKind};
+pub use files::{
+    is_key as is_pane_key, is_subagent_id, path_for as pane_file, remove_subagents, subagent_path, Kind as FileKind,
+};
 
 use std::collections::HashSet;
 use std::path::PathBuf;

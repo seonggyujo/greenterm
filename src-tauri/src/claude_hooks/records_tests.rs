@@ -62,3 +62,17 @@ fn permission_message_names_the_tool_and_its_command() {
     let long = "x".repeat(DETAIL_CHARS + 5);
     assert_eq!(shorten(&long).chars().count(), DETAIL_CHARS + 1);
 }
+
+#[test]
+fn subagents_start_stop_and_go_with_the_session() {
+    let start = json!({"hook_event_name": "SubagentStart", "agent_id": "a1b2", "agent_type": "Explore"});
+    let record = json!({"type": "Explore", "started": 42});
+    assert_eq!(subagent_change(&start, 42), Some(SubagentChange::Start { id: "a1b2".into(), record }));
+    let stop = json!({"hook_event_name": "SubagentStop", "agent_id": "a1b2", "agent_type": "Explore"});
+    assert_eq!(subagent_change(&stop, 50), Some(SubagentChange::Stop { id: "a1b2".into() }));
+    let event = |name: &str| subagent_change(&json!({"hook_event_name": name}), 0);
+    assert_eq!(event("SessionStart"), Some(SubagentChange::Clear));
+    assert_eq!(event("SessionEnd"), Some(SubagentChange::Clear));
+    assert_eq!(event("SubagentStart"), None, "no agent_id");
+    assert_eq!(event("Stop"), None);
+}

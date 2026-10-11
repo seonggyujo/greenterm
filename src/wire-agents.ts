@@ -2,22 +2,23 @@ import { AgentBoard } from "./agent/agent-board";
 import { markOf, wantsAttention } from "./agent/agent-model";
 import { syncAgentHooks } from "./app/agent-hooks";
 import { createLogger } from "./app/log";
-import { folderName } from "./app/paths";
+import { folderLabel } from "./app/paths";
 import type { UptimeClock } from "./app/uptime-clock";
 import { onAgentUpdate } from "./ipc/agent";
 import { flashTaskbar } from "./ipc/attention";
 import type { PaneManager } from "./pane/pane-manager";
 import { markAgent, markHover, type PaneSignal } from "./pane/pane-signals";
 import type { AgentRow } from "./ui/agent-item";
-import { createAgentSidebar } from "./ui/agent-sidebar";
+import { createAgentSidebar, type SidebarParts } from "./ui/agent-sidebar";
 import { createUsageBar } from "./ui/usage-bar";
-import type { SessionWiring } from "./wire-sessions";
+import { ChangeWatch } from "./wire-changes";
 
 // Wiring only, like main.ts: agent updates and pane signals go into the
-// agent board; every change of the board redraws the sidebar, the usage bar
-// and the pane dots, and an agent that needs the user or finishes flashes
-// the taskbar button. The sidebar also holds the parts of wire-sessions.ts,
-// which hears which sessions run in panes.
+// agent board; every change of the board redraws the sidebar (with each
+// folder's uncommitted changes from wire-changes.ts), the usage bar and the
+// pane dots, and an agent that needs the user or finishes flashes the
+// taskbar button. The sidebar also holds the "New agent" button and the
+// recent sessions, which hear which sessions run in panes.
 
 const log = createLogger("attention");
 
@@ -29,12 +30,22 @@ export interface AgentWiring {
   onSignal(pty: number, signal: PaneSignal): void;
   /** Panes were added, closed or renamed: redraw. */
   refresh(): void;
+  /** The Claude Code session in the pane with pty id `pty`, when the hooks told it. */
+  sessionOf(pty: number): string | null;
   /** Starts listening to the agent files and checks Heron's Claude Code hooks. */
   start(): Promise<void>;
 }
 
-/** `panes` is read lazily: the pane manager is built after this. */
-export function wireAgents(clock: UptimeClock, panes: () => PaneManager, sessions: SessionWiring): AgentWiring {
+/**
+ * `panes` is read lazily: the pane manager is built after this.
+ * `onRunning` hears the ids of the sessions running in panes.
+ */
+export function wireAgents(
+  clock: UptimeClock,
+  panes: () => PaneManager,
+  parts: SidebarParts,
+  onRunning: (ids: string[]) => void,
+): AgentWiring {
   const board = new AgentBoard();
   const byPty = (pty: number) => panes().terminals().find((p) => p.id === pty);
   // A click focuses that pane and counts as having seen it.
@@ -50,21 +61,25 @@ export function wireAgents(clock: UptimeClock, panes: () => PaneManager, session
         for (const p of panes().terminals()) markHover(p.el, p.id !== null && p.id === pty);
       },
     },
-    sessions.parts,
+    parts,
   );
   const usageBar = createUsageBar(clock, pick);
+  const changes = new ChangeWatch(clock, () => refresh());
 
-  // The agent's own folder when the hooks report it, else the shell's.
-  const folderOf = (pty: number, fallback: string) => folderName(board.get(pty)?.cwd ?? "") ?? fallback;
   const refresh = () => {
     const terminals = panes().terminals();
     const rows: AgentRow[] = terminals.flatMap((p, i) => {
       const agent = p.id === null ? undefined : board.get(p.id);
-      return agent && p.id !== null ? [{ pty: p.id, number: i + 1, folder: folderOf(p.id, p.folder), agent }] : [];
+      if (!agent || p.id === null) return [];
+      // The agent's own folder when the hooks report it, else the shell's.
+      const path = agent.cwd ?? p.path;
+      const folder = (path && folderLabel(path)) ?? p.folder;
+      return [{ pty: p.id, number: i + 1, folder, path, agent, changes: path ? changes.of(path) : null }];
     });
-    sidebar.render(rows, board.limits !== null || rows.some((r) => r.agent.context !== null));
+    sidebar.render(rows, board.pluginSeen);
     usageBar.render(rows, board.limits);
-    sessions.setRunning(rows.flatMap((r) => (r.agent.sessionId ? [r.agent.sessionId] : [])));
+    changes.watch(rows.flatMap((r) => (r.path ? [{ pty: r.pty, folder: r.path, state: r.agent.state }] : [])));
+    onRunning(rows.flatMap((r) => (r.agent.sessionId ? [r.agent.sessionId] : [])));
     for (const p of terminals) {
       const agent = p.id === null ? undefined : board.get(p.id);
       markAgent(p.el, agent ? markOf(agent.state) : null);
@@ -80,6 +95,7 @@ export function wireAgents(clock: UptimeClock, panes: () => PaneManager, session
     sidebar: sidebar.el,
     usageBar: usageBar.el,
     refresh,
+    sessionOf: (pty) => board.get(pty)?.sessionId ?? null,
     onSignal(pty, signal) {
       switch (signal.kind) {
         case "title":
@@ -89,8 +105,9 @@ export function wireAgents(clock: UptimeClock, panes: () => PaneManager, session
         case "focus":
           return board.seen(pty);
         case "prompt":
-        case "closed":
           return board.remove(pty);
+        case "closed":
+          return board.forget(pty);
       }
     },
     async start() {

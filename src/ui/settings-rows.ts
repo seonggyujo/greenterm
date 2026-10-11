@@ -2,7 +2,7 @@ import { agentHooksOn, setAgentHooks } from "../app/agent-hooks";
 import { loadFontSize } from "../app/font-size";
 import { createLogger } from "../app/log";
 import { motionEnabled, setMotion } from "../app/motion";
-import { closeOnExitPref } from "../app/prefs";
+import { closeOnExitPref, restoreWorkspacePref } from "../app/prefs";
 import { loadTheme, type Theme } from "../app/theme";
 import { hooksErrorText } from "../i18n/hooks-error";
 import { getLang, setLang, t } from "../i18n/lang";
@@ -79,6 +79,13 @@ function preferenceRows(actions: SettingsActions): HTMLElement[] {
       createSwitch(s.closeOnExitHint, closeOnExitPref.get(), (on) => {
         log.info(`close pane on exit 0 ${on ? "on" : "off"}`);
         closeOnExitPref.set(on);
+      }),
+    ),
+    row(
+      s.restoreWorkspace,
+      createSwitch(s.restoreWorkspaceHint, restoreWorkspacePref.get(), (on) => {
+        log.info(`reopen last work ${on ? "on" : "off"}`);
+        restoreWorkspacePref.set(on);
       }),
     ),
     ...hooksRows(),
